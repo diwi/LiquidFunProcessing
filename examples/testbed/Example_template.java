@@ -152,11 +152,11 @@ public class Example_template extends PApplet {
 //    DwDebugDraw.displayParticles(canvas, world);
 //    DwDebugDraw.displayJoints   (canvas, world);
 
-//    debugdraw.display(canvas);
+    debugdraw.display(canvas);
     
-    bodyrenderer.display(canvas);
+//    bodyrenderer.display(canvas);
 //    particlerender.display(canvas);
-    particlerender_p5.display(canvas);
+//    particlerender_p5.display(canvas);
 
     
     // info
