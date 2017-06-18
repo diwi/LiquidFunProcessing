@@ -225,8 +225,10 @@ public class DwDebugDraw extends DebugDraw{
       canvas.vertex(pos.x + radius, pos.y - radius, 1, 0);
       canvas.vertex(pos.x + radius, pos.y + radius, 1, 1);
       canvas.vertex(pos.x - radius, pos.y + radius, 0, 1);
+      
     }
     canvas.endShape();
+    canvas.tint(255);
   }
 
   @Override

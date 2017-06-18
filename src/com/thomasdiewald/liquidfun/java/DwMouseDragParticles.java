@@ -72,6 +72,10 @@ public class DwMouseDragParticles implements ParticleQueryCallback {
   public void end(float screen_x, float screen_y) {
     active = false;
   }
+  
+  public boolean isActive(){
+    return active;
+  }
 
   @Override
   public boolean reportParticle(int index) {

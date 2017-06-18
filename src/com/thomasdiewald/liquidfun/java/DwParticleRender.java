@@ -18,7 +18,6 @@ import org.jbox2d.particle.ParticleColor;
 import org.jbox2d.particle.ParticleContact;
 
 import processing.core.PApplet;
-import processing.core.PConstants;
 import processing.core.PImage;
 import processing.opengl.PGraphics2D;
 
@@ -54,7 +53,8 @@ public abstract class DwParticleRender implements DwRender {
 
   // buffer data
   public int   particle_num = 0;
-  public float particle_rad = 0f;
+  public float particle_rad_world  = 0f;
+  public float particle_rad_screen = 0f;
   
   public int buf_pos_len = 0;
   public int buf_vel_len = 0;
@@ -66,6 +66,7 @@ public abstract class DwParticleRender implements DwRender {
   public byte [] buf_col = new byte [0];
   public float[] buf_con = new float[0];
   
+  
   public DwParticleRender(PApplet papplet, World world, DwViewportTransform transform){
     this.papplet = papplet;
     this.world = world;
@@ -75,13 +76,17 @@ public abstract class DwParticleRender implements DwRender {
 
   public void updateBuffers(){
     // particle data
-    particle_rad = world.getParticleRadius();
-    particle_num = world.getParticleCount();
-    Vec2[]            particle_pos = world.getParticlePositionBuffer();
-    Vec2[]            particle_vel = world.getParticleVelocityBuffer();
-    ParticleColor[]   particle_col = world.getParticleColorBuffer();
-    ParticleContact[] particle_con = world.getParticleContacts();
-    int particle_con_count         = world.getParticleContactCount();
+                      particle_num        = world.getParticleCount();
+                      particle_rad_world  = world.getParticleRadius();
+    Vec2[]            particle_pos        = world.getParticlePositionBuffer();
+    Vec2[]            particle_vel        = world.getParticleVelocityBuffer();
+    ParticleColor[]   particle_col        = world.getParticleColorBuffer();
+    ParticleContact[] particle_con        = world.getParticleContacts();
+    int               particle_con_count  = world.getParticleContactCount();
+    
+    
+    particle_rad_world *= param.radius_scale;
+    particle_rad_screen = (float) Math.ceil(particle_rad_world * transform.screen_scale);
 
     // buffer capacity
     buf_pos_len =  particle_num * 2; // [posx, posy]
@@ -94,8 +99,24 @@ public abstract class DwParticleRender implements DwRender {
     buf_vel = DwUtils.resizeBuffer(buf_vel, buf_vel_len);
     buf_col = DwUtils.resizeBuffer(buf_col, buf_col_len);
     buf_con = DwUtils.resizeBuffer(buf_con, buf_con_len);
-
-    // fill buffers    
+    
+    // contacts, reset
+    for(int i = 0; i < buf_con_len; i++){
+      buf_con[i] = 0;
+    }
+       
+    // contacts
+    for(int i = 0; i < particle_con_count; i++){
+      ParticleContact con = particle_con[i];
+      int ia = con.indexA * 2;
+      int ib = con.indexB * 2;
+      buf_con[ia+0] += con.weight;
+      buf_con[ib+0] += con.weight;
+      buf_con[ia+1] += 1;
+      buf_con[ib+1] += 1;
+    }
+     
+    // position, velocity, colors
     for(int i = 0, ipos = 0, ivel = 0, icol = 0, icon = 0; i < particle_num; i++){
       // position
       Vec2 pos = particle_pos[i];
@@ -107,96 +128,40 @@ public abstract class DwParticleRender implements DwRender {
       buf_vel[ivel++] = vel.y;
       // color
       ParticleColor col = particle_col[i];
-      buf_col[icol++] = col.r;
-      buf_col[icol++] = col.g;
-      buf_col[icol++] = col.b;
-      buf_col[icol++] = col.a;
-      // contacts
-      buf_con[icon++] = 0;
-      buf_con[icon++] = 0;
-    }
-    
-    // set contact data
-    for(int i = 0; i < particle_con_count; i++){
-      ParticleContact con = particle_con[i];
+      int col_r = col.r & 0xFF;
+      int col_g = col.g & 0xFF;
+      int col_b = col.b & 0xFF;
+      int col_a = col.a & 0xFF;
       
-      int ia = con.indexA * 2;
-      int ib = con.indexB * 2;
+      float con_x = buf_con[icon++];
+      float con_y = buf_con[icon++];
       
-      buf_con[ia+0] += con.weight;
-      buf_con[ib+0] += con.weight;
+      float vel_mag = (float) Math.sqrt(vel.x * vel.x + vel.y * vel.y) * 0.01f;
+      float con_mult = con_x / 50.0f;
+      
+      float sum = 1.0f + (con_mult + vel_mag);
+      sum *= sum; sum *= sum; sum *= sum;
 
-      buf_con[ia+1] += 1;
-      buf_con[ib+1] += 1;
+      col_r = Math.round(DwUtils.clamp(col_r * sum, 0, 255));
+      col_g = Math.round(DwUtils.clamp(col_g * sum, 0, 255));
+      col_b = Math.round(DwUtils.clamp(col_b * sum, 0, 255));
+      
+      buf_col[icol++] = (byte) col_r;
+      buf_col[icol++] = (byte) col_g;
+      buf_col[icol++] = (byte) col_b;
+      buf_col[icol++] = (byte) col_a;
     }
     
-//    for(int i = 0; i < particle_con_count; i++){
-//      ParticleContact con = particle_con[i];
-//      
-//      int ia = con.indexA * 2;
-//      int ib = con.indexB * 2;
-//      
-//      Vec2 norm = con.normal;
-//      Vec2 vela = particle_vel[ia];
-//      Vec2 velb = particle_vel[ib];
-//
-//
-//      float velx = velb.x - vela.x;
-//      float vely = velb.y - vela.y;
-//      float veln = velx * norm.x + vely * norm.y; // dot(dvel, norm)
-//      if (veln < 0) {
-////        sum_v2 += veln * veln;
-//      }
-//      
-//      buf_con[ia+0] += con.weight;
-//      buf_con[ib+0] += con.weight;
-//      
-//      buf_con_weight_max = Math.max(buf_con_weight_max, buf_con[ia+0]);
-//      buf_con_weight_max = Math.max(buf_con_weight_max, buf_con[ia+0]);
-//      
-//      buf_con[ia+1] += 1;
-//      buf_con[ib+1] += 1;
-//    }
-    
-    
-    float particle_rad = world.getParticleRadius() * param.radius_scale;
-    int radius_screen = (int) (Math.ceil(particle_rad * transform.screen_scale) * 2);
-    
-    // if no sprite is provided, create a default one
+
+    // sprite texture
     if(param.tex_sprite == null){
-      param.tex_sprite = createDefaultSprite(papplet, radius_screen * 2);
+      param.tex_sprite = DwUtils.createSprite(papplet, (int) particle_rad_screen * 4, param.falloff_exp1, param.falloff_exp2, param.falloff_mult);
     }
     
   }
   
   
-  
-  public PImage createDefaultSprite(PApplet papplet, int size){
-    size = Math.max(32, size);
-    
-    PImage pimg = papplet.createImage(size, size, PConstants.ARGB);
-    pimg.loadPixels();
-    for(int y = 0; y < size; y++){
-      for(int x = 0; x < size; x++){
-        int pid = y * size + x;
-        
-        float xn = (x / (float)size) * 2f - 1f;
-        float yn = (y / (float)size) * 2f - 1f;
-        float dd = (float) Math.sqrt(xn*xn + yn*yn);
-        
-        if(dd < 0) dd = 0; else if(dd > 1) dd = 1;
-        dd = (float) Math.pow(dd, param.falloff_exp1);
-        dd = 1.0f - dd;
-        dd = (float) Math.pow(dd, param.falloff_exp2);
-        dd *= param.falloff_mult;
-        pimg.pixels[pid] = ((int)(dd * 255)) << 24 | 0x00FFFFFF;
-      }
-    }
-    pimg.updatePixels();
-    return pimg;
-  }
-  
-  
+
   
   
   public abstract void update();

@@ -55,8 +55,8 @@ public class DwParticleRenderGL extends DwParticleRender{
   public DwParticleRenderGL(PApplet papplet, World world, DwViewportTransform transform){
     super(papplet, world, transform);
     
-    String[] src_frag = DwUtils.readASCIIfile(papplet, SHADER_DIR + "particle_render.frag");
-    String[] src_vert = DwUtils.readASCIIfile(papplet, SHADER_DIR + "particle_render.vert");
+    String[] src_frag = DwUtils.readASCIIfile(papplet, SHADER_DIR + "particle_render2.frag");
+    String[] src_vert = DwUtils.readASCIIfile(papplet, SHADER_DIR + "particle_render2.vert");
  
     shader_particles = new PShader(papplet, src_vert, src_frag);
   }
@@ -81,6 +81,10 @@ public class DwParticleRenderGL extends DwParticleRender{
   
   @Override
   public void display(PGraphics2D canvas){
+    
+    canvas.updateProjmodelview();
+    PMatrix3D mat_mvp = canvas.projmodelview.get();
+    mat_mvp.transpose();
 
     beginGL();
     
@@ -90,30 +94,11 @@ public class DwParticleRenderGL extends DwParticleRender{
     if(HANDLE_vbo_col[0] == 0) gl.glGenBuffers(1, HANDLE_vbo_col, 0);
     if(HANDLE_vbo_con[0] == 0) gl.glGenBuffers(1, HANDLE_vbo_con, 0);
     
-    boolean use_sprite = param.tex_sprite != null;
     
-
     PShader shader = shader_particles;
-
-    // Get the location of the attribute variables.
     shader.bind();
-
-    // shader uniforms
-    canvas.updateProjmodelview();
-    PMatrix3D mat_mvp = canvas.projmodelview.get();
-    mat_mvp.transpose();
-    float point_size = particle_rad * 2 * transform.screen_scale * param.radius_scale;
-
     shader.set("mat_mvp", mat_mvp);
-    // shader_particles.set("point_size", point_size);
-    shader.set("falloff_exp1" , param.falloff_exp1);
-    shader.set("falloff_exp2" , param.falloff_exp2);
-    shader.set("falloff_mult" , param.falloff_mult);
-    shader.set("color_mult"   , param.color_mult);
-    shader.set("use_sprite"   , use_sprite ? 1f : 0f);
-    if(use_sprite){
-      shader.set("tex_sprite", param.tex_sprite);
-    }
+    shader.set("tex_sprite", param.tex_sprite);
     
     // shader vertex attribute: position
     int LOC_pos = gl.glGetAttribLocation(shader.glProgram, "pos");
@@ -142,7 +127,7 @@ public class DwParticleRenderGL extends DwParticleRender{
       gl.glVertexAttribPointer(LOC_col, 4, GL.GL_UNSIGNED_BYTE, true, 0, 0);
     }
     
-    // shader vertex attribute: contaxt
+    // shader vertex attribute: contact
     int LOC_con = gl.glGetAttribLocation(shader.glProgram, "con");
     if(LOC_con != -1){
       gl.glEnableVertexAttribArray(LOC_con);
@@ -159,9 +144,8 @@ public class DwParticleRenderGL extends DwParticleRender{
     gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
     gl.glEnable(GL3.GL_VERTEX_PROGRAM_POINT_SIZE);
     gl.glEnable(GL2ES1.GL_POINT_SPRITE);
-    gl.glPointSize(point_size);
+    gl.glPointSize(particle_rad_screen * 2);
   
-
     // draw particles as points (see fragment shader for details)
     gl.glDrawArrays(GL3.GL_POINTS, 0, particle_num);
 
@@ -178,9 +162,7 @@ public class DwParticleRenderGL extends DwParticleRender{
   
   
 
-  
-  // Utils
-  
+
   protected void beginGL(){
     if(gl == null){
       PJOGL pgl = (PJOGL) papplet.beginPGL();  

@@ -18,6 +18,7 @@ import java.util.Collections;
 import org.jbox2d.callbacks.ParticleDestructionListener;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.Shape;
+import org.jbox2d.common.Rot;
 import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.World;
@@ -38,7 +39,7 @@ import processing.core.PShape;
  */
 public class DwParticleDestroyer implements ParticleDestructionListener{
   
-  public Transform xf = new Transform();
+  private final Transform xf = new Transform();
   
   public ArrayList<Integer> indices = new ArrayList<Integer>();
   public int num_destroyed = 0;

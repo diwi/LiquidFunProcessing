@@ -181,9 +181,7 @@ public class DwUtils {
   
   
   
-  static public PImage createSprite(PApplet papplet, int radius, int PARTICLE_SHAPE_IDX){
-    
-    int size = radius;
+  static public PImage createSprite(PApplet papplet, int size, int PARTICLE_SHAPE_IDX){
     size = Math.max(32, size);
     
     PImage pimg = papplet.createImage(size, size, PConstants.ARGB);
@@ -246,14 +244,12 @@ public class DwUtils {
   
   
   
-  
+
   static public PImage createSprite(PApplet papplet, int size, float exp1, float exp2, float mult){
-    size = Math.max(32, 64);
+    size = Math.max(32, size);
     
     PImage pimg = papplet.createImage(size, size, PConstants.ARGB);
     pimg.loadPixels();
-
-    
     for(int y = 0; y < size; y++){
       for(int x = 0; x < size; x++){
         int pid = y * size + x;
@@ -268,19 +264,11 @@ public class DwUtils {
         dd = (float) Math.pow(dd, exp2);
         dd *= mult;
         pimg.pixels[pid] = ((int)(dd * 255)) << 24 | 0x00FFFFFF;
-
       }
     }
     pimg.updatePixels();
- 
     return pimg;
   }
-  
-  
-  
-  
-  
-  
   
   
   
@@ -468,9 +456,7 @@ public class DwUtils {
     
     int off_x = (dimx - size *  num_x) / 2;
     int off_y = (dimy - size *  num_y) / 2;
-    
-    System.out.println(num_x+", "+num_y);
-    
+
     PGraphics2D pg = (PGraphics2D) papplet.createGraphics(dimx, dimy, PConstants.P2D);
     pg.smooth(0);
     pg.beginDraw();
@@ -521,6 +507,15 @@ public class DwUtils {
   
   static final public float clamp(float val, float lo, float hi){
     return (val < lo) ? lo : (val > hi) ? hi : val;
+  }
+  
+  
+  static protected int createColorARGB(byte[] bbuf, int off){
+    int r = bbuf[off++] & 0xFF;
+    int g = bbuf[off++] & 0xFF;
+    int b = bbuf[off++] & 0xFF;
+    int a = bbuf[off++] & 0xFF;
+    return (a << 24 | r << 16 | g << 8 | b);
   }
 }
 

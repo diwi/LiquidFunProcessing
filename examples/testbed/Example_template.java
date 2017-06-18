@@ -134,7 +134,7 @@ public class Example_template extends PApplet {
       mouseDrawAction();
       world.step(1f/60, 8, 4);
       bodyrenderer.update();
-      particlerender.update();
+//      particlerender.update();
       particlerender_p5.update();
     }
     
@@ -144,7 +144,7 @@ public class Example_template extends PApplet {
     canvas.applyMatrix(transform.mat_box2screen);
     canvas.background(32);
     canvas.fill(200);
-    canvas.tint(255,128,96);
+    canvas.tint(255);
     canvas.stroke(0);
     canvas.strokeWeight(1f/transform.screen_scale);
 
@@ -288,7 +288,7 @@ public class Example_template extends PApplet {
       
     }
 
-    createWall(15, 30, 30, 15, 240, 20);
+//    createWall(15, 30, 30, 15, 240, 20);
     
     bodyrenderer.createShape(false);
     

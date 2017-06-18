@@ -88,6 +88,10 @@ public class DwMouseDragBodies implements QueryCallback {
     }
     active = false;
   }
+  
+  public boolean isActive(){
+    return active;
+  }
 
   @Override
   public boolean reportFixture(Fixture argFixture) {
