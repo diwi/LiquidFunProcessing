@@ -26,7 +26,7 @@ import processing.opengl.PGraphics2D;
  * 
  * 
  * Box2D/LiquidFun particles renderer. 
- * Using low-level OpenGL calls to improve performance.
+ * updates render-buffers: position, colors, velocity, contacts, etc...
  * 
  * 
  * @author Thomas Diewald

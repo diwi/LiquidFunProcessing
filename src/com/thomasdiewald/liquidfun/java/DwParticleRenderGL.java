@@ -66,9 +66,9 @@ public class DwParticleRenderGL extends DwParticleRender{
   public void release(){
     beginGL();
     gl.glDeleteBuffers(1, HANDLE_vbo_pos, 0); HANDLE_vbo_pos[0] = 0;
-    gl.glDeleteBuffers(1, HANDLE_vbo_vel, 0); HANDLE_vbo_vel[0] = 0;
     gl.glDeleteBuffers(1, HANDLE_vbo_col, 0); HANDLE_vbo_col[0] = 0;
-    gl.glDeleteBuffers(1, HANDLE_vbo_con, 0); HANDLE_vbo_con[0] = 0;
+//    gl.glDeleteBuffers(1, HANDLE_vbo_vel, 0); HANDLE_vbo_vel[0] = 0;
+//    gl.glDeleteBuffers(1, HANDLE_vbo_con, 0); HANDLE_vbo_con[0] = 0;
     endGL();
   }
   
@@ -76,6 +76,34 @@ public class DwParticleRenderGL extends DwParticleRender{
   @Override
   public void update(){
     updateBuffers();
+    updateVBOs();
+  }
+  
+  
+  protected void updateVBOs(){
+    beginGL();
+    
+    // VBO handles
+    if(HANDLE_vbo_pos[0] == 0) gl.glGenBuffers(1, HANDLE_vbo_pos, 0);
+    if(HANDLE_vbo_col[0] == 0) gl.glGenBuffers(1, HANDLE_vbo_col, 0);
+//    if(HANDLE_vbo_vel[0] == 0) gl.glGenBuffers(1, HANDLE_vbo_vel, 0);
+//    if(HANDLE_vbo_con[0] == 0) gl.glGenBuffers(1, HANDLE_vbo_con, 0);
+    
+    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, HANDLE_vbo_pos[0]);
+    gl.glBufferData(GL.GL_ARRAY_BUFFER, buf_pos_len * 4, FloatBuffer.wrap(buf_pos), GL.GL_DYNAMIC_DRAW);
+    
+    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, HANDLE_vbo_col[0]);
+    gl.glBufferData(GL.GL_ARRAY_BUFFER, buf_col_len * 1, ByteBuffer.wrap(buf_col), GL.GL_DYNAMIC_DRAW);
+    
+//    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, HANDLE_vbo_vel[0]);
+//    gl.glBufferData(GL.GL_ARRAY_BUFFER, buf_vel_len * 4, FloatBuffer.wrap(buf_vel), GL.GL_DYNAMIC_DRAW);
+    
+//    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, HANDLE_vbo_con[0]);
+//    gl.glBufferData(GL.GL_ARRAY_BUFFER, buf_con_len * 4, FloatBuffer.wrap(buf_con), GL.GL_DYNAMIC_DRAW);
+    
+    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+    
+    endGL();
   }
   
   
@@ -88,13 +116,6 @@ public class DwParticleRenderGL extends DwParticleRender{
 
     beginGL();
     
-    // VBO handles
-    if(HANDLE_vbo_pos[0] == 0) gl.glGenBuffers(1, HANDLE_vbo_pos, 0);
-    if(HANDLE_vbo_vel[0] == 0) gl.glGenBuffers(1, HANDLE_vbo_vel, 0);
-    if(HANDLE_vbo_col[0] == 0) gl.glGenBuffers(1, HANDLE_vbo_col, 0);
-    if(HANDLE_vbo_con[0] == 0) gl.glGenBuffers(1, HANDLE_vbo_con, 0);
-    
-    
     PShader shader = shader_particles;
     shader.bind();
     shader.set("mat_mvp", mat_mvp);
@@ -103,36 +124,32 @@ public class DwParticleRenderGL extends DwParticleRender{
     // shader vertex attribute: position
     int LOC_pos = gl.glGetAttribLocation(shader.glProgram, "pos");
     if(LOC_pos != -1){
-      gl.glEnableVertexAttribArray(LOC_pos);
       gl.glBindBuffer(GL.GL_ARRAY_BUFFER, HANDLE_vbo_pos[0]);
-      gl.glBufferData(GL.GL_ARRAY_BUFFER, buf_pos_len * 4, FloatBuffer.wrap(buf_pos), GL.GL_DYNAMIC_DRAW);
+      gl.glEnableVertexAttribArray(LOC_pos);
       gl.glVertexAttribPointer(LOC_pos, 2, GL.GL_FLOAT, false, 0, 0);
-    }
-    
-    // shader vertex attribute: velocity
-    int LOC_vel = gl.glGetAttribLocation(shader.glProgram, "vel");
-    if(LOC_vel != -1){
-      gl.glEnableVertexAttribArray(LOC_vel);
-      gl.glBindBuffer(GL.GL_ARRAY_BUFFER, HANDLE_vbo_vel[0]);
-      gl.glBufferData(GL.GL_ARRAY_BUFFER, buf_vel_len * 4, FloatBuffer.wrap(buf_vel), GL.GL_DYNAMIC_DRAW);
-      gl.glVertexAttribPointer(LOC_vel, 2, GL.GL_FLOAT, false, 0, 0);
     }
     
     // shader vertex attribute: color
     int LOC_col = gl.glGetAttribLocation(shader.glProgram, "col");
     if(LOC_col != -1){
-      gl.glEnableVertexAttribArray(LOC_col);
       gl.glBindBuffer(GL.GL_ARRAY_BUFFER, HANDLE_vbo_col[0]);
-      gl.glBufferData(GL.GL_ARRAY_BUFFER, buf_col_len * 1, ByteBuffer.wrap(buf_col), GL.GL_DYNAMIC_DRAW);
+      gl.glEnableVertexAttribArray(LOC_col);
       gl.glVertexAttribPointer(LOC_col, 4, GL.GL_UNSIGNED_BYTE, true, 0, 0);
+    }
+    
+    // shader vertex attribute: velocity
+    int LOC_vel = gl.glGetAttribLocation(shader.glProgram, "vel");
+    if(LOC_vel != -1){
+      gl.glBindBuffer(GL.GL_ARRAY_BUFFER, HANDLE_vbo_vel[0]);
+      gl.glEnableVertexAttribArray(LOC_vel);
+      gl.glVertexAttribPointer(LOC_vel, 2, GL.GL_FLOAT, false, 0, 0);
     }
     
     // shader vertex attribute: contact
     int LOC_con = gl.glGetAttribLocation(shader.glProgram, "con");
     if(LOC_con != -1){
-      gl.glEnableVertexAttribArray(LOC_con);
       gl.glBindBuffer(GL.GL_ARRAY_BUFFER, HANDLE_vbo_con[0]);
-      gl.glBufferData(GL.GL_ARRAY_BUFFER, buf_con_len * 4, FloatBuffer.wrap(buf_con), GL.GL_DYNAMIC_DRAW);
+      gl.glEnableVertexAttribArray(LOC_con);
       gl.glVertexAttribPointer(LOC_con, 2, GL.GL_FLOAT, false, 0, 0);
     }
 
@@ -151,8 +168,8 @@ public class DwParticleRenderGL extends DwParticleRender{
 
     // cleanup
     if(LOC_pos != -1) gl.glDisableVertexAttribArray(LOC_pos);
-    if(LOC_vel != -1) gl.glDisableVertexAttribArray(LOC_vel);
     if(LOC_col != -1) gl.glDisableVertexAttribArray(LOC_col);
+    if(LOC_vel != -1) gl.glDisableVertexAttribArray(LOC_vel);
     if(LOC_con != -1) gl.glDisableVertexAttribArray(LOC_con);
     
     shader.unbind();

@@ -76,18 +76,17 @@ public class DwParticleRenderP5 extends DwParticleRender{
       // add shapes, in case group is smaller then actual number
       for(int i = shp_count; i < particle_num; i++){
         PShape shp_particle = papplet.createShape();
-        shp_particle.beginShape(PConstants.QUAD);
+        shp_particle.beginShape(PConstants.QUADS);
         shp_particle.noFill();
         shp_particle.noStroke();
-        shp_particle.textureMode(PConstants.NORMAL);
-        shp_particle.texture(param.tex_sprite);
+        shp_particle.textureMode(PConstants.NORMAL); // TODO: report issue
+        shp_particle.texture(param.tex_sprite);      // TODO: report issue
         shp_particle.vertex(-1, -1,  0, 0);
         shp_particle.vertex(+1, -1,  1, 0);
         shp_particle.vertex(+1, +1,  1, 1);
         shp_particle.vertex(-1, +1,  0, 1);   
-        shp_particle.endShape();    
+        shp_particle.endShape();
         shp_particles.addChild(shp_particle);
-
       }
     }
   }
@@ -97,11 +96,6 @@ public class DwParticleRenderP5 extends DwParticleRender{
   protected void updateShapesData(){
   
     final PMatrix2D mat = new PMatrix2D();
-    
-//    shp_particles.setFill(false);
-//    shp_particles.setStroke(false);
-//    shp_particles.setTextureMode(PConstants.NORMAL);
-//    shp_particles.setTexture(param.tex_sprite);
     
     for (int i = 0, ipos = 0, icol = 0; i < particle_num; i++) {
       // position
@@ -123,9 +117,6 @@ public class DwParticleRenderP5 extends DwParticleRender{
       shp.applyMatrix(mat);
 
       shp.setTint(tint);
-
-//      shp.setTexture(param.tex_sprite);
-      // set sprite, scale on the fly!
     }
     
   }

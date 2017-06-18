@@ -28,6 +28,7 @@ import com.thomasdiewald.liquidfun.java.DwDebugDraw;
 import com.thomasdiewald.liquidfun.java.DwMouseDragBodies;
 import com.thomasdiewald.liquidfun.java.DwMouseDragParticles;
 import com.thomasdiewald.liquidfun.java.DwParticleDestroyer;
+import com.thomasdiewald.liquidfun.java.DwParticleRender;
 import com.thomasdiewald.liquidfun.java.DwParticleRenderGL;
 import com.thomasdiewald.liquidfun.java.DwParticleRenderP5;
 import com.thomasdiewald.liquidfun.java.DwViewportTransform;
@@ -48,7 +49,7 @@ public class Particles_Spawn_Liquid extends PApplet {
   int viewport_x = 230;
   int viewport_y = 0;
   
-  boolean USE_PARTICLE_GL_RENDER = true;
+  boolean USE_PARTICLE_GL_RENDER = !true;
   boolean UPDATE_PHYSICS = true;
   
   DwPixelFlow pixelflow;
@@ -178,17 +179,16 @@ public class Particles_Spawn_Liquid extends PApplet {
   public void draw(){
     mouseDrawAction();
     
+    DwParticleRender particle_render = USE_PARTICLE_GL_RENDER ? particle_render_gl : particle_render_p5;
+    
     if(UPDATE_PHYSICS){
       world.step(1f/60, 8, 4);
      
       body_render.update();
-
+   
     }
     
-    if(USE_PARTICLE_GL_RENDER)
-      particle_render_gl.update();
-    else
-      particle_render_p5.update();
+    particle_render.update();
     
     int BACKGROUND = 16;
     
@@ -200,11 +200,7 @@ public class Particles_Spawn_Liquid extends PApplet {
 //    pg_particles.image(pg_checker, 0, 0);
 //    pg_particles.blendMode(BLEND);
 //    pg_particles.applyMatrix(transform.mat_box2screen);
-//    if(USE_PARTICLE_GL_RENDER)
-//      particle_render_gl.display(pg_particles);
-//    else
-//      particle_render_p5.display(pg_particles);
-//    pg_particles.endDraw();
+//    particle_render.display(pg_particles);
 //    
 //    
 //    if(APPLY_LIQUID_FX){
@@ -231,15 +227,11 @@ public class Particles_Spawn_Liquid extends PApplet {
 //    DwDebugDraw.displayJoints   (canvas, world);
 //    debug_render.display(canvas);
     
-    
-    if(USE_PARTICLE_GL_RENDER)
-      particle_render_gl.display(canvas);
-    else
-      particle_render_p5.display(canvas);
-    
+
+    particle_render.display(canvas);
     body_render.display(canvas);
     
-    
+ 
 
     canvas.popMatrix();
     
