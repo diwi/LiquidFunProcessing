@@ -87,8 +87,9 @@ public class DwBodyRenderP5 implements DwRender {
    */
   @Override
   public void display(PGraphics2D canvas){
-    shp_bodies.draw(canvas);
+//    shp_bodies.draw(canvas);
 
+    canvas.shape(shp_bodies);
   }
   
   
@@ -134,11 +135,11 @@ public class DwBodyRenderP5 implements DwRender {
   /**
    * 
    * creates new PShapes for every body in the world. 
-   * This also overwrites existing body shapes.
+   * Does not overwrites existing body shapes.
    * 
    */
   public void createShape(){
-    createShape(true);
+    createShape(false);
     
   }
   
@@ -146,7 +147,7 @@ public class DwBodyRenderP5 implements DwRender {
   /**
    * 
    * creates new PShapes for every body in the world. 
-   * This also overwrites existing body shapes.
+   * This also overwrites existing body shapes if replace_existing_shapes == true.
    * 
    */
   public void createShape(boolean replace_existing_shapes){

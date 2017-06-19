@@ -12,19 +12,13 @@
 
 package com.thomasdiewald.liquidfun.java;
 
-import java.util.ArrayList;
-import java.util.Collections;
-
 import org.jbox2d.callbacks.ParticleDestructionListener;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.Shape;
-import org.jbox2d.common.Rot;
 import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.World;
 import org.jbox2d.particle.ParticleGroup;
-
-import processing.core.PShape;
 
 
 /**
@@ -39,79 +33,53 @@ import processing.core.PShape;
  */
 public class DwParticleDestroyer implements ParticleDestructionListener{
   
-  private final Transform xf = new Transform();
+  public World world;
+  public DwViewportTransform vptransform;
   
-  public ArrayList<Integer> indices = new ArrayList<Integer>();
-  public int num_destroyed = 0;
+  private final Transform xf = new Transform();
   
   public CircleShape shape = new CircleShape();
 
-
-  public DwParticleDestroyer(){
-    reset();
-  }
-
-  public void reset(){
+  public DwParticleDestroyer(World world, DwViewportTransform vptransform){
+    this.world = world;
+    this.vptransform = vptransform;
     xf.setIdentity();
-    indices.clear();
-    num_destroyed = 0;
-  }
-  
-  public void destroyParticlesInShape(World world, Shape shape, boolean callback){
-    world.setParticleDestructionListener(this);
-    num_destroyed += world.destroyParticlesInShape(shape, xf, callback);
   }
 
-  public void destroyParticlesInShape(World world, Shape shape){
-    destroyParticlesInShape(world, shape, true);
-  }
-  
-  public void destroyParticlesAtLocation(World world, Vec2 pos, float radius, boolean callback){
-    shape.m_p.set(pos);
-    shape.m_radius = radius;
-    world.setParticleDestructionListener(this);
-    num_destroyed += world.destroyParticlesInShape(shape, xf, callback);
-  }
-  
-  public void destroyParticlesAtLocation(World world, Vec2 pos, float radius){
-    destroyParticlesAtLocation(world, pos, radius, true);
-  }
 
+  public void destroyParticles(float sceen_x, float screen_y, float screen_rad){
+    destroyParticles(sceen_x, screen_y, screen_rad, false);
+  }
   
-  public void destroyPShapes(PShape shp_group){
-    if(shp_group == null){
-      return;
+  public void destroyParticles(float sceen_x, float screen_y, float screen_rad, boolean callback){
+    vptransform.getScreen2box(sceen_x, screen_y, shape.m_p);
+    shape.m_radius = screen_rad / vptransform.screen_scale;
+    destroyParticles(shape);
+  }
+  
+  public void destroyParticles(Shape shape){
+    destroyParticles(shape, false);
+  }
+  
+  public void destroyParticles(Shape shape, boolean callback){
+    // push PDL
+    ParticleDestructionListener pdl = world.getParticleDestructionListener();
+    if(callback){
+      world.setParticleDestructionListener(this);
     }
-    int num_indices = indices.size();
-    
-    if(num_indices > 0){
-    
-      // make sure the list is sorted (just in case)
-      Collections.sort(indices);
-      
-      if(shp_group.getChildCount() >= indices.get(num_indices-1)){
-  
-        // iterate from back to front and remove shapes
-        for(int i = num_indices-1; i >= 0; i--){
-          shp_group.removeChild(indices.get(i));
-        }
-        //      if(num_destroyed != num_indices){
-        //        System.out.println("destroyed: "+num_destroyed+", "+num_indices);
-        //      }
-      }
-    }
-    reset();
+    // destroy particles
+    world.destroyParticlesInShape(shape, xf, callback);
+    // pop PDL
+    world.setParticleDestructionListener(pdl);
   }
-
-
+ 
+  
   @Override
   public void sayGoodbye(ParticleGroup group) {
-    //System.out.println("ParticleDestroyer.sayGoodbye(ParticleGroup group) is not implemented!");
   }
 
   @Override
   public void sayGoodbye(int index) {
-    indices.add(index);
   }
 
 }

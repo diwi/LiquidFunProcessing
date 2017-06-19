@@ -60,6 +60,7 @@ public class DwParticleRenderP5 extends DwParticleRender{
   
   
   protected void updateShapesCount(){
+    
     if(particle_num == 0){
       return;
     }
@@ -94,6 +95,10 @@ public class DwParticleRenderP5 extends DwParticleRender{
 
   
   protected void updateShapesData(){
+    
+    if(particle_num == 0){
+      return;
+    }
   
     final PMatrix2D mat = new PMatrix2D();
     

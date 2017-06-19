@@ -136,11 +136,21 @@ public abstract class DwParticleRender implements DwRender {
       float con_x = buf_con[icon++];
       float con_y = buf_con[icon++];
       
-      float vel_mag = (float) Math.sqrt(vel.x * vel.x + vel.y * vel.y) * 0.01f;
-      float con_mult = con_x / 50.0f;
+//      float vel_mag = (float) Math.sqrt(vel.x * vel.x + vel.y * vel.y) * 0.01f;
+//      float con_mult = con_x / 40.0f;
+//      
+//      float sum = 1.0f + (con_mult + vel_mag);
+//      sum *= sum; sum *= sum; sum *= sum; 
+      
+      float vel_mag = (float) (vel.x * vel.x + vel.y * vel.y) * 0.0025f;
+      float con_mult = con_x * 0.050f;
       
       float sum = 1.0f + (con_mult + vel_mag);
-      sum *= sum; sum *= sum; sum *= sum;
+      sum *= sum; 
+      sum *= sum; 
+      //sum *= sum;
+      
+      
 
       col_r = Math.round(DwUtils.clamp(col_r * sum, 0, 255));
       col_g = Math.round(DwUtils.clamp(col_g * sum, 0, 255));

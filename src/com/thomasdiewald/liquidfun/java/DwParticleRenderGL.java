@@ -81,13 +81,13 @@ public class DwParticleRenderGL extends DwParticleRender{
   
   
   protected void updateVBOs(){
+    if(particle_num == 0){
+      return;
+    }
+    
     beginGL();
     
-    // VBO handles
-    if(HANDLE_vbo_pos[0] == 0) gl.glGenBuffers(1, HANDLE_vbo_pos, 0);
-    if(HANDLE_vbo_col[0] == 0) gl.glGenBuffers(1, HANDLE_vbo_col, 0);
-//    if(HANDLE_vbo_vel[0] == 0) gl.glGenBuffers(1, HANDLE_vbo_vel, 0);
-//    if(HANDLE_vbo_con[0] == 0) gl.glGenBuffers(1, HANDLE_vbo_con, 0);
+    assureBuffers();
     
     gl.glBindBuffer(GL.GL_ARRAY_BUFFER, HANDLE_vbo_pos[0]);
     gl.glBufferData(GL.GL_ARRAY_BUFFER, buf_pos_len * 4, FloatBuffer.wrap(buf_pos), GL.GL_DYNAMIC_DRAW);
@@ -107,14 +107,29 @@ public class DwParticleRenderGL extends DwParticleRender{
   }
   
   
+  protected void assureBuffers(){
+    // VBO handles
+    if(HANDLE_vbo_pos[0] == 0) gl.glGenBuffers(1, HANDLE_vbo_pos, 0);
+    if(HANDLE_vbo_col[0] == 0) gl.glGenBuffers(1, HANDLE_vbo_col, 0);
+//    if(HANDLE_vbo_vel[0] == 0) gl.glGenBuffers(1, HANDLE_vbo_vel, 0);
+//    if(HANDLE_vbo_con[0] == 0) gl.glGenBuffers(1, HANDLE_vbo_con, 0);
+  }
+  
+  
   @Override
   public void display(PGraphics2D canvas){
+    
+    if(particle_num == 0){
+      return;
+    }
     
     canvas.updateProjmodelview();
     PMatrix3D mat_mvp = canvas.projmodelview.get();
     mat_mvp.transpose();
 
     beginGL();
+    
+    assureBuffers();
     
     PShader shader = shader_particles;
     shader.bind();

@@ -38,7 +38,7 @@ import processing.core.*;
 import processing.opengl.PGraphics2D;
 
 
-public class Example_template extends PApplet {
+public class Demo_DebugDraw extends PApplet {
 
   int viewport_w = 1280;
   int viewport_h = 720;
@@ -134,8 +134,8 @@ public class Example_template extends PApplet {
       mouseDrawAction();
       world.step(1f/60, 8, 4);
       bodyrenderer.update();
-//      particlerender.update();
-      particlerender_p5.update();
+      particlerender.update();
+//      particlerender_p5.update();
     }
     
     PGraphics2D canvas = (PGraphics2D) this.g;
@@ -152,10 +152,10 @@ public class Example_template extends PApplet {
 //    DwDebugDraw.displayParticles(canvas, world);
 //    DwDebugDraw.displayJoints   (canvas, world);
 
-    debugdraw.display(canvas);
+//    debugdraw.display(canvas);
     
-//    bodyrenderer.display(canvas);
-//    particlerender.display(canvas);
+    bodyrenderer.display(canvas);
+    particlerender.display(canvas);
 //    particlerender_p5.display(canvas);
 
     
@@ -211,7 +211,7 @@ public class Example_template extends PApplet {
 
   public void initScene() {
     
-    rectMode(CENTER);
+   
 
     float b2d_screen_w = width / transform.screen_scale;
     float b2d_screen_h = height / transform.screen_scale;
@@ -288,7 +288,7 @@ public class Example_template extends PApplet {
       
     }
 
-//    createWall(15, 30, 30, 15, 240, 20);
+    createWall(15, 30, 30, 15, 240, 20);
     
     bodyrenderer.createShape(false);
     
@@ -311,11 +311,10 @@ public class Example_template extends PApplet {
         ;
     def.groupFlags = 0;
     
-    def.color = new ParticleColor(new Color3f(0.9f, 0.25f, 0.1f));
+    def.color = new ParticleColor(new Color3f(1f, 0.35f, 0.1f));
+//    def.color = new ParticleColor(new Color3f(0.4f, 0.75f, 1));
     shape.setAsBox(box_w, box_h, new Vec2(-(box_w*1.5f), box_h*1.5f), 0);
     ParticleGroup particle_group = world.createParticleGroup(def);
-    
-//    particlerender_p5.add(particle_group);
   }
   
   
@@ -379,7 +378,7 @@ public class Example_template extends PApplet {
   
    
   public static void main(String args[]) {
-    PApplet.main(new String[] { Example_template.class.getName() });
+    PApplet.main(new String[] { Demo_DebugDraw.class.getName() });
   }
   
 }
