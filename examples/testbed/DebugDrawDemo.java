@@ -1,11 +1,14 @@
-/**]
+/**
  * 
- * PixelFlow | Copyright (C) 2016 Thomas Diewald - http://thomasdiewald.com
+ * LiquidFunProcessing | Copyright 2017 Thomas Diewald - www.thomasdiewald.com
  * 
- * A Processing/Java library for high performance GPU-Computing (GLSL).
+ * https://github.com/diwi/LiquidFunProcessing.git
+ * 
+ * Box2d / LiquidFun Library for Processing.
  * MIT License: https://opensource.org/licenses/MIT
  * 
  */
+
 
 
 package testbed;
@@ -18,27 +21,25 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
-import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 import org.jbox2d.particle.ParticleColor;
-import org.jbox2d.particle.ParticleGroup;
 import org.jbox2d.particle.ParticleGroupDef;
 import org.jbox2d.particle.ParticleType;
 
-import com.thomasdiewald.liquidfun.java.DwBodyRenderP5;
-import com.thomasdiewald.liquidfun.java.DwDebugDraw;
-import com.thomasdiewald.liquidfun.java.DwMouseDragBodies;
-import com.thomasdiewald.liquidfun.java.DwMouseDragParticles;
-import com.thomasdiewald.liquidfun.java.DwParticleRenderGL;
-import com.thomasdiewald.liquidfun.java.DwParticleRenderP5;
 import com.thomasdiewald.liquidfun.java.DwViewportTransform;
+import com.thomasdiewald.liquidfun.java.interaction.DwMouseDragBodies;
+import com.thomasdiewald.liquidfun.java.interaction.DwMouseDragParticles;
+import com.thomasdiewald.liquidfun.java.render.DwBodyRenderP5;
+import com.thomasdiewald.liquidfun.java.render.DwDebugDraw;
+import com.thomasdiewald.liquidfun.java.render.DwParticleRenderGL;
+import com.thomasdiewald.liquidfun.java.render.DwParticleRenderP5;
 
 import processing.core.*;
 import processing.opengl.PGraphics2D;
 
 
-public class Demo_DebugDraw extends PApplet {
+public class DebugDrawDemo extends PApplet {
 
   int viewport_w = 1280;
   int viewport_h = 720;
@@ -54,7 +55,7 @@ public class Demo_DebugDraw extends PApplet {
   DwDebugDraw debugdraw;
   DwBodyRenderP5 bodyrenderer;
   
-  DwParticleRenderGL particlerender;
+  DwParticleRenderGL particlerender_gl;
   DwParticleRenderP5 particlerender_p5;
   
   DwMouseDragParticles mouse_drag_particles;
@@ -78,9 +79,9 @@ public class Demo_DebugDraw extends PApplet {
       bodyrenderer.release();
       bodyrenderer = null;
     }
-    if(particlerender != null){
-      particlerender.release();
-      particlerender = null;
+    if(particlerender_gl != null){
+      particlerender_gl.release();
+      particlerender_gl = null;
     }
     if(particlerender_p5 != null){
       particlerender_p5.release();
@@ -109,7 +110,7 @@ public class Demo_DebugDraw extends PApplet {
     // Renderer
     debugdraw = new DwDebugDraw(this, world, transform);
     bodyrenderer = new DwBodyRenderP5(this, world, transform);
-    particlerender = new DwParticleRenderGL(this, world, transform);
+    particlerender_gl = new DwParticleRenderGL(this, world, transform);
     particlerender_p5 = new DwParticleRenderP5(this, world, transform);
 
     // mouse interaction
@@ -134,7 +135,7 @@ public class Demo_DebugDraw extends PApplet {
       mouseDrawAction();
       world.step(1f/60, 8, 4);
       bodyrenderer.update();
-      particlerender.update();
+      particlerender_gl.update();
 //      particlerender_p5.update();
     }
     
@@ -152,10 +153,10 @@ public class Demo_DebugDraw extends PApplet {
 //    DwDebugDraw.displayParticles(canvas, world);
 //    DwDebugDraw.displayJoints   (canvas, world);
 
-//    debugdraw.display(canvas);
+    debugdraw.display(canvas);
     
-    bodyrenderer.display(canvas);
-    particlerender.display(canvas);
+//    bodyrenderer.display(canvas);
+//    particlerender_gl.display(canvas);
 //    particlerender_p5.display(canvas);
 
     
@@ -181,9 +182,9 @@ public class Demo_DebugDraw extends PApplet {
 
   public void mousePressed() {
     if(mouseButton == LEFT){
-      mouse_drag_bodies.begin(mouseX, mouseY);
+      mouse_drag_bodies.press(mouseX, mouseY);
       if(!mouse_drag_bodies.active){
-        mouse_drag_particles.begin(mouseX, mouseY);
+        mouse_drag_particles.press(mouseX, mouseY);
       }
     }
   }
@@ -194,8 +195,8 @@ public class Demo_DebugDraw extends PApplet {
   }
   
   public void mouseReleased() {
-    mouse_drag_bodies   .end(mouseX, mouseY);
-    mouse_drag_particles.end(mouseX, mouseY);
+    mouse_drag_bodies   .release(mouseX, mouseY);
+    mouse_drag_particles.release(mouseX, mouseY);
   }
   
   
@@ -236,7 +237,7 @@ public class Demo_DebugDraw extends PApplet {
       body_def.bullet = true;
          
       Body circle_body = world.createBody(body_def);
-      Fixture fixture = circle_body.createFixture(fixture_def);
+      circle_body.createFixture(fixture_def);
       
       bodyrenderer.createShape(circle_body);
       bodyrenderer.styleShape(circle_body, true, color(0,128,255), true, color(0), 1f);
@@ -314,7 +315,7 @@ public class Demo_DebugDraw extends PApplet {
     def.color = new ParticleColor(new Color3f(1f, 0.35f, 0.1f));
 //    def.color = new ParticleColor(new Color3f(0.4f, 0.75f, 1));
     shape.setAsBox(box_w, box_h, new Vec2(-(box_w*1.5f), box_h*1.5f), 0);
-    ParticleGroup particle_group = world.createParticleGroup(def);
+    world.createParticleGroup(def);
   }
   
   
@@ -362,7 +363,7 @@ public class Demo_DebugDraw extends PApplet {
         body_def.position.y = ty + oy + y * (dimy);
    
         Body cube_body = world.createBody(body_def);
-        Fixture fixture = cube_body.createFixture(fixture_def);
+        cube_body.createFixture(fixture_def);
        
       }
     }
@@ -378,7 +379,7 @@ public class Demo_DebugDraw extends PApplet {
   
    
   public static void main(String args[]) {
-    PApplet.main(new String[] { Demo_DebugDraw.class.getName() });
+    PApplet.main(new String[] { DebugDrawDemo.class.getName() });
   }
   
 }

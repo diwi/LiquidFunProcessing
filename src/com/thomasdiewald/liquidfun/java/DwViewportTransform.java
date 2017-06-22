@@ -1,3 +1,15 @@
+/**
+ * 
+ * LiquidFunProcessing | Copyright 2017 Thomas Diewald - www.thomasdiewald.com
+ * 
+ * https://github.com/diwi/LiquidFunProcessing.git
+ * 
+ * Box2d / LiquidFun Library for Processing.
+ * MIT License: https://opensource.org/licenses/MIT
+ * 
+ */
+
+
 package com.thomasdiewald.liquidfun.java;
 
 import org.jbox2d.common.IViewportTransform;
@@ -52,7 +64,7 @@ public class DwViewportTransform implements IViewportTransform {
     setScreen(w, h, s, w/2, h);
   }
   
-  
+
   public DwViewportTransform(DwViewportTransform vpt) {
     flip_y = vpt.flip_y;
     setExtents(vpt.extents);
@@ -60,7 +72,14 @@ public class DwViewportTransform implements IViewportTransform {
   }
   
   
-  public void setScreen(float dim_x, float dim_y, float scale, float origin_x, float origin_y){
+  public DwViewportTransform setSceneScale(float scale){
+    screen_scale = scale;
+    updateMatrix();
+    return this;
+  }
+  
+  
+  public DwViewportTransform setScreen(float dim_x, float dim_y, float scale, float origin_x, float origin_y){
     
     float dim_xh = dim_x / 2;
     float dim_yh = dim_y / 2;
@@ -70,9 +89,16 @@ public class DwViewportTransform implements IViewportTransform {
     
     setExtents(dim_xh, dim_yh);
     setCamera(cam_x, cam_y, scale);
+    return this;
+  }
+  
+
+  public void setCamera(float x, float y) {
+    center.set(x, y);
+    updateMatrix();
   }
 
-  
+
   
   /**
    * set origin, in world
@@ -104,14 +130,6 @@ public class DwViewportTransform implements IViewportTransform {
   @Override
   public void setExtents(float halfWidth, float halfHeight) {
     extents.set(halfWidth, halfHeight);
-    
-    // screen size
-    screen_dimx = halfWidth  * 2;
-    screen_dimy = halfHeight * 2;
-    
-    // screen size in box world dimensions
-    box2d_dimx = screen_dimx / screen_scale;
-    box2d_dimy = screen_dimy / screen_scale;
   }
   
   @Override
@@ -180,6 +198,15 @@ public class DwViewportTransform implements IViewportTransform {
     // matrix: screen -> box2d
     mat_screen2box.set(mat_box2screen);
     mat_screen2box.invert();
+    
+    
+    // screen size
+    screen_dimx = extents.x * 2;
+    screen_dimy = extents.y * 2;
+    
+    // screen size in box world dimensions
+    box2d_dimx = screen_dimx / screen_scale;
+    box2d_dimy = screen_dimy / screen_scale;
     
   }
   

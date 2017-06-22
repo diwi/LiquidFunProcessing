@@ -46,7 +46,7 @@ import processing.opengl.PGraphics2D;
  */
 public class DwUtils {
 
-
+  @Deprecated
   static final public void updateBodyShapeTransforms(World world){
     
     Object obj = null;
@@ -82,7 +82,7 @@ public class DwUtils {
 
   
   
-  
+  @Deprecated
   static final public void updateParticleShapeTransforms(World world, PShape group_particles){
     updateParticleShapeTransforms(world, group_particles, false);
   }
@@ -92,7 +92,7 @@ public class DwUtils {
   
   
   
-  
+  @Deprecated
   static final public void updateParticleShapeTransforms(World world, PShape group_particles, boolean rotate){
     
     int shp_count = group_particles.getChildCount();
@@ -128,7 +128,7 @@ public class DwUtils {
   
   
   
-  
+  @Deprecated
   static final public int updateParticleShapeBuffer(World world, PShape group_particles){
     int particle_num_old = world.getParticleCount();
     int particle_num_new = 0;
@@ -272,6 +272,43 @@ public class DwUtils {
   
   
   
+  static public PGraphics2D createCheckerBoard(PApplet papplet, int dimx, int dimy, int size, int colA, int colB){
+    
+    int num_x = (int) dimx/size;
+    int num_y = (int) dimy/size;
+    
+    int off_x = (dimx - size *  num_x) / 2;
+    int off_y = (dimy - size *  num_y) / 2;
+
+    PGraphics2D pg = (PGraphics2D) papplet.createGraphics(dimx, dimy, PConstants.P2D);
+    pg.smooth(0);
+    pg.beginDraw();
+    pg.blendMode(PConstants.REPLACE);
+    pg.textureSampling(2);
+    pg.noStroke();
+    pg.fill(200);
+    for(int y = -1; y < num_y+1; y++){
+      for(int x = -1; x < num_x+1; x++){
+        int px = off_x + x * size;
+        int py = off_y + y * size;
+        
+        int col = (x ^ y) & 1;
+        
+        if(col == 1){
+          pg.fill(colA);
+        } else {
+          pg.fill(colB);
+        }
+
+        pg.rect(px, py, size, size);
+      }
+    }
+    
+    pg.endDraw();
+    
+    
+    return pg;
+  }
   
   
   
@@ -308,16 +345,7 @@ public class DwUtils {
 
   final static public String NL = System.getProperty("line.separator");
   
-  final static public double _1_DIV_3 = 1.0 / 3.0;
-  
 
-  final static public int log2ceil(double val){
-    return (int) Math.ceil(Math.log(val)/Math.log(2));
-  }
-  
-  final static public float mix(float a, float b, float mix){
-    return a * (1f-mix) + b * (mix);
-  }
 
 
   static public String[] readASCIIfile(InputStream inputstream) {
@@ -438,57 +466,25 @@ public class DwUtils {
   }
 
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  static public PGraphics2D createCheckerBoard(PApplet papplet, int dimx, int dimy, int size, int colA, int colB){
-    
-    int num_x = (int) dimx/size;
-    int num_y = (int) dimy/size;
-    
-    int off_x = (dimx - size *  num_x) / 2;
-    int off_y = (dimy - size *  num_y) / 2;
 
-    PGraphics2D pg = (PGraphics2D) papplet.createGraphics(dimx, dimy, PConstants.P2D);
-    pg.smooth(0);
-    pg.beginDraw();
-    pg.blendMode(PConstants.REPLACE);
-    pg.textureSampling(2);
-    pg.noStroke();
-    pg.fill(200);
-    for(int y = -1; y < num_y+1; y++){
-      for(int x = -1; x < num_x+1; x++){
-        int px = off_x + x * size;
-        int py = off_y + y * size;
-        
-        int col = (x ^ y) & 1;
-        
-        if(col == 1){
-          pg.fill(colA);
-        } else {
-          pg.fill(colB);
-        }
+  
 
-        pg.rect(px, py, size, size);
-      }
-    }
-    
-    pg.endDraw();
-    
-    
-    return pg;
+  
+  
+  
+  
+  
+  
+  final static public double _1_DIV_3 = 1.0 / 3.0;
+  
+
+  final static public int log2ceil(double val){
+    return (int) Math.ceil(Math.log(val)/Math.log(2));
   }
   
-  
-  
+  final static public float mix(float a, float b, float mix){
+    return a * (1f-mix) + b * (mix);
+  }
   
   
   
@@ -510,7 +506,7 @@ public class DwUtils {
   }
   
   
-  static protected int createColorARGB(byte[] bbuf, int off){
+  static final public int createColorARGB(byte[] bbuf, int off){
     int r = bbuf[off++] & 0xFF;
     int g = bbuf[off++] & 0xFF;
     int b = bbuf[off++] & 0xFF;

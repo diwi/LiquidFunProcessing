@@ -29,6 +29,7 @@ import org.jbox2d.particle.ParticleGroupType;
 import org.jbox2d.particle.ParticleType;
 
 import com.thomasdiewald.liquidfun.java.DwViewportTransform;
+import com.thomasdiewald.liquidfun.java.DwWorld;
 import com.thomasdiewald.liquidfun.java.interaction.DwMouseDragBodies;
 import com.thomasdiewald.liquidfun.java.interaction.DwMouseDragParticles;
 import com.thomasdiewald.liquidfun.java.interaction.DwParticleDestroyer;
@@ -48,7 +49,7 @@ import processing.opengl.PJOGL;
 
 
 
-public class Particles_Spawn_LiquidFx extends PApplet {
+public class Particles_Spawn_LiquidFx_2 extends PApplet {
 
   int viewport_w = 1280;
   int viewport_h = 720;
@@ -58,16 +59,13 @@ public class Particles_Spawn_LiquidFx extends PApplet {
 
   
   DwPixelFlow pixelflow;
-  World world;
-  DwViewportTransform transform;
+  DwWorld world;
 
-  DwDebugDraw debug_render;
+
   DwParticleRenderGL particle_render_gl;
   DwParticleRenderP5 particle_render_p5;
   DwBodyRenderP5     body_render;
   
-  DwMouseDragBodies    body_dragger;
-  DwMouseDragParticles particle_dragger;
   DwParticleDestroyer  particle_destroyer;
   DwParticleSpawn      particle_spawn;
 
@@ -138,25 +136,14 @@ public class Particles_Spawn_LiquidFx extends PApplet {
     sprite = loadImage("../data/sprite.png");
     sprite = DwUtils.createSprite(this, 64, 2, 1, 1);
     
-    transform = new DwViewportTransform(this);
-    
-    world = new World(new Vec2(0, -10f));
-    world.setParticleGravityScale(0.4f);
-    world.setParticleDensity(1.2f);
-    world.setParticleDamping(1.0f);
-    world.setParticleRadius(0.25f);
-    
-    body_dragger        = new DwMouseDragBodies(world, transform);
-    particle_dragger    = new DwMouseDragParticles(world, transform);
-    particle_destroyer  = new DwParticleDestroyer(world, transform);
-    particle_spawn      = new DwParticleSpawn(world, transform);
+    world = new DwWorld(this);
 
-    
-    debug_render = new DwDebugDraw(this, world, transform);
+    particle_destroyer  = new DwParticleDestroyer(world, world.transform);
+    particle_spawn      = new DwParticleSpawn(world, world.transform);
 
-    body_render = new DwBodyRenderP5(this, world, transform);
+    body_render = new DwBodyRenderP5(this, world, world.transform);
     
-    particle_render_gl = new DwParticleRenderGL(this, world, transform);
+    particle_render_gl = new DwParticleRenderGL(this, world, world.transform);
     particle_render_gl.param.tex_sprite = sprite;
     particle_render_gl.param.falloff_exp1 = 1f;
     particle_render_gl.param.falloff_exp2 = 2f;
@@ -164,7 +151,7 @@ public class Particles_Spawn_LiquidFx extends PApplet {
     particle_render_gl.param.radius_scale = 3f;
     particle_render_gl.param.color_mult   = 1f;
     
-    particle_render_p5 = new DwParticleRenderP5(this, world, transform);
+    particle_render_p5 = new DwParticleRenderP5(this, world, world.transform);
     particle_render_p5.param.tex_sprite = sprite;
     particle_render_p5.param.falloff_exp1 = 1f;
     particle_render_p5.param.falloff_exp2 = 2f;
@@ -186,9 +173,7 @@ public class Particles_Spawn_LiquidFx extends PApplet {
     DwParticleRender particle_render = USE_PARTICLE_GL_RENDER ? particle_render_gl : particle_render_p5;
     
     if(UPDATE_PHYSICS){
-      mouseDrawAction();
-      world.step(1f/60, 8, 4);
-      body_render.update();
+      world.update();
       particle_render.update();
     }
     
@@ -201,7 +186,7 @@ public class Particles_Spawn_LiquidFx extends PApplet {
     pg_particles.blendMode(REPLACE);
     pg_particles.image(pg_checker, 0, 0);
     pg_particles.blendMode(BLEND);
-    pg_particles.applyMatrix(transform.mat_box2screen);
+    pg_particles.applyMatrix(world.transform.mat_box2screen);
     body_render.display(pg_particles);
     particle_render.display(pg_particles);
 
@@ -215,7 +200,7 @@ public class Particles_Spawn_LiquidFx extends PApplet {
     pg_bodies.blendMode(REPLACE);
     pg_bodies.image(pg_checker, 0, 0);
     pg_bodies.blendMode(BLEND);
-    pg_bodies.applyMatrix(transform.mat_box2screen);
+    pg_bodies.applyMatrix(world.transform.mat_box2screen);
     body_render.display(pg_bodies);
     pg_bodies.endDraw();
     
@@ -235,10 +220,10 @@ public class Particles_Spawn_LiquidFx extends PApplet {
     canvas.image(pg_particles, 0, 0);
     canvas.image(pg_bodies, 0, 0);
     canvas.pushMatrix();
-    canvas.applyMatrix(transform.mat_box2screen);
+    canvas.applyMatrix(world.transform.mat_box2screen);
     canvas.tint(255);
     canvas.fill(255);
-    canvas.strokeWeight(1f/transform.screen_scale);
+    canvas.strokeWeight(1f/world.transform.screen_scale);
     canvas.stroke(128);
 //    DwDebugDraw.displayBodies   (canvas, world);
 //    DwDebugDraw.displayParticles(canvas, world);
@@ -271,8 +256,8 @@ public class Particles_Spawn_LiquidFx extends PApplet {
     BodyDef bodyDef = new BodyDef();
     Body groundBody = world.createBody(bodyDef);
     
-    float sizex = transform.box2d_dimx;
-    float sizey = transform.box2d_dimy;
+    float sizex = world.transform.box2d_dimx;
+    float sizey = world.transform.box2d_dimy;
     
     float sizexh = sizex * 0.5f;
     float sizeyh = sizey * 0.5f;
@@ -288,7 +273,7 @@ public class Particles_Spawn_LiquidFx extends PApplet {
     
 
     {
-      float radius = 20 / transform.screen_scale;
+      float radius = 20 / world.transform.screen_scale;
       CircleShape circle_shape = new CircleShape();
       circle_shape.setRadius(radius);
 
@@ -399,12 +384,6 @@ public class Particles_Spawn_LiquidFx extends PApplet {
 
 
   public void mousePressed() {
-    if(mouseButton == LEFT){
-      body_dragger.press(mouseX, mouseY);
-      if(!body_dragger.isActive()){
-        particle_dragger.press(mouseX, mouseY);
-      }
-    }
     if(mouseButton == CENTER){
       spawnParticles(mouseX, mouseY);
     }
@@ -421,10 +400,6 @@ public class Particles_Spawn_LiquidFx extends PApplet {
 
   public void mouseDrawAction(){    
     if(mousePressed){
-      if(mouseButton == LEFT){
-        body_dragger    .update(mouseX, mouseY);
-        particle_dragger.update(mouseX, mouseY);
-      }
       if(mouseButton == RIGHT){
         particle_destroyer.destroyParticles(mouseX, mouseY, 30);
       }
@@ -433,8 +408,6 @@ public class Particles_Spawn_LiquidFx extends PApplet {
   
   public void mouseReleased() {
     particle_spawn  .end(mouseX, mouseY);
-    body_dragger    .release(mouseX, mouseY);
-    particle_dragger.release(mouseX, mouseY);
   }
   
   
@@ -492,7 +465,7 @@ public class Particles_Spawn_LiquidFx extends PApplet {
   
  
   public static void main(String args[]) {
-    PApplet.main(new String[] { Particles_Spawn_LiquidFx.class.getName() });
+    PApplet.main(new String[] { Particles_Spawn_LiquidFx_2.class.getName() });
   }
   
 }
