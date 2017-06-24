@@ -13,6 +13,8 @@
 
 package testbed;
 
+import com.thomasdiewald.liquidfun.java.DwWorld;
+import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
 
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.EdgeShape;
@@ -23,15 +25,9 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.FixtureDef;
-import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.joints.RevoluteJointDef;
 import org.jbox2d.dynamics.joints.WheelJoint;
 import org.jbox2d.dynamics.joints.WheelJointDef;
-
-import com.thomasdiewald.liquidfun.java.DwViewportTransform;
-import com.thomasdiewald.liquidfun.java.interaction.DwMouseDragBodies;
-import com.thomasdiewald.liquidfun.java.render.DwBodyRenderP5;
-import com.thomasdiewald.liquidfun.java.render.DwDebugDraw;
 
 import processing.core.*;
 import processing.opengl.PGraphics2D;
@@ -46,38 +42,29 @@ public class box2d_Car extends PApplet {
   
   boolean UPDATE_PHYSICS = true;
   boolean USE_DEBUG_DRAW = false;
-  
-  
-  World world;
-  DwViewportTransform transform;
-  
-  DwDebugDraw debugdraw;
-  DwBodyRenderP5 bodyrenderer;
-  DwMouseDragBodies mouse_drag_bodies;
-  
+
+  DwWorld world;
+  DwBodyGroup bodies;
+
   PFont font;
-
-
+  
+  
   public void settings(){
     size(viewport_w, viewport_h, P2D);
     smooth(8);
   }
   
+  
   public void setup(){ 
     surface.setLocation(viewport_x, viewport_y);
-    
     font = createFont("SourceCodePro-Regular.ttf", 12);
-    
     reset();
-    frameRate(60);
+    frameRate(120);
   }
   
   
   public void release(){
-    if(bodyrenderer != null){
-      bodyrenderer.release();
-      bodyrenderer = null;
-    }
+    if(bodies != null) bodies.release(); bodies = null;
   }
   
   
@@ -85,71 +72,38 @@ public class box2d_Car extends PApplet {
     // release old resources
     release();
     
-    // Box2d world
-    world = new World(new Vec2(0, -10f));
-    
-    // particle settings
-    world.setParticleGravityScale(0.4f);
-    world.setParticleDensity(1.2f);
-    world.setParticleDamping(1.0f);
-    world.setParticleRadius(0.25f);
-    
-    // Transformation: world <-> screen
-    transform = new DwViewportTransform(this);
-    transform.setCamera(0, 0, 20);
- 
-    // Renderer
-    debugdraw = new DwDebugDraw(this, world, transform);
-    bodyrenderer = new DwBodyRenderP5(this, world, transform);
+    world = new DwWorld(this, 20);
 
-    // mouse interaction
-    mouse_drag_bodies    = new DwMouseDragBodies(world, transform);
+    // Renderer
+    bodies = new DwBodyGroup(this, world, world.transform);
 
     // create scene: rigid bodies, particles, etc ...
     initScene();
   }
   
-  
 
-
-  //////////////////////////////////////////////////////////////////////////////
-  // draw
-  //////////////////////////////////////////////////////////////////////////////
-  
-  
   public void draw(){
  
     // set camera
     Vec2 pos = m_car.m_xf.p;
-    transform.setCamera(pos.x, pos.y/2 + 5);
-    
+    world.transform.setCamera(pos.x, pos.y/2 + 5);
     
     if(UPDATE_PHYSICS){
-      mouseDrawAction();
-      world.step(1f/60, 8, 4);
-      bodyrenderer.update();
+      world.update();
     }
+    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
     
     PGraphics2D canvas = (PGraphics2D) this.g;
-    
-    canvas.pushMatrix();
-    canvas.applyMatrix(transform.mat_box2screen);
     canvas.background(255);
-    canvas.fill(200);
-    canvas.tint(255);
-    canvas.stroke(0);
-    canvas.strokeWeight(1f/transform.screen_scale);
-
-//    DwDebugDraw.displayBodies   (canvas, world);
-//    DwDebugDraw.displayParticles(canvas, world);
-//    DwDebugDraw.displayJoints   (canvas, world);
-
+    canvas.pushMatrix();
+    world.applyTransform(canvas);
+    world.drawBulletSpawnTrack(canvas);
     if(USE_DEBUG_DRAW){
-      debugdraw.display(canvas);
+      world.displayDebugDraw(canvas);
+      // DwDebugDraw.display(canvas, world);
     } else {
-      bodyrenderer.display(canvas);
+      bodies.display(canvas);
     }
-    
     canvas.popMatrix();
     
     int tx = 16;
@@ -181,24 +135,6 @@ public class box2d_Car extends PApplet {
   // User Interaction
   //////////////////////////////////////////////////////////////////////////////
 
-  public void mousePressed() {
-    if(mouseButton == LEFT){
-      mouse_drag_bodies.press(mouseX, mouseY);
-    }
-  }
-
-  public void mouseDrawAction(){
-    mouse_drag_bodies   .update(mouseX, mouseY);
-  }
-  
-  public void mouseDragged() {
-  }
-  
-  
-  public void mouseReleased() {
-    mouse_drag_bodies   .release(mouseX, mouseY);
-  }
-  
   public void keyReleased(){
     if(key == 't') UPDATE_PHYSICS = !UPDATE_PHYSICS;
     if(key == 'r') reset();
@@ -213,7 +149,6 @@ public class box2d_Car extends PApplet {
     }
   }
   
-
   public void keyPressed() {
     switch (key) {
       case 'a':
@@ -247,7 +182,6 @@ public class box2d_Car extends PApplet {
   //////////////////////////////////////////////////////////////////////////////
   // Scene Setup
   //////////////////////////////////////////////////////////////////////////////
-
   
   private Body m_car;
   private Body m_wheel1;
@@ -461,14 +395,10 @@ public class box2d_Car extends PApplet {
     
    
 
-    // creates shapes for all rigid bodies in the world.
-    bodyrenderer.createShape();
-
-    //  apply some custom styles to some bodies
-    bodyrenderer.styleShape(m_car, true, color(0,128,255, 160), true, color(0), 1f);
-    bodyrenderer.styleShape(m_wheel1, true, color(255,128,0), true, color(0), 1f);
-    bodyrenderer.styleShape(m_wheel2, true, color(128,255,0), true, color(0), 1f);
-    bodyrenderer.styleShape(ground, false, color(128,255,0), true, color(0), 2f);
+    bodies.add(m_car, true, color(0,128,255, 160), true, color(0), 1f);
+    bodies.add(m_wheel1, true, color(255,128,0), true, color(0), 1f);
+    bodies.add(m_wheel2, true, color(128,255,0), true, color(0), 1f);
+    bodies.add(ground, false, color(128,255,0), true, color(0), 2f);
   
     
     // add wheel hub for rendering, no need to create extra box2d bodies for that.
@@ -478,23 +408,26 @@ public class box2d_Car extends PApplet {
       PShape shp_cross = createShape();
       shp_cross.beginShape(LINES);
       shp_cross.stroke(0);
-      shp_cross.strokeWeight(1f / transform.screen_scale);
+      shp_cross.strokeWeight(1f / world.transform.screen_scale);
       shp_cross.vertex(-diam, 0); shp_cross.vertex(+diam, 0);
       shp_cross.vertex(0, -diam); shp_cross.vertex(0, +diam);
       shp_cross.endShape();
-      DwBodyRenderP5.getShape(m_wheel1).addChild(shp_cross);
+      DwWorld.getShape(m_wheel1).shape.addChild(shp_cross);
     }
     
     {
       PShape shp_cross = createShape();
       shp_cross.beginShape(LINES);
       shp_cross.stroke(0);
-      shp_cross.strokeWeight(1f / transform.screen_scale);
+      shp_cross.strokeWeight(1f / world.transform.screen_scale);
       shp_cross.vertex(-diam, 0); shp_cross.vertex(+diam, 0);
       shp_cross.vertex(0, -diam); shp_cross.vertex(0, +diam);
       shp_cross.endShape();
-      DwBodyRenderP5.getShape(m_wheel2).addChild(shp_cross);
+      DwWorld.getShape(m_wheel2).shape.addChild(shp_cross);
     }
+    
+    
+    bodies.createAll();
     
   }
   

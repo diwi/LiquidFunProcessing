@@ -14,6 +14,19 @@
 
 package testbed;
 
+
+import com.thomasdiewald.liquidfun.java.DwWorld;
+import com.thomasdiewald.liquidfun.java.interaction.DwParticleDestroyer;
+import com.thomasdiewald.liquidfun.java.interaction.DwParticleSpawn;
+import com.thomasdiewald.liquidfun.java.render.DwParticleRender;
+import com.thomasdiewald.liquidfun.java.render.DwParticleRenderGL;
+import com.thomasdiewald.liquidfun.java.render.DwParticleRenderP5;
+import com.thomasdiewald.liquidfun.java.render.deprecated.DwBodyRenderP5;
+import com.thomasdiewald.liquidfun.java.DwUtils;
+
+import com.thomasdiewald.pixelflow.java.DwPixelFlow;
+import com.thomasdiewald.pixelflow.java.imageprocessing.filter.DwParticleFluidFX;
+
 import org.jbox2d.collision.shapes.ChainShape;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.common.Color3f;
@@ -22,26 +35,10 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.FixtureDef;
-import org.jbox2d.dynamics.World;
 import org.jbox2d.particle.ParticleColor;
 import org.jbox2d.particle.ParticleGroup;
 import org.jbox2d.particle.ParticleGroupType;
 import org.jbox2d.particle.ParticleType;
-
-import com.thomasdiewald.liquidfun.java.DwViewportTransform;
-import com.thomasdiewald.liquidfun.java.DwWorld;
-import com.thomasdiewald.liquidfun.java.interaction.DwMouseDragBodies;
-import com.thomasdiewald.liquidfun.java.interaction.DwMouseDragParticles;
-import com.thomasdiewald.liquidfun.java.interaction.DwParticleDestroyer;
-import com.thomasdiewald.liquidfun.java.interaction.DwParticleSpawn;
-import com.thomasdiewald.liquidfun.java.render.DwBodyRenderP5;
-import com.thomasdiewald.liquidfun.java.render.DwDebugDraw;
-import com.thomasdiewald.liquidfun.java.render.DwParticleRender;
-import com.thomasdiewald.liquidfun.java.render.DwParticleRenderGL;
-import com.thomasdiewald.liquidfun.java.render.DwParticleRenderP5;
-import com.thomasdiewald.liquidfun.java.DwUtils;
-import com.thomasdiewald.pixelflow.java.DwPixelFlow;
-import com.thomasdiewald.pixelflow.java.imageprocessing.filter.DwParticleFluidFX;
 
 import processing.core.*;
 import processing.opengl.PGraphics2D;
@@ -78,7 +75,6 @@ public class Particles_Spawn_LiquidFx_2 extends PApplet {
   PImage sprite;
 
 
-  int PARTICLE_TYPE_INDEX = 0;
   boolean UPDATE_PHYSICS = true;
   boolean APPLY_LIQUID_FX = true;
   boolean USE_PARTICLE_GL_RENDER = true;
@@ -316,7 +312,7 @@ public class Particles_Spawn_LiquidFx_2 extends PApplet {
   
   
   int particle_color_hue = 5;
-  
+  int PARTICLE_TYPE_INDEX = 0;
 
   public void keyReleased() {
     

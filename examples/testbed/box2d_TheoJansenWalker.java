@@ -13,6 +13,8 @@
 
 package testbed;
 
+import com.thomasdiewald.liquidfun.java.DwWorld;
+import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
 
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.EdgeShape;
@@ -23,17 +25,10 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.FixtureDef;
-import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.joints.DistanceJointDef;
 import org.jbox2d.dynamics.joints.Joint;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
 import org.jbox2d.dynamics.joints.RevoluteJointDef;
-
-import com.thomasdiewald.liquidfun.java.DwViewportTransform;
-import com.thomasdiewald.liquidfun.java.interaction.DwMouseDragBodies;
-import com.thomasdiewald.liquidfun.java.render.DwBodyRenderP5;
-import com.thomasdiewald.liquidfun.java.render.DwDebugDraw;
-import com.thomasdiewald.liquidfun.java.render.DwJointRenderP5;
 
 import processing.core.*;
 import processing.opengl.PGraphics2D;
@@ -49,15 +44,10 @@ public class box2d_TheoJansenWalker extends PApplet {
   boolean UPDATE_PHYSICS = true;
   boolean USE_DEBUG_DRAW = false;
 
-  World world;
-  DwViewportTransform transform;
-  
-  DwDebugDraw debugdraw;
-  DwBodyRenderP5 bodyrenderer;
-  DwJointRenderP5 jointrenderer;
-  
-  DwMouseDragBodies mouse_drag_bodies;
-  
+
+  DwWorld world;
+  DwBodyGroup bodies;
+
   PFont font;
   
   public void settings(){
@@ -67,7 +57,6 @@ public class box2d_TheoJansenWalker extends PApplet {
   
   public void setup(){ 
     surface.setLocation(viewport_x, viewport_y);
-    
     font = createFont("SourceCodePro-Regular.ttf", 12);
     reset();
     frameRate(120);
@@ -75,15 +64,7 @@ public class box2d_TheoJansenWalker extends PApplet {
   
   
   public void release(){
-    if(bodyrenderer != null){
-      bodyrenderer.release();
-      bodyrenderer = null;
-    }
-    if(jointrenderer != null){
-      jointrenderer.release();
-      jointrenderer = null;
-    }
-    
+    if(bodies != null) bodies.release(); bodies = null;
   }
   
   
@@ -91,25 +72,10 @@ public class box2d_TheoJansenWalker extends PApplet {
     // release old resources
     release();
     
-    // Box2d world
-    world = new World(new Vec2(0, -10f));
-    
-    // particle settings
-    world.setParticleGravityScale(0.4f);
-    world.setParticleDensity(1.2f);
-    world.setParticleDamping(1.0f);
-    world.setParticleRadius(0.25f);
-    
-    // Transformation: world <-> screen
-    transform = new DwViewportTransform(this);
-    transform.setScreen(width, height, 20, width/2, height-10);
+    world = new DwWorld(this, 20);
 
     // Renderer
-    debugdraw = new DwDebugDraw(this, world, transform);
-    bodyrenderer = new DwBodyRenderP5(this, world, transform);
-    jointrenderer = new DwJointRenderP5(this, world, transform);
-    // mouse interaction
-    mouse_drag_bodies = new DwMouseDragBodies(world, transform);
+    bodies = new DwBodyGroup(this, world, world.transform);
 
     // create scene: rigid bodies, particles, etc ...
     initScene();
@@ -117,44 +83,27 @@ public class box2d_TheoJansenWalker extends PApplet {
   
   
 
-
-  //////////////////////////////////////////////////////////////////////////////
-  // draw
-  //////////////////////////////////////////////////////////////////////////////
-  
-  
   public void draw(){
     
-    // focus the car
-    Vec2 car_pos = m_chassis.m_xf.p;
-    transform.setCamera(car_pos.x/2, car_pos.y/2+10);
+    // set camera
+    Vec2 pos = m_chassis.m_xf.p;
+    world.transform.setCamera(pos.x/2, pos.y/2 + 10);
     
     if(UPDATE_PHYSICS){
-      mouseDrawAction();
-      world.step(1f/60, 8, 4);
-      bodyrenderer.update();
-      jointrenderer.update();
+      world.update();
     }
+    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
     
     PGraphics2D canvas = (PGraphics2D) this.g;
-    
-    canvas.pushMatrix();
-    canvas.applyMatrix(transform.mat_box2screen);
     canvas.background(255);
-    canvas.fill(200);
-    canvas.tint(255);
-    canvas.stroke(0);
-    canvas.strokeWeight(1f/transform.screen_scale);
-
-//    DwDebugDraw.displayBodies   (canvas, world);
-//    DwDebugDraw.displayParticles(canvas, world);
-//    DwDebugDraw.displayJoints   (canvas, world);
-
+    canvas.pushMatrix();
+    world.applyTransform(canvas);
+    world.drawBulletSpawnTrack(canvas);
     if(USE_DEBUG_DRAW){
-      debugdraw.display(canvas);
+      world.displayDebugDraw(canvas);
+      // DwDebugDraw.display(canvas, world);
     } else {
-      jointrenderer.display(canvas);
-      bodyrenderer.display(canvas);
+      bodies.display(canvas);
     }
     canvas.popMatrix();
     
@@ -187,23 +136,6 @@ public class box2d_TheoJansenWalker extends PApplet {
   // User Interaction
   //////////////////////////////////////////////////////////////////////////////
 
-  public void mousePressed() {
-    if(mouseButton == LEFT){
-      mouse_drag_bodies.press(mouseX, mouseY);
-    }
-  }
-
-  public void mouseDrawAction(){
-    mouse_drag_bodies   .update(mouseX, mouseY);
-  }
-  
-  public void mouseDragged() {
-  }
-  
-  public void mouseReleased() {
-    mouse_drag_bodies   .release(mouseX, mouseY);
-  }
-  
   public void keyReleased(){
     if(key == 't') UPDATE_PHYSICS = !UPDATE_PHYSICS;
     if(key == 'r') reset();
@@ -237,7 +169,6 @@ public class box2d_TheoJansenWalker extends PApplet {
   // https://github.com/jbox2d/jbox2d/blob/master/jbox2d-testbed/src/main/java/org/jbox2d/testbed/tests/TheoJansen.java
   public void initScene() {
     
-    
     m_offset.set(0.0f, 8.0f);
     m_motorSpeed = 2.0f;
     m_motorOn = true;
@@ -257,9 +188,8 @@ public class box2d_TheoJansenWalker extends PApplet {
 
       shape.set(new Vec2(50.0f, 0.0f), new Vec2(50.0f, 10.0f));
       ground.createFixture(shape, 0.0f);
-      
-      bodyrenderer.createShape(ground);
-      bodyrenderer.styleShape(ground, true, color(0), true, color(0), 2f);
+
+      bodies.add(ground, true, color(0), true, color(0), 2f);
     }
 
     // Balls
@@ -274,8 +204,7 @@ public class box2d_TheoJansenWalker extends PApplet {
       Body body = world.createBody(bd);
       body.createFixture(shape, 1.0f);
       
-      bodyrenderer.createShape(body);
-      bodyrenderer.styleShape(body, true, color(0), false, color(0), 1f);
+      bodies.add(body, true, color(0), true, color(0), 1f);
     }
 
     // Chassis
@@ -293,8 +222,7 @@ public class box2d_TheoJansenWalker extends PApplet {
       m_chassis = world.createBody(bd);
       m_chassis.createFixture(sd);
       
-      bodyrenderer.createShape(m_chassis);
-      bodyrenderer.styleShape(m_chassis, true, color(96, 64), true, color(0), 1f);
+      bodies.add(m_chassis, true, color(0, 255), true, color(0), 1f);
     }
 
     {
@@ -311,8 +239,7 @@ public class box2d_TheoJansenWalker extends PApplet {
       m_wheel = world.createBody(bd);
       m_wheel.createFixture(sd);
       
-      bodyrenderer.createShape(m_wheel);
-      bodyrenderer.styleShape(m_wheel, true, color(96, 64), true, color(0), 1f);
+      bodies.add(m_wheel, true, color(64), true, color(0), 4f);
     }
 
     {
@@ -330,21 +257,24 @@ public class box2d_TheoJansenWalker extends PApplet {
 
     wheelAnchor = pivot.add(new Vec2(0.0f, -0.8f));
 
-    createLeg(-1.0f, wheelAnchor, color(255,96,32, 180));
-    createLeg(+1.0f, wheelAnchor, color(255,96,32, 180));
+    createLeg(-1.0f, wheelAnchor, color(255,96,32, 255));
+    createLeg(+1.0f, wheelAnchor, color(255,96,32, 255));
 
     m_wheel.setTransform(m_wheel.getPosition(), 120.0f * MathUtils.PI / 180.0f);
-    createLeg(-1.0f, wheelAnchor, color(32,255,96, 180));
-    createLeg(+1.0f, wheelAnchor, color(32,255,96, 180));
+    createLeg(-1.0f, wheelAnchor, color(32,255,96, 255));
+    createLeg(+1.0f, wheelAnchor, color(32,255,96, 255));
 
     m_wheel.setTransform(m_wheel.getPosition(), -120.0f * MathUtils.PI / 180.0f);
-    createLeg(-1.0f, wheelAnchor, color(32,96,255, 180));
-    createLeg(+1.0f, wheelAnchor, color(32,96,255, 180));
+    createLeg(-1.0f, wheelAnchor, color(32,96,255, 255));
+    createLeg(+1.0f, wheelAnchor, color(32,96,255, 255));
     
     
-    // creates shapes for all rigid bodies in the world.
-    bodyrenderer.createShape();
-    jointrenderer.createShape();
+    bodies.createAll();
+    
+    int bcount = bodies.debug_countBodiesWithoutShape();
+    System.out.println("bodies w/o shape: "+bcount);
+    int fcount = bodies.debug_countFixturesWithoutShape();
+    System.out.println("fixtures w/o shape: "+fcount);
   }
 
   
@@ -409,11 +339,9 @@ public class box2d_TheoJansenWalker extends PApplet {
     
     body1.createFixture(fd1);
     body2.createFixture(fd2);
-    
-    bodyrenderer.createShape(body1);
-    bodyrenderer.createShape(body2);
-    bodyrenderer.styleShape(body1, true, col, true, color(0), 1f);
-    bodyrenderer.styleShape(body2, true, col, true, color(0), 1f);
+
+    bodies.add(body1, true, col, true, color(0), 1f);
+    bodies.add(body2, true, col, true, color(0), 1f);
 
     DistanceJointDef djd = new DistanceJointDef();
 
@@ -440,18 +368,10 @@ public class box2d_TheoJansenWalker extends PApplet {
     rjd.initialize(body2, m_chassis, p4.add(m_offset));
     world.createJoint(rjd);
     
-
-    jointrenderer.createShape(joint1);
-    jointrenderer.styleShape(joint1, false, col, true, col, 2f);
-    
-    jointrenderer.createShape(joint2);
-    jointrenderer.styleShape(joint2, false, col, true, col, 2f);
-    
-    jointrenderer.createShape(joint3);
-    jointrenderer.styleShape(joint3, false, col, true, col, 2f);
-    
-    jointrenderer.createShape(joint4);
-    jointrenderer.styleShape(joint4, false, col, true, col, 2f);
+    bodies.add(joint1, false, col, true, col, 2f);
+    bodies.add(joint2, false, col, true, col, 2f);
+    bodies.add(joint3, false, col, true, col, 2f);
+    bodies.add(joint4, false, col, true, col, 2f);
   
   }
   

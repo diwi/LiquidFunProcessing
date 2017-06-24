@@ -17,7 +17,8 @@ package testbed;
 import com.thomasdiewald.liquidfun.java.DwWorld;
 import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
 
-import org.jbox2d.collision.shapes.PolygonShape;
+import org.jbox2d.collision.shapes.CircleShape;
+import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
@@ -28,7 +29,7 @@ import processing.core.*;
 import processing.opengl.PGraphics2D;
 
 
-public class box2d_Dominos extends PApplet {
+public class box2d_VaryingRestitution extends PApplet {
 
   int viewport_w = 1280;
   int viewport_h = 720;
@@ -46,7 +47,6 @@ public class box2d_Dominos extends PApplet {
     smooth(8);
   }
   
-  
   public void setup(){ 
     surface.setLocation(viewport_x, viewport_y);
     reset();
@@ -63,9 +63,9 @@ public class box2d_Dominos extends PApplet {
     // release old resources
     release();
     
-    world = new DwWorld(this, 25);
-    world.transform.setScreen(width, height, 25, width/2, height-10);
-
+    world = new DwWorld(this, 22);
+    world.transform.setScreen(width, height, 15, width/2, height-100);
+    
     // Renderer
     bodies = new DwBodyGroup(this, world, world.transform);
 
@@ -74,13 +74,11 @@ public class box2d_Dominos extends PApplet {
   }
   
   
-  
+
   public void draw(){
-    
     if(UPDATE_PHYSICS){
       world.update();
     }
-    
     bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
     
     PGraphics2D canvas = (PGraphics2D) this.g;
@@ -95,6 +93,7 @@ public class box2d_Dominos extends PApplet {
       bodies.display(canvas);
     }
     canvas.popMatrix();
+
     
     // info
     int num_bodies    = world.getBodyCount();
@@ -102,6 +101,9 @@ public class box2d_Dominos extends PApplet {
     String txt_fps = String.format(getClass().getName()+ " [bodies: %d]  [particles: %d]  [fps %6.2f]", num_bodies, num_particles, frameRate);
     surface.setTitle(txt_fps);
   }
+  
+  
+
   
   
   
@@ -116,92 +118,61 @@ public class box2d_Dominos extends PApplet {
   
 
   
+  
   //////////////////////////////////////////////////////////////////////////////
   // Scene Setup
   //////////////////////////////////////////////////////////////////////////////
- 
-  // https://github.com/jbox2d/jbox2d/blob/master/jbox2d-testbed/src/main/java/org/jbox2d/testbed/tests/DominoTest.java
-  public void initScene() {
-    
-    
-    { // Floor
-      FixtureDef fd = new FixtureDef();
-      PolygonShape sd = new PolygonShape();
-      sd.setAsBox(50.0f, 10.0f);
-      fd.shape = sd;
 
+  
+  // https://github.com/jbox2d/jbox2d/blob/master/jbox2d-testbed/src/main/java/org/jbox2d/testbed/tests/VaryingRestitution.java
+  public void initScene() {
+    {
       BodyDef bd = new BodyDef();
-      bd.position = new Vec2(0.0f, -10.0f);
-      Body body = world.createBody(bd);
-      body.createFixture(fd);
+      Body ground = world.createBody(bd);
+
+      EdgeShape shape = new EdgeShape();
+      shape.set(new Vec2(-40.0f, 0.0f), new Vec2(40.0f, 0.0f));
+      ground.createFixture(shape, 0.0f);
       
-      bodies.add(body, true, color(0), false, color(0), 1f);
+      bodies.add(ground, false, color(0), true, color(200), 1f);
     }
 
-    { // Platforms
-      for (int i = 0; i < 4; i++) {
-        FixtureDef fd = new FixtureDef();
-        PolygonShape sd = new PolygonShape();
-        sd.setAsBox(15.0f, 0.125f);
-        fd.shape = sd;
+    {
+      CircleShape shape = new CircleShape();
+      shape.m_radius = 0.7f;
 
+      FixtureDef fd = new FixtureDef();
+      fd.shape = shape;
+      fd.density = 1.0f;
+
+
+      int count = 40;
+      for (int i = 0; i < count; ++i) {
         BodyDef bd = new BodyDef();
-        bd.position = new Vec2(0.0f, 5f + 5f * i);
+        bd.type = BodyType.DYNAMIC;
+        bd.position.set(-count * 0.8f + 1.6f * i, 20.0f);
+
         Body body = world.createBody(bd);
+
+        fd.restitution = i / (float)count;
         body.createFixture(fd);
         
-        bodies.add(body, true, color(0), false, color(0), 1f);
-      }
-    }
-
-    { // Dominos
-      FixtureDef fd = new FixtureDef();
-      PolygonShape sd = new PolygonShape();
-      sd.setAsBox(0.125f, 2f);
-      fd.shape = sd;
-      fd.density = 25.0f;
-
-      BodyDef bd = new BodyDef();
-      bd.type = BodyType.DYNAMIC;
-      float friction = .5f;
-      int num_col = 4;
-      int num_row = 25;
-
-      colorMode(HSB, 360, 100, 100);
-      
-      for (int i = 0; i < num_col; ++i) {
-        for (int j = 0; j < num_row; j++) {
-          fd.friction = friction;
-          bd.position = new Vec2(-14.75f + j * (29.5f / (num_row - 1)), 7.3f + 5f * i);
-          if (i == 2 && j == 0) {
-            bd.angle = -0.1f;
-            bd.position.x += .1f;
-          } else if (i == 3 && j == num_row - 1) {
-            bd.angle = .1f;
-            bd.position.x -= .1f;
-          } else
-            bd.angle = 0f;
-          Body bdomino = world.createBody(bd);
-          bdomino.createFixture(fd);
+        float base = 65;
+        float col = (255 - base) * fd.restitution;
         
-          // create shape, and define individual fill
-          int hue = (int) ((i * num_row + j) / (float)(num_col * num_row) * 360);
-          int fcol = color(hue, 100, 100);
-          int scol = color(hue, 50, 50, 128);
-
-          bodies.add(bdomino, true, fcol, true, scol, 1f);
-        }
+        bodies.add(body, true, color(base + col, base, base), false, color(200), 1f);
       }
-      
-      colorMode(RGB, 255);
     }
 
   }
   
   
-
+  
+  
+ 
+   
   public static void main(String args[]) {
-    PApplet.main(new String[] { box2d_Dominos.class.getName() });
+    PApplet.main(new String[] { box2d_VaryingRestitution.class.getName() });
   }
   
 }

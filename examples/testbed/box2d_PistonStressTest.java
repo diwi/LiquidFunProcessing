@@ -13,6 +13,8 @@
 
 package testbed;
 
+import com.thomasdiewald.liquidfun.java.DwWorld;
+import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
 
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -22,15 +24,8 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.FixtureDef;
-import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.joints.PrismaticJointDef;
 import org.jbox2d.dynamics.joints.RevoluteJointDef;
-
-import com.thomasdiewald.liquidfun.java.DwViewportTransform;
-import com.thomasdiewald.liquidfun.java.interaction.DwMouseDragBodies;
-import com.thomasdiewald.liquidfun.java.render.DwBodyRenderP5;
-import com.thomasdiewald.liquidfun.java.render.DwDebugDraw;
-import com.thomasdiewald.liquidfun.java.render.DwJointRenderP5;
 
 import processing.core.PApplet;
 import processing.opengl.PGraphics2D;
@@ -46,15 +41,9 @@ public class box2d_PistonStressTest extends PApplet {
   boolean UPDATE_PHYSICS = true;
   boolean USE_DEBUG_DRAW = false;
 
-  World world;
-  DwViewportTransform transform;
+  DwWorld world;
+  DwBodyGroup bodies;
   
-  DwDebugDraw debugdraw;
-  DwBodyRenderP5 bodyrenderer;
-  DwJointRenderP5 jointrenderer;
-  
-  DwMouseDragBodies mouse_drag_bodies;
-
   public void settings(){
     size(viewport_w, viewport_h, P2D);
     smooth(8);
@@ -68,85 +57,44 @@ public class box2d_PistonStressTest extends PApplet {
   
   
   public void release(){
-    if(bodyrenderer != null){
-      bodyrenderer.release();
-      bodyrenderer = null;
-    }
-    if(jointrenderer != null){
-      jointrenderer.release();
-      jointrenderer = null;
-    }
-    
+    if(bodies != null) bodies.release(); bodies = null;
   }
-  
   
   public void reset(){
     // release old resources
     release();
     
-    // Box2d world
-    world = new World(new Vec2(0, -10f));
+    world = new DwWorld(this, 20);
+    world.transform.setScreen(width, height, 20, width/2, height+10);
     
-    // particle settings
-    world.setParticleGravityScale(0.4f);
-    world.setParticleDensity(1.2f);
-    world.setParticleDamping(1.0f);
-    world.setParticleRadius(0.25f);
-    
-    // Transformation: world <-> screen
-    transform = new DwViewportTransform(this);
-    transform.setScreen(width, height, 18, width/2, height);
-
     // Renderer
-    debugdraw = new DwDebugDraw(this, world, transform);
-    bodyrenderer = new DwBodyRenderP5(this, world, transform);
-    jointrenderer = new DwJointRenderP5(this, world, transform);
-    // mouse interaction
-    mouse_drag_bodies = new DwMouseDragBodies(world, transform);
+    bodies = new DwBodyGroup(this, world, world.transform);
 
     // create scene: rigid bodies, particles, etc ...
     initScene();
   }
   
   
-
-
-  //////////////////////////////////////////////////////////////////////////////
-  // draw
-  //////////////////////////////////////////////////////////////////////////////
-  
   
   public void draw(){
     
     if(UPDATE_PHYSICS){
-      mouseDrawAction();
-      world.step(1f/60, 8, 4);
-      bodyrenderer.update();
-      jointrenderer.update();
+      world.update();
     }
+    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
     
     PGraphics2D canvas = (PGraphics2D) this.g;
-    
-    canvas.pushMatrix();
-    canvas.applyMatrix(transform.mat_box2screen);
     canvas.background(255);
-    canvas.fill(200);
-    canvas.tint(255);
-    canvas.stroke(0);
-    canvas.strokeWeight(1f/transform.screen_scale);
-
-//    DwDebugDraw.displayBodies   (canvas, world);
-//    DwDebugDraw.displayParticles(canvas, world);
-//    DwDebugDraw.displayJoints   (canvas, world);
-
+    canvas.pushMatrix();
+    world.applyTransform(canvas);
+    world.drawBulletSpawnTrack(canvas);
     if(USE_DEBUG_DRAW){
-      debugdraw.display(canvas);
+      world.displayDebugDraw(canvas);
+      // DwDebugDraw.display(canvas, world);
     } else {
-      jointrenderer.display(canvas);
-      bodyrenderer.display(canvas);
+      bodies.display(canvas);
     }
     canvas.popMatrix();
-    
     
     // info
     int num_bodies    = world.getBodyCount();
@@ -157,40 +105,18 @@ public class box2d_PistonStressTest extends PApplet {
   
 
   
-  
-  
+
   //////////////////////////////////////////////////////////////////////////////
   // User Interaction
   //////////////////////////////////////////////////////////////////////////////
 
-  public void mousePressed() {
-    if(mouseButton == LEFT){
-      mouse_drag_bodies.press(mouseX, mouseY);
-    }
-  }
-
-  public void mouseDrawAction(){
-    mouse_drag_bodies   .update(mouseX, mouseY);
-  }
-  
-  public void mouseDragged() {
-  }
-  
-  public void mouseReleased() {
-    mouse_drag_bodies   .release(mouseX, mouseY);
-  }
-  
   public void keyReleased(){
     if(key == 't') UPDATE_PHYSICS = !UPDATE_PHYSICS;
     if(key == 'r') reset();
     if(key == 'f') USE_DEBUG_DRAW = !USE_DEBUG_DRAW;
   }
-  
-  public void keyPressed() {
-  }
 
 
-  
   
   //////////////////////////////////////////////////////////////////////////////
   // Scene Setup
@@ -216,6 +142,8 @@ public class box2d_PistonStressTest extends PApplet {
       sides.restitution = .8f;
       sides.filter.categoryBits = 4;
       sides.filter.maskBits = 2;
+      
+     
 
 //      bd.position.set(-10.01f, 50.0f);
 //      Body bleft = world.createBody(bd);
@@ -229,10 +157,8 @@ public class box2d_PistonStressTest extends PApplet {
       bsides.createFixture(sides);
       shape.setAsBox(5.0f, 100.0f, new Vec2(+10.15f, 50.0f), 0);
       bsides.createFixture(sides);
-      
-      bodyrenderer.createShape(bsides);
-      bodyrenderer.styleShape(bsides, true, color(32), true, color(0), 1f);
 
+      bodies.add(bsides, true, color(32), true, color(0), 1f);
     }
 
     // turney
@@ -258,10 +184,8 @@ public class box2d_PistonStressTest extends PApplet {
 
         body.createFixture(fd);
       }
-      bodyrenderer.createShape(body);
-      bodyrenderer.styleShape(body, true, color(255,64,0), true, color(0), 1f);
+      bodies.add(body, true, color(255,64,0), true, color(0), 1f);
       
-
       RevoluteJointDef rjd = new RevoluteJointDef();
       rjd.initialize(body, ground, body.getPosition());
       rjd.motorSpeed = MathUtils.PI * 0.8f;
@@ -293,9 +217,7 @@ public class box2d_PistonStressTest extends PApplet {
         world.createJoint(rjd);
 
         prevBody = body;
-        
-        bodyrenderer.createShape(prevBody);
-        bodyrenderer.styleShape(prevBody, true, color(200,32,0), true, color(0), 1f);
+        bodies.add(prevBody, true, color(200,32,0), true, color(0), 1f);
       }
 
       // Define follower.
@@ -315,8 +237,7 @@ public class box2d_PistonStressTest extends PApplet {
         world.createJoint(rjd);
 
         prevBody = body;
-        bodyrenderer.createShape(prevBody);
-        bodyrenderer.styleShape(prevBody, true, color(200,32,0), true, color(0), 1f);
+        bodies.add(prevBody, true, color(200,32,0), true, color(0), 1f);
       }
 
       // Define piston
@@ -335,9 +256,8 @@ public class box2d_PistonStressTest extends PApplet {
         piston.filter.maskBits = 2;
         body.createFixture(piston);
         body.setBullet(false);
-        
-        bodyrenderer.createShape(body);
-        bodyrenderer.styleShape(body, true, color(200,32,0), true, color(0), 1f);
+
+        bodies.add(body, true, color(200,32,0), true, color(0), 1f);
         
         
         RevoluteJointDef rjd = new RevoluteJointDef();
@@ -371,8 +291,7 @@ public class box2d_PistonStressTest extends PApplet {
           fixture.filter.maskBits = 1 | 4 | 2;
           body.createFixture(fixture);
           
-          bodyrenderer.createShape(body);
-          bodyrenderer.styleShape(body, true, color(32,128,255), true, color(0), 1f);
+          bodies.add(body, true, color(32,128,255), true, color(0), 1f);
         }
 
         
@@ -387,11 +306,11 @@ public class box2d_PistonStressTest extends PApplet {
           fixture.filter.maskBits = 1 | 4 | 2;
           Body body = world.createBody(bd);
           body.createFixture(fixture);
-          
-          bodyrenderer.createShape(body);
-          bodyrenderer.styleShape(body, true, color(32,255,128), true, color(0), 1f);
+
+          bodies.add(body, true, color(32,255,128), true, color(0), 1f);
         }
         
+
         float angle = 0.0f;
         float delta = MathUtils.PI / 3.0f;
         Vec2 vertices[] = new Vec2[6];
@@ -415,16 +334,14 @@ public class box2d_PistonStressTest extends PApplet {
           Body body = world.createBody(bd);
           body.createFixture(fixture);
           
-          bodyrenderer.createShape(body);
-          bodyrenderer.styleShape(body, true, color(255,255,32), true, color(0), 1f);
+          bodies.add(body, true, color(255,255,32), true, color(0), 1f);
         }
       }
     }
-
     
-    bodyrenderer.createShape();
-//    jointrenderer.createShape();
-  
+    world.bullet.fixture_def.filter.categoryBits = 2;
+    world.bullet.fixture_def.filter.maskBits = 1 | 4 | 2;
+
   }
   
   

@@ -14,16 +14,7 @@
 package testbed;
 
 
-import com.thomasdiewald.liquidfun.java.DwWorld;
-import com.thomasdiewald.liquidfun.java.interaction.DwParticleDestroyer;
-import com.thomasdiewald.liquidfun.java.interaction.DwParticleSpawn;
-import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
-import com.thomasdiewald.liquidfun.java.render.DwParticleRender;
-import com.thomasdiewald.liquidfun.java.render.DwParticleRenderGL;
-import com.thomasdiewald.liquidfun.java.render.DwParticleRenderP5;
-
-import com.thomasdiewald.pixelflow.java.DwPixelFlow;
-import com.thomasdiewald.pixelflow.java.imageprocessing.filter.DwParticleFluidFX;
+import java.util.Arrays;
 
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -39,11 +30,22 @@ import org.jbox2d.particle.ParticleGroupDef;
 import org.jbox2d.particle.ParticleGroupType;
 import org.jbox2d.particle.ParticleType;
 
+import com.thomasdiewald.liquidfun.java.DwUtils;
+import com.thomasdiewald.liquidfun.java.DwWorld;
+import com.thomasdiewald.liquidfun.java.interaction.DwParticleDestroyer;
+import com.thomasdiewald.liquidfun.java.interaction.DwParticleSpawn;
+import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
+import com.thomasdiewald.liquidfun.java.render.DwParticleRender;
+import com.thomasdiewald.liquidfun.java.render.DwParticleRenderGL;
+import com.thomasdiewald.liquidfun.java.render.DwParticleRenderP5;
+import com.thomasdiewald.pixelflow.java.DwPixelFlow;
+import com.thomasdiewald.pixelflow.java.imageprocessing.filter.DwParticleFluidFX;
+
 import processing.core.*;
 import processing.opengl.PGraphics2D;
 
 
-public class DebugDrawDemo extends PApplet {
+public class DebugDrawDemo_ParticleIndexBuffer extends PApplet {
 
   int viewport_w = 1280;
   int viewport_h = 720;
@@ -66,6 +68,7 @@ public class DebugDrawDemo extends PApplet {
   DwParticleFluidFX particle_fluidfx;
   
   PGraphics2D pg_liquid;
+  PGraphics2D pg_prigid;
   PGraphics2D pg_bodies;
   
   public void settings(){
@@ -110,6 +113,9 @@ public class DebugDrawDemo extends PApplet {
     pg_liquid = (PGraphics2D) createGraphics(width, height, P2D);
     pg_liquid.smooth(0);
 
+    pg_prigid = (PGraphics2D) createGraphics(width, height, P2D);
+    pg_prigid.smooth(0);
+    
     pg_bodies = (PGraphics2D) createGraphics(width, height, P2D);
     pg_bodies.smooth(8);
     
@@ -119,88 +125,195 @@ public class DebugDrawDemo extends PApplet {
   
   
 
+  int index_length;
+  int[] index_buffer;
+  int[] group_offset;
+  int[] group_length;
+  
+  int[] addBucked(int[] buckets){
+    return Arrays.copyOf(buckets, buckets.length + 1);
+  }
+  
+  public void generateParticleGroups(){
 
+    int[] particle_flags = world.getParticleFlagsBuffer();
+    
+    int num_groups = 2;
+    group_offset = new int[num_groups];
+    group_length = new int[num_groups];
+
+    for(ParticleGroup gpgroup = world.getParticleGroupList(); gpgroup != null; gpgroup = gpgroup.getNext()){
+      
+      int pgroup_size = gpgroup.getParticleCount();
+      int pgroup_flag = gpgroup.getGroupFlags();
+      int pgroup_from = gpgroup.getBufferIndex();
+      int pgroup_to   = pgroup_from + pgroup_size;
+      
+      for(int i = pgroup_from; i < pgroup_to; i++){
+        int particle_flag = particle_flags[i];
+        
+        boolean is_wall  = (particle_flag & ParticleType.b2_wallParticle) != 0;
+        boolean is_solid = (pgroup_flag & ParticleGroupType.b2_solidParticleGroup) != 0;
+        boolean is_rigid = (pgroup_flag & ParticleGroupType.b2_rigidParticleGroup) != 0;
+ 
+        int group_id = 0;
+        if(is_wall || is_solid || is_rigid){
+          group_id = 1;
+        } else {
+          group_id = 0;
+        }
+        group_length[group_id]++;
+      }
+    }
+    
+
+    index_length = 0;
+    for(int i = 0; i < num_groups; i++){
+      group_offset[i] = index_length;
+      index_length += group_length[i];
+      group_length[i] = 0; // reset
+    }
+    
+//    System.out.println(index_length+" "+particle_count);
+//    System.out.println();
+    
+    index_buffer = DwUtils.resizeBuffer(index_buffer, index_length);
+    
+    
+    
+    for(ParticleGroup gpgroup = world.getParticleGroupList(); gpgroup != null; gpgroup = gpgroup.getNext()){
+      
+      int pgroup_size = gpgroup.getParticleCount();
+      int pgroup_flag = gpgroup.getGroupFlags();
+      int pgroup_from = gpgroup.getBufferIndex();
+      int pgroup_to   = pgroup_from + pgroup_size;
+      
+      for(int i = pgroup_from; i < pgroup_to; i++){
+        int particle_flag = particle_flags[i];
+        
+        boolean is_wall  = (particle_flag & ParticleType.b2_wallParticle) != 0;
+        boolean is_solid = (pgroup_flag & ParticleGroupType.b2_solidParticleGroup) != 0;
+        boolean is_rigid = (pgroup_flag & ParticleGroupType.b2_rigidParticleGroup) != 0;
+ 
+        int group_id = 0;
+        if(is_wall || is_solid || is_rigid){
+          group_id = 1;
+        } else {
+          group_id = 0;
+        }
+        
+        int pos = group_offset[group_id] + group_length[group_id];
+        group_length[group_id]++;
+        index_buffer[pos] = i;
+      }
+    }
+    
+    
+
+//    for(int i = 0; i < index_length; i++){
+//      index_buffer[i] = i;
+//    }
+//    
+//    group_offset[0] = 0;
+//    group_lenght[0] = index_length;
+
+    particlerender_gl.setIndexBuffer(index_buffer, index_length);
+    particlerender_gl.setIndexGroups(group_offset, group_length);
+  }
+  
+ 
   //////////////////////////////////////////////////////////////////////////////
   // draw
   //////////////////////////////////////////////////////////////////////////////
   
-  
   public void draw(){
     
     DwParticleRender particlerender = (keyPressed && key == 'h') ? particlerender_p5 : particlerender_gl;
-    
-    
+
     if(UPDATE_PHYSICS){
       mouseDrawAction();
       world.update();
       particlerender.update();
     }
+    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
 
- 
-    
     int BACKGROUND = 16;
-
-    pg_liquid.beginDraw();
-    pg_liquid.clear();
-    pg_liquid.background(BACKGROUND, 0);
-    pg_liquid.pushMatrix();
-    world.applyTransform(pg_liquid);
+    
     if(USE_DEBUG_DRAW){
-      world.displayDebugDraw(pg_liquid);
-      // DwDebugDraw.display(pg_liquid, world);
+      background(BACKGROUND);
+      pushMatrix();
+      world.applyTransform(this.g);
+      world.drawBulletSpawnTrack(this.g);
+      world.displayDebugDraw(this.g);
+      popMatrix();
     } else {
-//      bodies.display(pg_liquid);
-      particlerender.display(pg_liquid);
-    }
-    pg_liquid.popMatrix();
-    pg_liquid.endDraw();
-    
-    
-    pg_bodies.beginDraw();
-    pg_bodies.clear();
-    pg_bodies.background(BACKGROUND, 0);
-    pg_bodies.pushMatrix();
-    world.applyTransform(pg_bodies);
-    if(USE_DEBUG_DRAW){
-      world.displayDebugDraw(pg_bodies);
-      // DwDebugDraw.display(pg_bodies, world);
-    } else {
-      bodies.display(pg_bodies);
-    }
-    pg_bodies.popMatrix();
-    pg_bodies.endDraw();
-    
-    
-    
-    if(APPLY_LIQUID_FX){
-      particle_fluidfx.param.base_LoD = 1;
-      particle_fluidfx.param.base_blur_radius = 2;
-      particle_fluidfx.param.highlight_enabled = true;
-      particle_fluidfx.param.highlight_LoD = 1;
-      particle_fluidfx.param.highlight_decay = 0.6f;
-      particle_fluidfx.param.sss_enabled = true;
-      particle_fluidfx.param.sss_LoD = 3;
-      particle_fluidfx.param.sss_decay = 0.5f;
-      particle_fluidfx.apply(pg_liquid);
       
-      particle_fluidfx.param.base_LoD = 0;
-      particle_fluidfx.param.base_blur_radius = 1;
-      particle_fluidfx.param.highlight_enabled = true;
-      particle_fluidfx.param.highlight_LoD = 2;
-      particle_fluidfx.param.highlight_decay = 0.9f;
-      particle_fluidfx.param.sss_enabled = true;
-      particle_fluidfx.param.sss_LoD = 1;
-      particle_fluidfx.param.sss_decay = 0.7f;
-      particle_fluidfx.apply(pg_bodies);
+      generateParticleGroups();
+      particlerender_gl.useGroups(true);
+
+      pg_liquid.beginDraw();
+      pg_liquid.clear();
+      pg_liquid.background(BACKGROUND, 0);
+      world.applyTransform(pg_liquid);
+      particlerender_gl.setRenderGroupIds(0);
+      particlerender.display(pg_liquid);
+      pg_liquid.endDraw();
+      
+      pg_prigid.beginDraw();
+      pg_prigid.clear();
+      pg_prigid.background(BACKGROUND, 0);
+      world.applyTransform(pg_prigid);
+      particlerender_gl.setRenderGroupIds(1);
+      particlerender.display(pg_prigid);
+      pg_prigid.endDraw();
+      
+      pg_bodies.beginDraw();
+      pg_bodies.clear();
+      pg_bodies.background(BACKGROUND, 0);
+      world.applyTransform(pg_bodies);
+      bodies.display(pg_bodies);
+      pg_bodies.endDraw();
+      
+      
+      if(APPLY_LIQUID_FX){
+        particle_fluidfx.param.base_LoD = 1;
+        particle_fluidfx.param.base_blur_radius = 2;
+        particle_fluidfx.param.base_threshold = 0.7f;
+        particle_fluidfx.param.highlight_enabled = true;
+        particle_fluidfx.param.highlight_LoD = 1;
+        particle_fluidfx.param.highlight_decay = 0.6f;
+        particle_fluidfx.param.sss_enabled = true;
+        particle_fluidfx.param.sss_LoD = 3;
+        particle_fluidfx.param.sss_decay = 0.5f;
+        particle_fluidfx.apply(pg_liquid);
+        
+        particle_fluidfx.apply(pg_prigid);
+        
+        particle_fluidfx.param.base_LoD = 0;
+        particle_fluidfx.param.base_blur_radius = 1;
+        particle_fluidfx.param.base_threshold = 0.7f;
+        particle_fluidfx.param.highlight_enabled = true;
+        particle_fluidfx.param.highlight_LoD = 2;
+        particle_fluidfx.param.highlight_decay = 0.9f;
+        particle_fluidfx.param.sss_enabled = true;
+        particle_fluidfx.param.sss_LoD = 1;
+        particle_fluidfx.param.sss_decay = 0.7f;
+        particle_fluidfx.apply(pg_bodies);
+      }
+      
+      
+//      DwFilter.get(pixelflow).gamma.apply(pg_liquid, pg_liquid, 1.4f);
+//      DwFilter.get(pixelflow).gamma.apply(pg_bodies, pg_bodies, 1.4f);
+      
+      background(BACKGROUND);
+      image(pg_prigid, 0, 0);
+      image(pg_liquid, 0, 0);
+      image(pg_bodies, 0, 0);
+      pushMatrix();
+      world.applyTransform(this.g);
+      world.drawBulletSpawnTrack(this.g);
+      popMatrix();
     }
-    
-    
-//    DwFilter.get(pixelflow).gamma.apply(pg_liquid, pg_liquid, 1.4f);
-//    DwFilter.get(pixelflow).gamma.apply(pg_bodies, pg_bodies, 1.4f);
-    
-    background(BACKGROUND);
-    image(pg_liquid, 0, 0);
-    image(pg_bodies, 0, 0);
     
     // info
     int num_bodies    = world.getBodyCount();
@@ -208,7 +321,6 @@ public class DebugDrawDemo extends PApplet {
     String txt_fps = String.format(getClass().getName()+ " [bodies: %d]  [particles: %d]  [fps %6.2f]", num_bodies, num_particles, frameRate);
     surface.setTitle(txt_fps);
   }
-  
 
   
   
@@ -339,7 +451,7 @@ public class DebugDrawDemo extends PApplet {
       bodies.add(ground, true, color(0), !true, color(0), 1f);
     }
 
-    createWall(8, 20, 60, 25, 240, 10);
+    createWall(5, 20, 50, 25, 260, 10);
 
     
     
@@ -355,7 +467,7 @@ public class DebugDrawDemo extends PApplet {
         | ParticleType.b2_waterParticle
         | ParticleType.b2_viscousParticle
 //        | ParticleType.b2_tensileParticle
-//        | ParticleType.b2_colorMixingParticle
+        | ParticleType.b2_colorMixingParticle
         ;
     def.groupFlags = 0;
     
@@ -383,11 +495,14 @@ public class DebugDrawDemo extends PApplet {
     tx /= scree_scale;
     ty /= scree_scale;
     
-    PolygonShape cube = new PolygonShape();
-    cube.setAsBox(dimx*0.5f, dimy*0.5f);
+    PolygonShape brick_shape = new PolygonShape();
+    brick_shape.setAsBox(dimx*0.5f, dimy*0.5f);
+    
+    PolygonShape brick_shape2 = new PolygonShape();
+    brick_shape2.setAsBox(dimx*0.25f, dimy*0.5f);
     
     FixtureDef fixture_def = new FixtureDef();
-    fixture_def.shape = cube;
+    fixture_def.shape = brick_shape;
     fixture_def.density = 30;
     fixture_def.friction = 0.50f;
     fixture_def.restitution = 0.5f;
@@ -415,10 +530,23 @@ public class DebugDrawDemo extends PApplet {
         boolean odd_row = (y & 1) == 1;
 //        if(odd_row && x == numx-1) continue;
         
+ 
 //        if(random(1) < 0.1) continue;
 
         ox = -numx * dimx * 0.5f;
         ox += odd_row ? dimx * off : 0;
+        
+        fixture_def.shape = brick_shape;
+        if(!odd_row && x == 0){
+          fixture_def.shape = brick_shape2;
+          ox += dimx * 0.25;
+        }
+        else if(odd_row && x == (numx-1)){
+          fixture_def.shape = brick_shape2;
+          ox -= dimx * 0.25;
+        }
+        
+        
         
         body_def.position.x = tx + ox + x * (dimx);
         body_def.position.y = ty + oy + y * (dimy);
@@ -492,7 +620,7 @@ public class DebugDrawDemo extends PApplet {
     
     
     particle_color_hue %= 360;
-    particle_spawn.group_def.color = new ParticleColor(createHSBColor(particle_color_hue, 90, 90));
+    particle_spawn.group_def.color = new ParticleColor(createHSBColor(particle_color_hue, 100, 100));
   }
   
   
@@ -566,7 +694,7 @@ public class DebugDrawDemo extends PApplet {
   
    
   public static void main(String args[]) {
-    PApplet.main(new String[] { DebugDrawDemo.class.getName() });
+    PApplet.main(new String[] { DebugDrawDemo_ParticleIndexBuffer.class.getName() });
   }
   
 }

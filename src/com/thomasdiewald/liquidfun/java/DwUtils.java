@@ -487,16 +487,25 @@ public class DwUtils {
   }
   
   
-  
+  /**
+   * allocates a new int[] array only if buffer.length < len
+   */
   static final public int[] resizeBuffer(int[] buffer, int len){
+    if(buffer == null) return new int[len];
     return (buffer.length >= len) ? buffer : new int[(int) Math.ceil(len * 1.5f)];
   }
-  
+  /**
+   * allocates a new float[] array only if buffer.length < len
+   */
   static final public float[] resizeBuffer(float[] buffer, int len){
+    if(buffer == null) return new float[len];
     return (buffer.length >= len) ? buffer : new float[(int) Math.ceil(len * 1.5f)];
   }
-  
+  /**
+   * allocates a new byte[] array only if buffer.length < len
+   */
   static final public byte[] resizeBuffer(byte[] buffer, int len){
+    if(buffer == null) return new byte[len];
     return (buffer.length >= len) ? buffer : new byte[(int) Math.ceil(len * 1.5f)];
   }
   

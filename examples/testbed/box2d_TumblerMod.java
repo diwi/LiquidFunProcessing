@@ -14,6 +14,9 @@
 package testbed;
 
 
+import com.thomasdiewald.liquidfun.java.DwWorld;
+import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
+
 import org.jbox2d.collision.shapes.ChainShape;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -23,14 +26,8 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.Fixture;
-import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
 import org.jbox2d.dynamics.joints.RevoluteJointDef;
-
-import com.thomasdiewald.liquidfun.java.DwViewportTransform;
-import com.thomasdiewald.liquidfun.java.interaction.DwMouseDragBodies;
-import com.thomasdiewald.liquidfun.java.render.DwBodyRenderP5;
-import com.thomasdiewald.liquidfun.java.render.DwDebugDraw;
 
 import processing.core.*;
 import processing.opengl.PGraphics2D;
@@ -45,14 +42,10 @@ public class box2d_TumblerMod extends PApplet {
   
   boolean UPDATE_PHYSICS = true;
   boolean USE_DEBUG_DRAW = false;
-  
-  World world;
-  DwViewportTransform transform;
-  
-  DwDebugDraw debugdraw;
-  DwBodyRenderP5 bodyrenderer;
-  DwMouseDragBodies mouse_drag_bodies;
-  
+
+  DwWorld world;
+  DwBodyGroup bodies;
+
   public void settings(){
     size(viewport_w, viewport_h, P2D);
     smooth(8);
@@ -60,17 +53,13 @@ public class box2d_TumblerMod extends PApplet {
   
   public void setup(){ 
     surface.setLocation(viewport_x, viewport_y);
-    
     reset();
     frameRate(120);
   }
   
   
   public void release(){
-    if(bodyrenderer != null){
-      bodyrenderer.release();
-      bodyrenderer = null;
-    }
+    if(bodies != null) bodies.release(); bodies = null;
   }
   
   
@@ -78,79 +67,49 @@ public class box2d_TumblerMod extends PApplet {
     // release old resources
     release();
     
-    // Box2d world
-    world = new World(new Vec2(0, -10f));
-    
-    // particle settings
-    world.setParticleGravityScale(0.4f);
-    world.setParticleDensity(1.2f);
-    world.setParticleDamping(1.0f);
-    world.setParticleRadius(0.25f);
-    
-    // Transformation: world <-> screen
-    transform = new DwViewportTransform(this);
-    transform.setScreen(width, height, 22, width/2, height/2);
+    // create world
+    world = new DwWorld(this, 20);
+    world.transform.setScreen(width, height, 22, width/2, height/2);
 
-    // Renderer
-    debugdraw = new DwDebugDraw(this, world, transform);
-    bodyrenderer = new DwBodyRenderP5(this, world, transform);
-
-    // mouse interaction
-    mouse_drag_bodies = new DwMouseDragBodies(world, transform);
+    // create renderer
+    bodies = new DwBodyGroup(this, world, world.transform);
 
     // create scene: rigid bodies, particles, etc ...
     initScene();
-
   }
   
   
-
-
-  //////////////////////////////////////////////////////////////////////////////
-  // draw
-  //////////////////////////////////////////////////////////////////////////////
-  
-  
   public void draw(){
+    
     if(UPDATE_PHYSICS){
       if(frameCount % 4 == 0){
         addBodies();
       }
-      mouseDrawAction();
-      world.step(1f/60, 8, 4);
-      bodyrenderer.update();
+      world.update();
     }
+    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
     
     PGraphics2D canvas = (PGraphics2D) this.g;
-
-
     canvas.background(32);
     canvas.pushMatrix();
-    canvas.applyMatrix(transform.mat_box2screen);
-    canvas.fill(200);
-    canvas.tint(255);
-    canvas.stroke(0);
-    canvas.strokeWeight(1f/transform.screen_scale);
-
-//    DwDebugDraw.displayBodies   (canvas, world);
-//    DwDebugDraw.displayParticles(canvas, world);
-//    DwDebugDraw.displayJoints   (canvas, world);
-
+    world.applyTransform(canvas);
+    world.drawBulletSpawnTrack(canvas);
     if(USE_DEBUG_DRAW){
-      debugdraw.display(canvas);
+      world.displayDebugDraw(canvas);
+      // DwDebugDraw.display(canvas, world);
     } else {
-      bodyrenderer.display(canvas);
+      bodies.display(canvas);
     }
-    
-
     canvas.popMatrix();
     
+
     // info
     int num_bodies    = world.getBodyCount();
     int num_particles = world.getParticleCount();
     String txt_fps = String.format(getClass().getName()+ " [bodies: %d]  [particles: %d]  [fps %6.2f]", num_bodies, num_particles, frameRate);
     surface.setTitle(txt_fps);
   }
+  
   
 
   
@@ -160,34 +119,13 @@ public class box2d_TumblerMod extends PApplet {
   // User Interaction
   //////////////////////////////////////////////////////////////////////////////
 
-  public void mousePressed() {
-    if(mouseButton == LEFT){
-      mouse_drag_bodies.press(mouseX, mouseY);
-    }
-  }
-
-  public void mouseDrawAction(){
-    mouse_drag_bodies.update(mouseX, mouseY);
-  }
-  
-  public void mouseDragged() {
-  }
-  
-  public void mouseReleased() {
-    mouse_drag_bodies.release(mouseX, mouseY);
-  }
-  
   public void keyReleased(){
     if(key == 't') UPDATE_PHYSICS = !UPDATE_PHYSICS;
     if(key == 'r') reset();
     if(key == 'f') USE_DEBUG_DRAW = !USE_DEBUG_DRAW;
   }
   
-  public void keyPressed() {
-  }
 
-
-  
   
   //////////////////////////////////////////////////////////////////////////////
   // Scene Setup
@@ -209,8 +147,8 @@ public class box2d_TumblerMod extends PApplet {
       bd.position.set(0.0f, 0.0f);
 
       Body bwheel = world.createBody(bd);
-      bodyrenderer.createShape(bwheel);
-      
+//      bodies.add(bwheel);
+
       ChainShape shape = new ChainShape();
       int num_verts = 128;
       float rad = 10;
@@ -231,9 +169,7 @@ public class box2d_TumblerMod extends PApplet {
       
       shape.createLoop(vertices, num_verts);
       Fixture wheel = bwheel.createFixture(shape, 15.0f);
-      
-      bodyrenderer.createShape(wheel);
-      bodyrenderer.styleShape(wheel, true, color(240), false, color(255), 1f);
+      bodies.add(wheel, true, color(240), false, color(255), 1f);
       
       // obstacles inside wheel
       CircleShape sobstacle = new CircleShape(); 
@@ -246,12 +182,9 @@ public class box2d_TumblerMod extends PApplet {
         float y = radius * (float) Math.sin(angle);
         sobstacle.m_p.set(x, y);
         Fixture fobstacle = bwheel.createFixture(sobstacle, 150.0f);
-        
-        bodyrenderer.createShape(fobstacle);
-        bodyrenderer.styleShape(fobstacle, true, color(32), false, color(0), 1f);
+        bodies.add(fobstacle, true, color(64), false, color(255), 1f);
       }
 
-      
       // motor
       RevoluteJointDef jd = new RevoluteJointDef();
       jd.bodyA = groundbody;
@@ -266,10 +199,6 @@ public class box2d_TumblerMod extends PApplet {
     }
     m_count = 0;
    
-
-    // creates shapes for all rigid bodies in the world.
-    bodyrenderer.createShape();
-
   }
   
   
@@ -291,14 +220,10 @@ public class box2d_TumblerMod extends PApplet {
       fixture.m_restitution = 0.5f;
       
       ++m_count;
-      
-      bodyrenderer.createShape(body);
-      
+
       colorMode(HSB, 360, 100, 100);
-      float r = (360 * m_count /(float)MAX_NUM) % 360;
-      float g = 100;
-      float b = 100;
-      bodyrenderer.styleShape(body, true, color(r,g,b), true, color(r, g, b *0.5f), 1f);
+      float hue = (360 * m_count /(float)MAX_NUM) % 360;
+      bodies.add(body, true, color(hue, 100, 100), true, color(hue, 100, 50), 1f);
       colorMode(RGB, 255, 255, 255);
     }
   }

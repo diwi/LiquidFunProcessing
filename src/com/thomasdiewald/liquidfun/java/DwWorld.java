@@ -23,14 +23,14 @@ import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.joints.Joint;
 
+import com.thomasdiewald.liquidfun.java.interaction.DwBullet;
 import com.thomasdiewald.liquidfun.java.interaction.DwInteractionEvent;
 import com.thomasdiewald.liquidfun.java.interaction.DwMouseDragBodies;
 import com.thomasdiewald.liquidfun.java.interaction.DwMouseDragParticles;
-import com.thomasdiewald.liquidfun.java.render.DwBodyShape;
-
+import com.thomasdiewald.liquidfun.java.render.DwBody;
 import com.thomasdiewald.liquidfun.java.render.DwDebugDraw;
-import com.thomasdiewald.liquidfun.java.render.DwFixtureShape;
-import com.thomasdiewald.liquidfun.java.render.DwJointShape;
+import com.thomasdiewald.liquidfun.java.render.DwFixture;
+import com.thomasdiewald.liquidfun.java.render.DwJoint;
 
 import processing.core.PApplet;
 import processing.core.PGraphics;
@@ -75,19 +75,19 @@ public class DwWorld extends World{
     
     DwInteractionEvent mouse_drag_bodies    = new DwMouseDragBodies   (this, transform);
     DwInteractionEvent mouse_drag_particles = new DwMouseDragParticles(this, transform);
+    bullet   = new DwBullet            (this, transform);
     
     addMouseAction(mouse_drag_bodies);
     addMouseAction(mouse_drag_particles);
+    addMouseAction(bullet);
   }
   
-  
+  public DwBullet bullet;
   
   public void dispose(){
   }
   
-  
-  
-  
+
   
   //////////////////////////////////////////////////////////////////////////////
   //
@@ -107,13 +107,13 @@ public class DwWorld extends World{
     updateBodies();
     updateJoints();
   }
-  
-  
-  protected void updateBodies(){
+
+
+  public void updateBodies(){
     for (Body body = super.getBodyList(); body != null; body = body.getNext()) {
       Transform xf = body.getTransform();
       
-      DwBodyShape dwbody = getShape(body);
+      DwBody dwbody = getShape(body);
       if(dwbody != null){
         dwbody.shape.resetMatrix();
         dwbody.shape.rotate(xf.q.getAngle());
@@ -132,7 +132,7 @@ public class DwWorld extends World{
   }
   
   
-  protected void updateJoints(){
+  public void updateJoints(){
     Vec2 ancA = new Vec2();
     Vec2 ancB = new Vec2();
  
@@ -149,7 +149,7 @@ public class DwWorld extends World{
       joint.getAnchorB(ancB);
       // TODO: different joint types
       
-      DwJointShape dwjoint = getShape(joint);
+      DwJoint dwjoint = getShape(joint);
       if(dwjoint != null){
         
         Vec2 AB = ancB.sub(ancA);
@@ -189,6 +189,19 @@ public class DwWorld extends World{
   
   
   
+  
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  // Bullet
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  public void drawBulletSpawnTrack(PGraphics canvas){
+    bullet.drawSpawnTrack(canvas);
+  }
+  
+
+  
+
   
   //////////////////////////////////////////////////////////////////////////////
   //
@@ -295,14 +308,14 @@ public class DwWorld extends World{
 
   
   static public void release(Body body){
-    DwBodyShape dwbody = getShape(body);
+    DwBody dwbody = getShape(body);
     if(dwbody != null){
       dwbody.parent.release(body);
     }
   }
   
   static public void release(Joint joint){
-    DwJointShape dwjoint = getShape(joint);
+    DwJoint dwjoint = getShape(joint);
     if(dwjoint != null){
       dwjoint.parent.release(joint);
     }
@@ -318,34 +331,34 @@ public class DwWorld extends World{
   
   
   static public boolean hasShape(Joint joint){
-    return (joint.m_userData != null) && (joint.m_userData instanceof DwJointShape);
+    return (joint.m_userData != null) && (joint.m_userData instanceof DwJoint);
   }
   
-  static public DwJointShape getShape(Joint joint){
+  static public DwJoint getShape(Joint joint){
     if(hasShape(joint)){
-      return (DwJointShape) joint.m_userData;
+      return (DwJoint) joint.m_userData;
     }
     return null;
   }
 
   static public boolean hasShape(Fixture fixture){
-    return (fixture.m_userData != null) && (fixture.m_userData instanceof DwFixtureShape);
+    return (fixture.m_userData != null) && (fixture.m_userData instanceof DwFixture);
   }
   
-  static public DwFixtureShape getShape(Fixture fixture){
+  static public DwFixture getShape(Fixture fixture){
     if(hasShape(fixture)){
-      return (DwFixtureShape) fixture.m_userData;
+      return (DwFixture) fixture.m_userData;
     }
     return null;
   }
   
   static public boolean hasShape(Body body){
-    return (body.m_userData != null) && (body.m_userData instanceof DwBodyShape);
+    return (body.m_userData != null) && (body.m_userData instanceof DwBody);
   }
   
-  static public DwBodyShape getShape(Body body){
+  static public DwBody getShape(Body body){
     if(hasShape(body)){
-      return (DwBodyShape) body.m_userData;
+      return (DwBody) body.m_userData;
     }
     return null;
   }
@@ -360,7 +373,7 @@ public class DwWorld extends World{
       , int     stroke_color
       , float   stroke_weight
   ){
-    DwBodyShape dwbody = getShape(body);
+    DwBody dwbody = getShape(body);
     return setStyle(dwbody.shape, fill_enabled, fill_color, stroke_enabled, stroke_color, stroke_weight);
   }
   
@@ -371,7 +384,7 @@ public class DwWorld extends World{
       , int     stroke_color
       , float   stroke_weight
   ){
-    DwFixtureShape dwfixture = getShape(fixture);
+    DwFixture dwfixture = getShape(fixture);
     return setStyle(dwfixture.shape, fill_enabled, fill_color, stroke_enabled, stroke_color, stroke_weight);
   }
   
@@ -382,7 +395,7 @@ public class DwWorld extends World{
       , int     stroke_color
       , float   stroke_weight
   ){
-    DwJointShape dwjoint = getShape(joint);
+    DwJoint dwjoint = getShape(joint);
     return setStyle(dwjoint.shape, fill_enabled, fill_color, stroke_enabled, stroke_color, stroke_weight);
   }
   

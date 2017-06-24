@@ -17,22 +17,18 @@ package testbed;
 import com.thomasdiewald.liquidfun.java.DwWorld;
 import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
 
-import org.jbox2d.collision.shapes.CircleShape;
+import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.collision.shapes.PolygonShape;
-import org.jbox2d.common.MathUtils;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
-import org.jbox2d.dynamics.Fixture;
-import org.jbox2d.dynamics.joints.RevoluteJoint;
-import org.jbox2d.dynamics.joints.RevoluteJointDef;
-
+import org.jbox2d.dynamics.FixtureDef;
 import processing.core.*;
 import processing.opengl.PGraphics2D;
 
 
-public class box2d_Tumbler extends PApplet {
+public class box2d_VaryingFriction extends PApplet {
 
   int viewport_w = 1280;
   int viewport_h = 720;
@@ -41,7 +37,6 @@ public class box2d_Tumbler extends PApplet {
   
   boolean UPDATE_PHYSICS = true;
   boolean USE_DEBUG_DRAW = false;
-
 
   DwWorld world;
   DwBodyGroup bodies;
@@ -68,7 +63,7 @@ public class box2d_Tumbler extends PApplet {
     release();
     
     world = new DwWorld(this, 22);
-    world.transform.setScreen(width, height, 22, width/2, height/2);
+    world.transform.setScreen(width, height, 15, width/2, height-100);
     
     // Renderer
     bodies = new DwBodyGroup(this, world, world.transform);
@@ -81,9 +76,6 @@ public class box2d_Tumbler extends PApplet {
 
   public void draw(){
     if(UPDATE_PHYSICS){
-      if(frameCount % 4 == 0){
-        addBodies();
-      }
       world.update();
     }
     bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
@@ -129,100 +121,110 @@ public class box2d_Tumbler extends PApplet {
   //////////////////////////////////////////////////////////////////////////////
   // Scene Setup
   //////////////////////////////////////////////////////////////////////////////
-  int MAX_NUM = 800;
-  RevoluteJoint m_joint;
-  int m_count;
-  
-  // https://github.com/jbox2d/jbox2d/blob/master/jbox2d-testbed/src/main/java/org/jbox2d/testbed/tests/Tumbler.java
-  public void initScene() {
-    
 
+  
+  // https://github.com/jbox2d/jbox2d/blob/master/jbox2d-testbed/src/main/java/org/jbox2d/testbed/tests/VaryingFrictionTest.java
+  public void initScene() {
     {
       BodyDef bd = new BodyDef();
-      Body groundbody = world.createBody(bd);
+      Body ground = world.createBody(bd);
+
+      EdgeShape shape = new EdgeShape();
+      shape.set(new Vec2(-40.0f, 0.0f), new Vec2(40.0f, 0.0f));
+      ground.createFixture(shape, 0.0f);
       
-      bd.type = BodyType.DYNAMIC;
-      bd.allowSleep = false;
-      bd.position.set(0.0f, 0.0f);
-      Body body = world.createBody(bd);
-
-      PolygonShape shape = new PolygonShape();
-      shape.setAsBox(1, 11.0f, new Vec2(10.0f, 0.0f), 0.0f);
-      body.createFixture(shape, 15.0f);
-      shape.setAsBox(1, 11.0f, new Vec2(-10.0f, 0.0f), 0.0f);
-      body.createFixture(shape, 15.0f);
-      shape.setAsBox(11.0f, 1, new Vec2(0.0f, 10.0f), 0.0f);
-      body.createFixture(shape, 15.0f);
-      shape.setAsBox(11.0f, 1, new Vec2(0.0f, -10.0f), 0.0f);
-      body.createFixture(shape, 15.0f);
-
-      
-      CircleShape obstacle = new CircleShape(); 
-      obstacle.m_radius = 1; 
-      obstacle.m_p.set(-2, -6.5f);
-      body.createFixture(obstacle, 115.0f);
-      obstacle.m_p.set(2, +6.5f);
-      body.createFixture(obstacle, 115.0f);
-//      obstacle.m_p.set(-7.5f, 0);
-//      body.createFixture(obstacle, 15.0f);
-//      obstacle.m_p.set(+7.5f, 0);
-//      body.createFixture(obstacle, 15.0f);
-
-
-      bodies.add(body, true, color(224), true, color(0), 1f);
-
-      RevoluteJointDef jd = new RevoluteJointDef();
-      jd.bodyA = groundbody;
-      jd.bodyB = body;
-      jd.localAnchorA.set(0.0f, 0.0f);
-      jd.localAnchorB.set(0.0f, 0.0f);
-      jd.referenceAngle = 0.0f;
-      jd.motorSpeed = 0.1f * MathUtils.PI;
-      jd.maxMotorTorque = 1e7f;
-      jd.enableMotor = true;
-      m_joint = (RevoluteJoint) world.createJoint(jd);
+      bodies.add(ground, false, color(0), true, color(200), 1f);
     }
-    m_count = 0;
-   
 
-    // creates shapes for all rigid bodies in the world.
+    {
+      PolygonShape shape = new PolygonShape();
+      shape.setAsBox(13.0f, 0.25f);
+
+      BodyDef bd = new BodyDef();
+      bd.position.set(-4.0f, 22.0f);
+      bd.angle = -0.25f;
+
+      Body ground = world.createBody(bd);
+      ground.createFixture(shape, 0.0f);
+    }
+
+    {
+      PolygonShape shape = new PolygonShape();
+      shape.setAsBox(0.25f, 1.0f);
+
+      BodyDef bd = new BodyDef();
+      bd.position.set(10.5f, 19.0f);
+
+      Body ground = world.createBody(bd);
+      ground.createFixture(shape, 0.0f);
+    }
+
+    {
+      PolygonShape shape = new PolygonShape();
+      shape.setAsBox(13.0f, 0.25f);
+
+      BodyDef bd = new BodyDef();
+      bd.position.set(4.0f, 14.0f);
+      bd.angle = 0.25f;
+
+      Body ground = world.createBody(bd);
+      ground.createFixture(shape, 0.0f);
+    }
+
+    {
+      PolygonShape shape = new PolygonShape();
+      shape.setAsBox(0.25f, 1.0f);
+
+      BodyDef bd = new BodyDef();
+      bd.position.set(-10.5f, 11.0f);
+
+      Body ground = world.createBody(bd);
+      ground.createFixture(shape, 0.0f);
+    }
+
+    {
+      PolygonShape shape = new PolygonShape();
+      shape.setAsBox(13.0f, 0.25f);
+
+      BodyDef bd = new BodyDef();
+      bd.position.set(-4.0f, 6.0f);
+      bd.angle = -0.25f;
+
+      Body ground = world.createBody(bd);
+      ground.createFixture(shape, 0.0f);
+    }
+
+    {
+      PolygonShape shape = new PolygonShape();
+      shape.setAsBox(0.5f, 0.5f);
+
+      FixtureDef fd = new FixtureDef();
+      fd.shape = shape;
+      fd.density = 25.0f;
+
+      float friction[] = { 0.75f, 0.5f, 0.35f, 0.1f, 0.0f };
+
+      for (int i = 0; i < 5; ++i) {
+        BodyDef bd = new BodyDef();
+        bd.type = BodyType.DYNAMIC;
+        bd.position.set(-15.0f + 4.0f * i, 28.0f);
+        Body body = world.createBody(bd);
+
+        fd.friction = friction[i];
+        body.createFixture(fd);
+      }
+}
+
     bodies.createAll();
   }
   
   
-  public void addBodies(){
-    if (m_count < MAX_NUM) {
-      
-      float x = random(-0.7f, 0.7f);
-      float y = random(-0.7f, 0.7f);
-      
-      BodyDef bd = new BodyDef();
-      bd.type = BodyType.DYNAMIC;
-      bd.position.set(x, y);
-      Body body = world.createBody(bd);
-
-      PolygonShape shape = new PolygonShape();
-      shape.setAsBox(0.18f, 0.18f);
-      Fixture fixture = body.createFixture(shape, 0.01f);
-      fixture.m_friction = 0.1f;
-      fixture.m_restitution = 0.5f;
-      
-      ++m_count;
-
-      colorMode(HSB, 360, 100, 100);
-      float r = (360 * m_count /(float)MAX_NUM) % 360;
-      float g = 100;
-      float b = 100;
-      bodies.add(body, true, color(r,g,b), true, color(r, g, b *0.5f), 1f);
-      colorMode(RGB, 255, 255, 255);
-    }
-  }
   
   
  
    
   public static void main(String args[]) {
-    PApplet.main(new String[] { box2d_Tumbler.class.getName() });
+    PApplet.main(new String[] { box2d_VaryingFriction.class.getName() });
   }
   
 }

@@ -13,6 +13,8 @@
 
 package testbed;
 
+import com.thomasdiewald.liquidfun.java.DwWorld;
+import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
 
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
@@ -21,11 +23,6 @@ import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
-
-import com.thomasdiewald.liquidfun.java.DwViewportTransform;
-import com.thomasdiewald.liquidfun.java.interaction.DwMouseDragBodies;
-import com.thomasdiewald.liquidfun.java.render.DwBodyRenderP5;
-import com.thomasdiewald.liquidfun.java.render.DwDebugDraw;
 
 import processing.core.*;
 import processing.opengl.PGraphics2D;
@@ -40,13 +37,9 @@ public class box2d_DominoTower extends PApplet {
   
   boolean UPDATE_PHYSICS = true;
   boolean USE_DEBUG_DRAW = false;
-  
-  World world;
-  DwViewportTransform transform;
-  
-  DwDebugDraw debugdraw;
-  DwBodyRenderP5 bodyrenderer;
-  DwMouseDragBodies mouse_drag_bodies;
+
+  DwWorld world;
+  DwBodyGroup bodies;
   
   public void settings(){
     size(viewport_w, viewport_h, P2D);
@@ -55,83 +48,49 @@ public class box2d_DominoTower extends PApplet {
   
   public void setup(){ 
     surface.setLocation(viewport_x, viewport_y);
-    
     reset();
     frameRate(120);
   }
   
   
   public void release(){
-    if(bodyrenderer != null){
-      bodyrenderer.release();
-      bodyrenderer = null;
-    }
+    if(bodies != null) bodies.release(); bodies = null;
   }
-  
   
   public void reset(){
     // release old resources
     release();
     
-    // Box2d world
-    world = new World(new Vec2(0, -10f));
+    world = new DwWorld(this, 20);
+    world.transform.setScreen(width, height, 20, width/2, height-10);
     
-    // particle settings
-    world.setParticleGravityScale(0.4f);
-    world.setParticleDensity(1.2f);
-    world.setParticleDamping(1.0f);
-    world.setParticleRadius(0.25f);
-    
-    // Transformation: world <-> screen
-    transform = new DwViewportTransform(this);
-    transform.setScreen(width, height, 20, width/2, height-10);
-
     // Renderer
-    debugdraw = new DwDebugDraw(this, world, transform);
-    bodyrenderer = new DwBodyRenderP5(this, world, transform);
-
-    // mouse interaction
-    mouse_drag_bodies = new DwMouseDragBodies(world, transform);
+    bodies = new DwBodyGroup(this, world, world.transform);
 
     // create scene: rigid bodies, particles, etc ...
     initScene();
   }
   
   
-
-
-  //////////////////////////////////////////////////////////////////////////////
-  // draw
-  //////////////////////////////////////////////////////////////////////////////
-  
   
   public void draw(){
+    
     if(UPDATE_PHYSICS){
-      mouseDrawAction();
-      world.step(1f/60, 8, 4);
-      bodyrenderer.update();
+      world.update();
     }
+    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
     
     PGraphics2D canvas = (PGraphics2D) this.g;
-    
-    canvas.pushMatrix();
-    canvas.applyMatrix(transform.mat_box2screen);
     canvas.background(32);
-    canvas.fill(200);
-    canvas.tint(255);
-    canvas.stroke(0);
-    canvas.strokeWeight(1f/transform.screen_scale);
-
-//    DwDebugDraw.displayBodies   (canvas, world);
-//    DwDebugDraw.displayParticles(canvas, world);
-//    DwDebugDraw.displayJoints   (canvas, world);
-
+    canvas.pushMatrix();
+    world.applyTransform(canvas);
+    world.drawBulletSpawnTrack(canvas);
     if(USE_DEBUG_DRAW){
-      debugdraw.display(canvas);
+      world.displayDebugDraw(canvas);
+      // DwDebugDraw.display(canvas, world);
     } else {
-      bodyrenderer.display(canvas);
+      bodies.display(canvas);
     }
-    
     canvas.popMatrix();
     
     // info
@@ -149,48 +108,25 @@ public class box2d_DominoTower extends PApplet {
   // User Interaction
   //////////////////////////////////////////////////////////////////////////////
 
-  public void mousePressed() {
-    if(mouseButton == LEFT){
-      mouse_drag_bodies.press(mouseX, mouseY);
-    }
-  }
-
-  public void mouseDrawAction(){
-    mouse_drag_bodies   .update(mouseX, mouseY);
-  }
-  
-  public void mouseDragged() {
-  }
-  
-  public void mouseReleased() {
-    mouse_drag_bodies   .release(mouseX, mouseY);
-  }
-  
   public void keyReleased(){
-    if(key == 't') UPDATE_PHYSICS = !UPDATE_PHYSICS;
     if(key == 'r') reset();
+    if(key == 't') UPDATE_PHYSICS = !UPDATE_PHYSICS;
     if(key == 'f') USE_DEBUG_DRAW = !USE_DEBUG_DRAW;
   }
   
-  public void keyPressed() {
-  }
 
-
-  
   
   //////////////////////////////////////////////////////////////////////////////
   // Scene Setup
   //////////////////////////////////////////////////////////////////////////////
- 
-  // https://github.com/jbox2d/jbox2d/blob/master/jbox2d-testbed/src/main/java/org/jbox2d/testbed/tests/DominoTower.java
-  
-  
+
   final float dwidth = .20f;
   final float dheight = 1.0f;
   float ddensity;// = 10f;
   final float dfriction = 0.1f;
   int baseCount = 25;
-
+  
+  // https://github.com/jbox2d/jbox2d/blob/master/jbox2d-testbed/src/main/java/org/jbox2d/testbed/tests/DominoTower.java
   public void initScene() {
     
     { // Floor
@@ -202,8 +138,7 @@ public class box2d_DominoTower extends PApplet {
       Body floor = world.createBody(bd);
       floor.createFixture(sd, 0f);
       
-      bodyrenderer.createShape(floor);
-      bodyrenderer.styleShape(floor, true, color(0), false, color(0), 1f);
+      bodies.add(floor, true, color(0), false, color(0), 1f);
     }
 
     { // Bullets
@@ -239,11 +174,8 @@ public class box2d_DominoTower extends PApplet {
       bullet2.setLinearVelocity(new Vec2(35f, -10f));
       bullet2.setAngularVelocity(-8.3f);
       
-      bodyrenderer.createShape(bullet1);
-      bodyrenderer.styleShape(bullet1, true, color(255), false, color(0), 1f);
-      
-      bodyrenderer.createShape(bullet2);
-      bodyrenderer.styleShape(bullet2, true, color(255), false, color(0), 1f);
+      bodies.add(bullet1, true, color(255), false, color(0), 1f);
+      bodies.add(bullet2, true, color(255), false, color(0), 1f);
     }
 
     {
@@ -278,11 +210,8 @@ public class box2d_DominoTower extends PApplet {
       }
     }
    
-
-    // creates shapes for all rigid bodies in the world.
-    bodyrenderer.createShape();
-
   }
+  
   
   int count = 0;
   public void makeDomino(float x, float y, boolean horizontal, World world) {
@@ -302,7 +231,6 @@ public class box2d_DominoTower extends PApplet {
     myBody.createFixture(fd);
     
     
-    
     colorMode(HSB, 360, 100, 100);
     int ch = (count/5) % 360;
     int cs = 100;
@@ -310,9 +238,7 @@ public class box2d_DominoTower extends PApplet {
     if(horizontal) cb = 50;
     int fcol = color(ch, cs, cb);
     int scol = color(ch, cs*0.5f, cb*0.5f, 128);
-    bodyrenderer.createShape(myBody);
-    bodyrenderer.styleShape(myBody, true, fcol, true, scol, 1f);
-    
+    bodies.add(myBody, true, fcol, true, scol, 1f);
     colorMode(RGB, 255);
     
     count++;

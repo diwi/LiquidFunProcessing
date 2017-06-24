@@ -14,6 +14,9 @@
 package testbed;
 
 
+import com.thomasdiewald.liquidfun.java.DwWorld;
+import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
+
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.MathUtils;
@@ -22,15 +25,8 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.FixtureDef;
-import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
 import org.jbox2d.dynamics.joints.RevoluteJointDef;
-
-import com.thomasdiewald.liquidfun.java.DwViewportTransform;
-import com.thomasdiewald.liquidfun.java.interaction.DwMouseDragBodies;
-import com.thomasdiewald.liquidfun.java.render.DwBodyRenderP5;
-import com.thomasdiewald.liquidfun.java.render.DwDebugDraw;
-import com.thomasdiewald.liquidfun.java.render.DwJointRenderP5;
 
 import processing.core.PApplet;
 import processing.core.PFont;
@@ -47,22 +43,17 @@ public class box2d_CircleStressTest extends PApplet {
   boolean UPDATE_PHYSICS = true;
   boolean USE_DEBUG_DRAW = false;
 
-  World world;
-  DwViewportTransform transform;
-  
-  DwDebugDraw debugdraw;
-  DwBodyRenderP5 bodyrenderer;
-  DwJointRenderP5 jointrenderer;
-  
-  DwMouseDragBodies mouse_drag_bodies;
-  
-  
+  DwWorld world;
+  DwBodyGroup bodies;
+  DwBodyGroup bullets;
   PFont font;
-
+  
+  
   public void settings(){
     size(viewport_w, viewport_h, P2D);
     smooth(8);
   }
+  
   
   public void setup(){ 
     surface.setLocation(viewport_x, viewport_y);
@@ -73,15 +64,9 @@ public class box2d_CircleStressTest extends PApplet {
   
   
   public void release(){
-    if(bodyrenderer != null){
-      bodyrenderer.release();
-      bodyrenderer = null;
-    }
-    if(jointrenderer != null){
-      jointrenderer.release();
-      jointrenderer = null;
-    }
-    
+    if(bodies != null) bodies.release(); bodies = null;
+    if(bullets != null) bullets.release(); bullets = null;
+ 
   }
   
   
@@ -89,68 +74,39 @@ public class box2d_CircleStressTest extends PApplet {
     // release old resources
     release();
     
-    // Box2d world
-    world = new World(new Vec2(0, -50f));
-    
-    // particle settings
-    world.setParticleGravityScale(0.4f);
-    world.setParticleDensity(1.2f);
-    world.setParticleDamping(1.0f);
-    world.setParticleRadius(0.25f);
-    
-    // Transformation: world <-> screen
-    transform = new DwViewportTransform(this);
-    transform.setScreen(width, height, 10, width/2, height-10);
+    world = new DwWorld(this, 10);
+    world.transform.setScreen(width, height, 10, width/2, height-30);
 
     // Renderer
-    debugdraw = new DwDebugDraw(this, world, transform);
-    bodyrenderer = new DwBodyRenderP5(this, world, transform);
-    jointrenderer = new DwJointRenderP5(this, world, transform);
-    // mouse interaction
-    mouse_drag_bodies = new DwMouseDragBodies(world, transform);
-
+    bodies = new DwBodyGroup(this, world, world.transform);
+    bullets = new DwBodyGroup(this, world, world.transform);
     // create scene: rigid bodies, particles, etc ...
     initScene();
   }
   
   
-
-
-  //////////////////////////////////////////////////////////////////////////////
-  // draw
-  //////////////////////////////////////////////////////////////////////////////
-  
   
   public void draw(){
     
     if(UPDATE_PHYSICS){
-      mouseDrawAction();
-      world.step(1f/60, 8, 4);
-      bodyrenderer.update();
-      jointrenderer.update();
+      world.update();
     }
+    bullets.addBullet(true, color(200, 0, 0), true, color(0), 1f);
     
     PGraphics2D canvas = (PGraphics2D) this.g;
-    
-    canvas.pushMatrix();
-    canvas.applyMatrix(transform.mat_box2screen);
     canvas.background(255);
-    canvas.fill(200);
-    canvas.tint(255);
-    canvas.stroke(0);
-    canvas.strokeWeight(1f/transform.screen_scale);
-
-//    DwDebugDraw.displayBodies   (canvas, world);
-//    DwDebugDraw.displayParticles(canvas, world);
-//    DwDebugDraw.displayJoints   (canvas, world);
-
+    canvas.pushMatrix();
+    world.applyTransform(canvas);
+    world.drawBulletSpawnTrack(canvas);
     if(USE_DEBUG_DRAW){
-      debugdraw.display(canvas);
+      world.displayDebugDraw(canvas);
+      // DwDebugDraw.display(canvas, world);
     } else {
-      jointrenderer.display(canvas);
-      bodyrenderer.display(canvas);
+      bodies.display(canvas);
+      bullets.display(canvas);
     }
     canvas.popMatrix();
+    
     
     int tx = 16;
     int ty = 16;
@@ -162,7 +118,6 @@ public class box2d_CircleStressTest extends PApplet {
     text("'t'   pause"      , tx, ty+=gy);
     text("'f'   debugdraw"  , tx, ty+=gy);
   
-    
     // info
     int num_bodies    = world.getBodyCount();
     int num_particles = world.getParticleCount();
@@ -172,29 +127,12 @@ public class box2d_CircleStressTest extends PApplet {
   
 
   
+
   
   
   //////////////////////////////////////////////////////////////////////////////
   // User Interaction
   //////////////////////////////////////////////////////////////////////////////
-
-  public void mousePressed() {
-    if(mouseButton == LEFT){
-      mouse_drag_bodies.press(mouseX, mouseY);
-    }
-  }
-
-  public void mouseDrawAction(){
-    mouse_drag_bodies   .update(mouseX, mouseY);
-  }
-  
-  public void mouseDragged() {
-  }
-  
-  public void mouseReleased() {
-    mouse_drag_bodies   .release(mouseX, mouseY);
-  }
-  
   public void keyReleased(){
     if(key == 't') UPDATE_PHYSICS = !UPDATE_PHYSICS;
     if(key == 'r') reset();
@@ -203,10 +141,10 @@ public class box2d_CircleStressTest extends PApplet {
   }
 
   
+  
   //////////////////////////////////////////////////////////////////////////////
   // Scene Setup
   //////////////////////////////////////////////////////////////////////////////
-
 
   private RevoluteJoint joint;
   
@@ -269,20 +207,14 @@ public class box2d_CircleStressTest extends PApplet {
       bwall_T.createFixture(fd);
       
       
-      bodyrenderer.createShape(bwall_L);
-      bodyrenderer.styleShape (bwall_L, true, color(32), true, color(0), 1f);
-      bodyrenderer.createShape(bwall_R);
-      bodyrenderer.styleShape (bwall_R, true, color(32), true, color(0), 1f);
+      bodies.add(bwall_L, true, color(32), true, color(0), 1f);
+      bodies.add(bwall_R, true, color(32), true, color(0), 1f);
       
-      bodyrenderer.createShape(bwall_B);
-      bodyrenderer.styleShape (bwall_B, true, color(32), true, color(0), 1f);
-      bodyrenderer.createShape(bwall_T);
-      bodyrenderer.styleShape (bwall_T, true, color(32), true, color(0), 1f);
+      bodies.add(bwall_B, true, color(32), true, color(0), 1f);
+      bodies.add(bwall_T, true, color(32), true, color(0), 1f);
       
-      bodyrenderer.createShape(bchamfer_L);
-      bodyrenderer.styleShape (bchamfer_L, true, color(32), true, color(0), 1f);
-      bodyrenderer.createShape(bchamfer_R);
-      bodyrenderer.styleShape (bchamfer_R, true, color(32), true, color(0), 1f);
+      bodies.add(bchamfer_L, true, color(32), true, color(0), 1f);
+      bodies.add(bchamfer_R, true, color(32), true, color(0), 1f);
     }
 
     CircleShape cd;
@@ -317,8 +249,7 @@ public class box2d_CircleStressTest extends PApplet {
     rjd.enableMotor = true;
     joint = (RevoluteJoint) world.createJoint(rjd);
     
-    bodyrenderer.createShape(body);
-    bodyrenderer.styleShape (body, true, color(255,64,32), true, color(0), 1f);
+    bodies.add(body, true, color(255,64,32), true, color(0), 1f);
     
 
     {
@@ -341,15 +272,12 @@ public class box2d_CircleStressTest extends PApplet {
           Body myBody = world.createBody(bod);
           myBody.createFixture(fd2);
 
-          bodyrenderer.createShape(myBody);
-          bodyrenderer.styleShape (myBody, true, color(32,128,255,180), true, color(0), 1f);
+          bodies.add(myBody, true, color(32,128,255,180), true, color(0), 1f);
         }
       }
 
     }
 
-    bodyrenderer.createShape();
-//    jointrenderer.createShape();
   
   }
   
