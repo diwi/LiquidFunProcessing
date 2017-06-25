@@ -66,7 +66,6 @@ public class box2d_CircleStressTest extends PApplet {
   public void release(){
     if(bodies != null) bodies.release(); bodies = null;
     if(bullets != null) bullets.release(); bullets = null;
- 
   }
   
   
@@ -88,10 +87,12 @@ public class box2d_CircleStressTest extends PApplet {
   
   public void draw(){
     
+    bullets.addBullet(true, color(0), true, color(0), 1f);
+    
     if(UPDATE_PHYSICS){
       world.update();
     }
-    bullets.addBullet(true, color(200, 0, 0), true, color(0), 1f);
+
     
     PGraphics2D canvas = (PGraphics2D) this.g;
     canvas.background(255);

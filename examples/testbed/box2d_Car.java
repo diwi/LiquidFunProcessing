@@ -73,6 +73,7 @@ public class box2d_Car extends PApplet {
     release();
     
     world = new DwWorld(this, 20);
+    world.mouse_drag_bodies.mult_dragforce = 100f;
 
     // Renderer
     bodies = new DwBodyGroup(this, world, world.transform);
@@ -88,10 +89,11 @@ public class box2d_Car extends PApplet {
     Vec2 pos = m_car.m_xf.p;
     world.transform.setCamera(pos.x, pos.y/2 + 5);
     
+    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
+    
     if(UPDATE_PHYSICS){
       world.update();
     }
-    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
     
     PGraphics2D canvas = (PGraphics2D) this.g;
     canvas.background(255);
@@ -427,7 +429,7 @@ public class box2d_Car extends PApplet {
     }
     
     
-    bodies.createAll();
+    bodies.addAll();
     
   }
   

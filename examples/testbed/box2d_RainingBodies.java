@@ -13,27 +13,23 @@
 
 package testbed;
 
-
 import com.thomasdiewald.liquidfun.java.DwWorld;
 import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
 
-import org.jbox2d.collision.shapes.ChainShape;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
-import org.jbox2d.common.MathUtils;
+import org.jbox2d.collision.shapes.Shape;
+import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.Fixture;
-import org.jbox2d.dynamics.joints.RevoluteJoint;
-import org.jbox2d.dynamics.joints.RevoluteJointDef;
-
 import processing.core.*;
 import processing.opengl.PGraphics2D;
 
 
-public class box2d_TumblerMod extends PApplet {
+public class box2d_RainingBodies extends PApplet {
 
   int viewport_w = 1280;
   int viewport_h = 720;
@@ -45,7 +41,7 @@ public class box2d_TumblerMod extends PApplet {
 
   DwWorld world;
   DwBodyGroup bodies;
-
+  
   public void settings(){
     size(viewport_w, viewport_h, P2D);
     smooth(8);
@@ -62,16 +58,14 @@ public class box2d_TumblerMod extends PApplet {
     if(bodies != null) bodies.release(); bodies = null;
   }
   
-  
   public void reset(){
     // release old resources
     release();
     
-    // create world
     world = new DwWorld(this, 20);
-    world.transform.setScreen(width, height, 22, width/2, height/2);
-
-    // create renderer
+    world.transform.setScreen(width, height, 20, width/2, height);
+    
+    // Renderer
     bodies = new DwBodyGroup(this, world, world.transform);
 
     // create scene: rigid bodies, particles, etc ...
@@ -79,12 +73,15 @@ public class box2d_TumblerMod extends PApplet {
   }
   
   
+  
   public void draw(){
     
-    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
+    
+    bodies.addBullet(true, color(220), true, color(0), 1f);
     
     if(UPDATE_PHYSICS){
-      if(frameCount % 4 == 0){
+      removeLostBodies();
+      if(frameCount % 10 == 0){
         addBodies();
       }
       world.update();
@@ -92,10 +89,12 @@ public class box2d_TumblerMod extends PApplet {
 
     
     PGraphics2D canvas = (PGraphics2D) this.g;
+    
     canvas.background(32);
     canvas.pushMatrix();
     world.applyTransform(canvas);
     world.drawBulletSpawnTrack(canvas);
+    
     if(USE_DEBUG_DRAW){
       world.displayDebugDraw(canvas);
       // DwDebugDraw.display(canvas, world);
@@ -104,7 +103,6 @@ public class box2d_TumblerMod extends PApplet {
     }
     canvas.popMatrix();
     
-
     // info
     int num_bodies    = world.getBodyCount();
     int num_particles = world.getParticleCount();
@@ -112,8 +110,17 @@ public class box2d_TumblerMod extends PApplet {
     surface.setTitle(txt_fps);
   }
   
-  
 
+  
+  public void removeLostBodies(){
+    for (Body body = world.getBodyList(); body != null; body = body.getNext()) {
+      Transform xf = body.getTransform();
+      if(xf.p.y < -10.0){
+        world.destroyBody(body);
+      }
+    }
+  }
+  
   
   
   
@@ -122,8 +129,8 @@ public class box2d_TumblerMod extends PApplet {
   //////////////////////////////////////////////////////////////////////////////
 
   public void keyReleased(){
-    if(key == 't') UPDATE_PHYSICS = !UPDATE_PHYSICS;
     if(key == 'r') reset();
+    if(key == 't') UPDATE_PHYSICS = !UPDATE_PHYSICS;
     if(key == 'f') USE_DEBUG_DRAW = !USE_DEBUG_DRAW;
   }
   
@@ -132,109 +139,97 @@ public class box2d_TumblerMod extends PApplet {
   //////////////////////////////////////////////////////////////////////////////
   // Scene Setup
   //////////////////////////////////////////////////////////////////////////////
+
   int MAX_NUM = 800;
-  RevoluteJoint m_joint;
-  int m_count;
+  int m_count = 0;
   
-  // https://github.com/jbox2d/jbox2d/blob/master/jbox2d-testbed/src/main/java/org/jbox2d/testbed/tests/Tumbler.java
   public void initScene() {
     
-
-    {
-      BodyDef bd = new BodyDef();
-      Body groundbody = world.createBody(bd);
-      
-      bd.type = BodyType.DYNAMIC;
-      bd.allowSleep = false;
-      bd.position.set(0.0f, 0.0f);
-
-      Body bwheel = world.createBody(bd);
-//      bodies.add(bwheel);
-
-      ChainShape shape = new ChainShape();
-      int num_verts = 128;
-      float rad = 10;
-      float angle_step = (float) (Math.PI * 2 / num_verts);
-      
-      float dent_size = 1.5f;
-      int num_dents = 5;
-      
-      // wheel
-      Vec2[] vertices = new Vec2[num_verts];
-      for(int i = 0; i < num_verts; i++){
-        float inorm = (float) ((Math.PI * 2) * i / (float) num_verts);
-        float rad_off = (float) Math.cos(inorm * num_dents) * dent_size;
-        float x = (rad + rad_off) * (float) Math.cos(angle_step * i);
-        float y = (rad + rad_off) * (float) Math.sin(angle_step * i);
-        vertices[i] = new Vec2(x, y); 
-      }
-      
-      shape.createLoop(vertices, num_verts);
-      Fixture wheel = bwheel.createFixture(shape, 15.0f);
-      bodies.add(wheel, true, color(240), false, color(255), 1f);
-      
-      // obstacles inside wheel
-      CircleShape sobstacle = new CircleShape(); 
-      sobstacle.m_radius = 4f/num_dents;
-      angle_step = (float) (Math.PI * 2 / num_dents);
-      for(int i = 0; i < num_dents; i++){
-        float angle = angle_step * 0.5f + angle_step * i;
-        float radius = rad - 4f;
-        float x = radius * (float) Math.cos(angle);
-        float y = radius * (float) Math.sin(angle);
-        sobstacle.m_p.set(x, y);
-        Fixture fobstacle = bwheel.createFixture(sobstacle, 150.0f);
-        bodies.add(fobstacle, true, color(64), false, color(255), 1f);
-      }
-
-      // motor
-      RevoluteJointDef jd = new RevoluteJointDef();
-      jd.bodyA = groundbody;
-      jd.bodyB = bwheel;
-      jd.localAnchorA.set(0.0f, 0.0f);
-      jd.localAnchorB.set(0.0f, 0.0f);
-      jd.referenceAngle = 0.0f;
-      jd.motorSpeed = 0.1f * MathUtils.PI;
-      jd.maxMotorTorque = 1000000f;
-      jd.enableMotor = true;
-      m_joint = (RevoluteJoint) world.createJoint(jd);
-    }
     m_count = 0;
-   
+    
+    float screen_scale = world.transform.screen_scale;
+    float b2d_screen_w = world.transform.box2d_dimx;
+    float b2d_screen_h = world.transform.box2d_dimy;
+    float b2d_thickness = 10 / screen_scale;
+    
+    { // Walls
+      BodyDef bd = new BodyDef();
+      bd.position.set(0, 0);
+
+      Body ground = world.createBody(bd);
+      PolygonShape sd = new PolygonShape();
+      
+      float x, y, w, h;
+
+      float angle = 60 * PI/180;
+      for(int i = 0; i < 10; i++){
+        x = random(-0.5f, 0.5f) * b2d_screen_w;
+        y = random( 0, 0.5f) * b2d_screen_h;
+        w = random(15, 20);
+        h = b2d_thickness;
+        sd.setAsBox(w/2f, h/2f, new Vec2(x, y), random(-1, 1) * angle);
+        ground.createFixture(sd, 0);
+      }
+
+      bodies.add(ground, true, color(0), !true, color(0), 1f);
+    }
   }
   
   
+  
   public void addBodies(){
-    if (m_count < MAX_NUM) {
+    if (world.getBodyCount() < MAX_NUM) {
+
+      float b2d_screen_w = world.transform.box2d_dimx;
+      float b2d_screen_h = world.transform.box2d_dimy;
       
-      float x = random(-0.7f, 0.7f);
-      float y = random(-0.7f, 0.7f);
+      float x = random(-0.4f, 0.4f) * b2d_screen_w;
+      float y = random(-2f, 2) + b2d_screen_h;
+      
+      float w = random(0.5f, 2.2f);
+      float h = random(0.5f, 1.2f);
       
       BodyDef bd = new BodyDef();
       bd.type = BodyType.DYNAMIC;
       bd.position.set(x, y);
       Body body = world.createBody(bd);
+      
 
-      PolygonShape shape = new PolygonShape();
-      shape.setAsBox(0.18f, 0.18f);
+      Shape shape = null;
+      if(random(1) < 0.5){
+        PolygonShape pshape = new PolygonShape();
+        pshape.setAsBox(w, h, new Vec2(0,0), random(TWO_PI));
+        shape = pshape;
+      } else {
+        CircleShape cshape = new CircleShape();
+        cshape.m_p.set(0,0);
+        cshape.m_radius = w / 2f;
+        shape = cshape;
+      }
+ 
       Fixture fixture = body.createFixture(shape, 0.01f);
       fixture.m_friction = 0.1f;
       fixture.m_restitution = 0.5f;
       
-      ++m_count;
-
       colorMode(HSB, 360, 100, 100);
-      float hue = (360 * m_count /(float)MAX_NUM) % 360;
-      bodies.add(body, true, color(hue, 100, 100), true, color(hue, 100, 50), 1f);
+
+      float r = (360 * m_count /(float)MAX_NUM) % 360;
+      float g = 100;
+      float b = 100;
+      
+      bodies.add(body, true, color(r,g,b), true, color(r, g, b *0.5f), 1f);
       colorMode(RGB, 255, 255, 255);
+      
+      m_count++;
     }
   }
   
-  
+
+
  
    
   public static void main(String args[]) {
-    PApplet.main(new String[] { box2d_TumblerMod.class.getName() });
+    PApplet.main(new String[] { box2d_RainingBodies.class.getName() });
   }
   
 }

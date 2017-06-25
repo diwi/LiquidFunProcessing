@@ -23,7 +23,7 @@ import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.joints.Joint;
 
-import com.thomasdiewald.liquidfun.java.interaction.DwBullet;
+import com.thomasdiewald.liquidfun.java.interaction.DwMouseSpawnBullet;
 import com.thomasdiewald.liquidfun.java.interaction.DwInteractionEvent;
 import com.thomasdiewald.liquidfun.java.interaction.DwMouseDragBodies;
 import com.thomasdiewald.liquidfun.java.interaction.DwMouseDragParticles;
@@ -43,6 +43,11 @@ public class DwWorld extends World{
   public PApplet papplet;
   public DwViewportTransform transform;
   public DwDebugDraw debug_draw;
+  
+  
+  public DwMouseDragBodies    mouse_drag_bodies;   
+  public DwMouseDragParticles mouse_drag_particles;
+  public DwMouseSpawnBullet   mouse_shoot_bullet;
   
 
   public DwWorld(PApplet papplet){
@@ -73,16 +78,15 @@ public class DwWorld extends World{
     papplet.registerMethod("mouseEvent", this);
     papplet.registerMethod("keyEvent"  , this);
     
-    DwInteractionEvent mouse_drag_bodies    = new DwMouseDragBodies   (this, transform);
-    DwInteractionEvent mouse_drag_particles = new DwMouseDragParticles(this, transform);
-    bullet   = new DwBullet            (this, transform);
+    mouse_drag_bodies    = new DwMouseDragBodies   (this, transform);
+    mouse_drag_particles = new DwMouseDragParticles(this, transform);
+    mouse_shoot_bullet   = new DwMouseSpawnBullet  (this, transform);
     
     addMouseAction(mouse_drag_bodies);
     addMouseAction(mouse_drag_particles);
-    addMouseAction(bullet);
+    addMouseAction(mouse_shoot_bullet);
   }
-  
-  public DwBullet bullet;
+
   
   public void dispose(){
   }
@@ -100,7 +104,13 @@ public class DwWorld extends World{
     update(1/60f, 8, 4);
   }
   
-  
+  /**
+   * Take a time step. This performs collision detection, integration, and constraint solution.
+   * 
+   * @param timeStep the amount of time to simulate, this should not vary.
+   * @param velocityIterations for the velocity constraint solver.
+   * @param positionIterations for the position constraint solver.
+   */
   public void update(float timestep, int iter_velocity, int iter_position){
     mouseUpdateAction();
     super.step(timestep, iter_velocity, iter_position);
@@ -196,7 +206,7 @@ public class DwWorld extends World{
   //
   //////////////////////////////////////////////////////////////////////////////
   public void drawBulletSpawnTrack(PGraphics canvas){
-    bullet.drawSpawnTrack(canvas);
+    mouse_shoot_bullet.drawSpawnTrack(canvas);
   }
   
 
@@ -249,6 +259,10 @@ public class DwWorld extends World{
     }
   }
   
+  public void removeAllMouseActions(){
+    mouse_actions.clear();
+  }
+  
   public boolean hasMouseAction(DwInteractionEvent mouse_action){
     return mouse_actions.contains(mouse_action);
   }
@@ -276,7 +290,7 @@ public class DwWorld extends World{
     return list;
   }
   
-  
+
   
   
   

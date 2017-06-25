@@ -64,10 +64,9 @@ public class box2d_MobileBalanced extends PApplet {
     // release old resources
     release();
     
-    world = new DwWorld(this, 22);
+    world = new DwWorld(this, 50);
     world.transform.setCamera(0, 18, 50);
-    world.debug_draw.setStrokeWeight(1f);
-    
+ 
     // Renderer
     bodies = new DwBodyGroup(this, world, world.transform);
 
@@ -78,11 +77,13 @@ public class box2d_MobileBalanced extends PApplet {
   
 
   public void draw(){
+    
+    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
+    
     if(UPDATE_PHYSICS){
       world.update();
     }
     
-    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
 
     PGraphics2D canvas = (PGraphics2D) this.g;
     canvas.background(32);
@@ -154,7 +155,7 @@ public class box2d_MobileBalanced extends PApplet {
     jointDef.localAnchorB = h;
     world.createJoint(jointDef);
     
-    bodies.createAll();
+    bodies.addAll();
   }
 
   
@@ -163,6 +164,7 @@ public class box2d_MobileBalanced extends PApplet {
     a *= 0.90f;
     
     float fdepth = 1 - depth / (float) (e_depth+1);
+    float hue =  220 / 360f;
     
     float density = 20.0f;
     Vec2 h = new Vec2(0.0f, a);
@@ -178,7 +180,7 @@ public class box2d_MobileBalanced extends PApplet {
     PolygonShape shape = new PolygonShape();
     shape.setAsBox(0.25f * a, a);
     Fixture fixture1 = body.createFixture(shape, density);
-    bodies.add(fixture1, true, color(fdepth, 1, 1), true, color(0), 1f);
+    bodies.add(fixture1, true, color(hue, fdepth, 1), true, color(0), 1f);
 
     if (depth == e_depth){
       return body;
@@ -186,7 +188,7 @@ public class box2d_MobileBalanced extends PApplet {
 
     shape.setAsBox(offset, 0.25f * a, new Vec2(0, -a), 0.0f);
     Fixture fixture2 = body.createFixture(shape, density);
-    bodies.add(fixture2, true, color(fdepth, 1, 1), true, color(0), 1f);
+    bodies.add(fixture2, true, color(hue, fdepth, 1), true, color(0), 1f);
     
     Vec2 a1 = new Vec2(offset, -a);
     Vec2 a2 = new Vec2(-offset, -a);

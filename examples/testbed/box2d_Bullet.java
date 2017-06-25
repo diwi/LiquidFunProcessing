@@ -15,7 +15,7 @@ package testbed;
 
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
-import com.thomasdiewald.liquidfun.java.interaction.DwBullet;
+import com.thomasdiewald.liquidfun.java.interaction.DwMouseSpawnBullet;
 import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
 
 import org.jbox2d.collision.shapes.EdgeShape;
@@ -41,7 +41,7 @@ public class box2d_Bullet extends PApplet {
 
   DwWorld world;
   DwBodyGroup bodies;
-  DwBullet bullet;
+  DwMouseSpawnBullet bullet;
   
   public void settings(){
     size(viewport_w, viewport_h, P2D);
@@ -70,7 +70,7 @@ public class box2d_Bullet extends PApplet {
     // Renderer
     bodies = new DwBodyGroup(this, world, world.transform);
     
-    bullet = new DwBullet(world, world.transform);
+    bullet = new DwMouseSpawnBullet(world, world.transform);
     
     // create scene: rigid bodies, particles, etc ...
     initScene();
@@ -187,7 +187,7 @@ public class box2d_Bullet extends PApplet {
     }
     
     
-    bodies.createAll();
+    bodies.addAll();
     
   }
 

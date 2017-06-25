@@ -229,13 +229,16 @@ public class DebugDrawDemo_ParticleIndexBuffer extends PApplet {
   public void draw(){
     
     DwParticleRender particlerender = (keyPressed && key == 'h') ? particlerender_p5 : particlerender_gl;
+    
+    
+    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
 
     if(UPDATE_PHYSICS){
       mouseDrawAction();
       world.update();
       particlerender.update();
     }
-    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
+
 
     int BACKGROUND = 16;
     

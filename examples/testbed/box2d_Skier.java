@@ -76,11 +76,13 @@ public class box2d_Skier extends PApplet {
 
   
   public void draw(){
+    
+    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
  
     if(UPDATE_PHYSICS){
       world.update();
     }
-    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
+
     
     PGraphics2D canvas = (PGraphics2D) this.g;
     canvas.background(255);
@@ -283,7 +285,7 @@ public class box2d_Skier extends PApplet {
       m_skier = skier;
     }
 
-    bodies.createAll();
+    bodies.addAll();
   }
 
 

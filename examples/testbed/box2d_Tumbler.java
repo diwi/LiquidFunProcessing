@@ -80,13 +80,16 @@ public class box2d_Tumbler extends PApplet {
   
 
   public void draw(){
+    
+    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
+    
     if(UPDATE_PHYSICS){
       if(frameCount % 4 == 0){
         addBodies();
       }
       world.update();
     }
-    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
+
     
     PGraphics2D canvas = (PGraphics2D) this.g;
     canvas.background(32);
@@ -130,8 +133,9 @@ public class box2d_Tumbler extends PApplet {
   // Scene Setup
   //////////////////////////////////////////////////////////////////////////////
   int MAX_NUM = 800;
+  int m_count = 0;
   RevoluteJoint m_joint;
-  int m_count;
+
   
   // https://github.com/jbox2d/jbox2d/blob/master/jbox2d-testbed/src/main/java/org/jbox2d/testbed/tests/Tumbler.java
   public void initScene() {
@@ -186,7 +190,7 @@ public class box2d_Tumbler extends PApplet {
    
 
     // creates shapes for all rigid bodies in the world.
-    bodies.createAll();
+    bodies.addAll();
   }
   
   

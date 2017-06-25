@@ -78,11 +78,13 @@ public class box2d_PistonStressTest extends PApplet {
   
   public void draw(){
     
+    bodies.addBullet(true, color(0), true, color(0), 1f);
+    
+    
     if(UPDATE_PHYSICS){
       world.update();
     }
-    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
-    
+  
     PGraphics2D canvas = (PGraphics2D) this.g;
     canvas.background(255);
     canvas.pushMatrix();
@@ -339,8 +341,8 @@ public class box2d_PistonStressTest extends PApplet {
       }
     }
     
-    world.bullet.fixture_def.filter.categoryBits = 2;
-    world.bullet.fixture_def.filter.maskBits = 1 | 4 | 2;
+    world.mouse_shoot_bullet.fixture_def.filter.categoryBits = 2;
+    world.mouse_shoot_bullet.fixture_def.filter.maskBits = 1 | 4 | 2;
 
   }
   
