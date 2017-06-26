@@ -84,6 +84,7 @@ public class DebugDrawDemo extends PApplet {
     if(bodies != null) bodies.release(); bodies = null;
     if(particlerender_gl != null) particlerender_gl.release(); particlerender_gl = null;
     if(particlerender_p5 != null) particlerender_p5.release(); particlerender_p5 = null;
+    if(world     != null) world    .release(); world     = null;  
   }
   
   
@@ -507,7 +508,8 @@ public class DebugDrawDemo extends PApplet {
       particle_spawn.join_groups = true;
       screen_radius = 10;
     }
-    particle_spawn.spawn(screen_x, screen_y, screen_radius);
+    particle_spawn.setCircleShape(screen_radius);
+    particle_spawn.spawn(screen_x, screen_y);
   }
   
   

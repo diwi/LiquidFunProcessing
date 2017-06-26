@@ -116,6 +116,8 @@ public class Particles_Spawn_LiquidFx_2 extends PApplet {
       particle_render_p5.release();
       particle_render_p5 = null;
     }
+
+    if(world     != null) world    .release(); world     = null;
   }
   
 
@@ -303,7 +305,8 @@ public class Particles_Spawn_LiquidFx_2 extends PApplet {
     
     body_render.createShape();
     
-    particle_spawn.spawn(width/2,  height/2, height/3);
+    particle_spawn.setCircleShape(height/3);
+    particle_spawn.spawn(width/2,  height/2);
   }
   
   
@@ -414,7 +417,8 @@ public class Particles_Spawn_LiquidFx_2 extends PApplet {
       particle_spawn.join_groups = true;
       screen_radius = 10;
     }
-    particle_spawn.spawn(screen_x, screen_y, screen_radius);
+    particle_spawn.setCircleShape(screen_radius);
+    particle_spawn.spawn(screen_x, screen_y);
   }
   
   

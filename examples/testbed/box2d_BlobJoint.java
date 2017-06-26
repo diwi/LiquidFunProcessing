@@ -15,6 +15,8 @@ package testbed;
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
 import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
+import com.thomasdiewald.liquidfun.java.render.DwParticleRenderGL;
+
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
@@ -43,6 +45,7 @@ public class box2d_BlobJoint extends PApplet {
 
   DwWorld world;
   DwBodyGroup bodies;
+  DwParticleRenderGL particles;
   
   public void settings(){
     size(viewport_w, viewport_h, P2D);
@@ -57,7 +60,9 @@ public class box2d_BlobJoint extends PApplet {
   
   
   public void release(){
-    if(bodies != null) bodies.release(); bodies = null;
+    if(bodies    != null) bodies   .release(); bodies    = null;
+    if(particles != null) particles.release(); particles = null;
+    if(world     != null) world    .release(); world     = null;
   }
   
   public void reset(){
@@ -69,7 +74,8 @@ public class box2d_BlobJoint extends PApplet {
     
     // Renderer
     bodies = new DwBodyGroup(this, world, world.transform);
-
+    particles = new DwParticleRenderGL(this, world, world.transform);
+    
     // create scene: rigid bodies, particles, etc ...
     initScene();
   }
@@ -82,6 +88,7 @@ public class box2d_BlobJoint extends PApplet {
     
     if(UPDATE_PHYSICS){
       world.update();
+      particles.update();
     }
     
     PGraphics2D canvas = (PGraphics2D) this.g;
@@ -96,6 +103,7 @@ public class box2d_BlobJoint extends PApplet {
       // DwDebugDraw.display(canvas, world);
     } else {
       bodies.display(canvas);
+      particles.display(canvas);
     }
     canvas.popMatrix();
     

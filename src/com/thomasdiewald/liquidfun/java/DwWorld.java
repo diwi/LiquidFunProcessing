@@ -23,7 +23,8 @@ import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.joints.Joint;
 
-import com.thomasdiewald.liquidfun.java.interaction.DwMouseSpawnBullet;
+import com.thomasdiewald.liquidfun.java.interaction.DwMouseShootBullet;
+import com.thomasdiewald.liquidfun.java.interaction.DwParticleSpawn;
 import com.thomasdiewald.liquidfun.java.interaction.DwInteractionEvent;
 import com.thomasdiewald.liquidfun.java.interaction.DwMouseDragBodies;
 import com.thomasdiewald.liquidfun.java.interaction.DwMouseDragParticles;
@@ -44,14 +45,21 @@ public class DwWorld extends World{
   public DwViewportTransform transform;
   public DwDebugDraw debug_draw;
   
-  
-  public DwMouseDragBodies    mouse_drag_bodies;   
-  public DwMouseDragParticles mouse_drag_particles;
-  public DwMouseSpawnBullet   mouse_shoot_bullet;
-  
+  public final DwMouseDragBodies    mouse_drag_bodies;   
+  public final DwMouseDragParticles mouse_drag_particles;
+  public final DwMouseShootBullet   mouse_shoot_bullet;
+  public final DwParticleSpawn      mouse_spawn_particles;
 
+  private String[] registered_methods = 
+    {
+      "dispose"
+     ,"mouseEvent"
+     ,"keyEvent" 
+    };
+  
+  
   public DwWorld(PApplet papplet){
-    this(papplet, 15);
+    this(papplet, 20);
   }
   
   public DwWorld(PApplet papplet, float scale){
@@ -71,24 +79,42 @@ public class DwWorld extends World{
     transform = new DwViewportTransform(papplet);
     transform.setScreen(w, h, scale, w/2, h);
     
-    
+  
     debug_draw = new DwDebugDraw(papplet, this, transform);
       
-    papplet.registerMethod("dispose"   , this);
-    papplet.registerMethod("mouseEvent", this);
-    papplet.registerMethod("keyEvent"  , this);
-    
-    mouse_drag_bodies    = new DwMouseDragBodies   (this, transform);
-    mouse_drag_particles = new DwMouseDragParticles(this, transform);
-    mouse_shoot_bullet   = new DwMouseSpawnBullet  (this, transform);
-    
-    addMouseAction(mouse_drag_bodies);
-    addMouseAction(mouse_drag_particles);
-    addMouseAction(mouse_shoot_bullet);
-  }
+    for(int i = 0; i < registered_methods.length; i++){
+      papplet.registerMethod(registered_methods[i], this);
+    }
 
+    
+    mouse_drag_bodies     = new DwMouseDragBodies   (this, transform);
+    mouse_drag_particles  = new DwMouseDragParticles(this, transform);
+    mouse_shoot_bullet    = new DwMouseShootBullet  (this, transform);
+    mouse_spawn_particles = new DwParticleSpawn     (this, transform);
+    
+    addMouseAction(mouse_drag_bodies    );
+    addMouseAction(mouse_drag_particles );
+    addMouseAction(mouse_shoot_bullet   );
+    addMouseAction(mouse_spawn_particles);
+  }
   
+
+
+  /**
+   * called by processing
+   */
   public void dispose(){
+    for(int i = 0; i < registered_methods.length; i++){
+      papplet.unregisterMethod(registered_methods[i], this);
+    }
+  }
+  
+  
+  /**
+   * must be called by the user, in case this world instance wont be used any longer.
+   */
+  public void release(){
+    dispose();
   }
   
 

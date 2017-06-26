@@ -16,6 +16,7 @@ package testbed;
 import com.thomasdiewald.liquidfun.java.DwWorld;
 import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
 import com.thomasdiewald.liquidfun.java.render.DwJoint;
+import com.thomasdiewald.liquidfun.java.render.DwParticleRenderGL;
 
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -45,6 +46,7 @@ public class box2d_Collisions extends PApplet {
 
   DwWorld world;
   DwBodyGroup bodies;
+  DwParticleRenderGL particles;
   
   public void settings(){
     size(viewport_w, viewport_h, P2D);
@@ -59,7 +61,9 @@ public class box2d_Collisions extends PApplet {
   
   
   public void release(){
-    if(bodies != null) bodies.release(); bodies = null;
+    if(bodies    != null) bodies   .release(); bodies    = null;
+//    if(particles != null) particles.release(); particles = null;
+    if(world     != null) world    .release(); world     = null;  
   }
   
   public void reset(){
@@ -77,6 +81,7 @@ public class box2d_Collisions extends PApplet {
     
     // Renderer
     bodies = new DwBodyGroup(this, world, world.transform);
+    particles = new DwParticleRenderGL(this, world, world.transform);
 
     // create scene: rigid bodies, particles, etc ...
     initScene();
@@ -94,9 +99,8 @@ public class box2d_Collisions extends PApplet {
         addBodies();
       }
       world.update();
-      
+      particles.update();
       doSomethingWithCollisionContactsAndDistanceJoints();
-      
     }
 
     
@@ -112,6 +116,7 @@ public class box2d_Collisions extends PApplet {
       // DwDebugDraw.display(canvas, world);
     } else {
       bodies.display(canvas);
+      particles.display(canvas);
     }
     canvas.popMatrix();
     

@@ -87,6 +87,7 @@ public class DebugDrawDemo_ParticleIndexBuffer extends PApplet {
     if(bodies != null) bodies.release(); bodies = null;
     if(particlerender_gl != null) particlerender_gl.release(); particlerender_gl = null;
     if(particlerender_p5 != null) particlerender_p5.release(); particlerender_p5 = null;
+    if(world     != null) world    .release(); world     = null;  
   }
   
   
@@ -100,6 +101,8 @@ public class DebugDrawDemo_ParticleIndexBuffer extends PApplet {
     bodies = new DwBodyGroup(this, world, world.transform);
     particlerender_gl = new DwParticleRenderGL(this, world, world.transform);
     particlerender_p5 = new DwParticleRenderP5(this, world, world.transform);
+    
+    particlerender_gl.param.radius_scale = 3;
     
     particle_destroyer  = new DwParticleDestroyer(world, world.transform);
     particle_spawn      = new DwParticleSpawn(world, world.transform);
@@ -638,7 +641,8 @@ public class DebugDrawDemo_ParticleIndexBuffer extends PApplet {
       particle_spawn.join_groups = true;
       screen_radius = 10;
     }
-    particle_spawn.spawn(screen_x, screen_y, screen_radius);
+    particle_spawn.setCircleShape(screen_radius);
+    particle_spawn.spawn(screen_x, screen_y);
   }
   
   

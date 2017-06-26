@@ -54,7 +54,9 @@ public class box2d_DominoTower extends PApplet {
   
   
   public void release(){
-    if(bodies != null) bodies.release(); bodies = null;
+    if(bodies    != null) bodies   .release(); bodies    = null;
+//    if(particles != null) particles.release(); particles = null;
+    if(world     != null) world    .release(); world     = null;  
   }
   
   public void reset(){
@@ -131,16 +133,28 @@ public class box2d_DominoTower extends PApplet {
   // https://github.com/jbox2d/jbox2d/blob/master/jbox2d-testbed/src/main/java/org/jbox2d/testbed/tests/DominoTower.java
   public void initScene() {
     
+    float screen_scale = world.transform.screen_scale;
+    float dimx = world.transform.box2d_dimx;
+    float dimy = world.transform.box2d_dimy;
+    float thick = 20 / screen_scale;
+    
     { // Floor
-      PolygonShape sd = new PolygonShape();
-      sd.setAsBox(50.0f, 10.0f);
 
       BodyDef bd = new BodyDef();
-      bd.position = new Vec2(0.0f, -10.0f);
-      Body floor = world.createBody(bd);
-      floor.createFixture(sd, 0f);
+      Body ground = world.createBody(bd);
       
-      bodies.add(floor, true, color(0), false, color(0), 1f);
+      PolygonShape sd = new PolygonShape();
+      
+      sd.setAsBox(dimx/2, thick);
+      ground.createFixture(sd, 0);
+      
+      sd.setAsBox(thick, dimy/2, new Vec2(-dimx/2, dimy/2), 0);
+      ground.createFixture(sd, 0);
+      
+      sd.setAsBox(thick, dimy/2, new Vec2(+dimx/2, dimy/2), 0);
+      ground.createFixture(sd, 0);
+      
+      bodies.add(ground, true, color(0), false, color(0), 1f);
     }
 
     { // Bullets

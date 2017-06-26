@@ -16,6 +16,7 @@ package testbed;
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
 import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
+import com.thomasdiewald.liquidfun.java.render.DwParticleRenderGL;
 
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
@@ -40,6 +41,7 @@ public class box2d_Dominos extends PApplet {
 
   DwWorld world;
   DwBodyGroup bodies;
+  DwParticleRenderGL particles;
 
   public void settings(){
     size(viewport_w, viewport_h, P2D);
@@ -55,7 +57,9 @@ public class box2d_Dominos extends PApplet {
   
   
   public void release(){
-    if(bodies != null) bodies.release(); bodies = null;
+    if(bodies    != null) bodies   .release(); bodies    = null;
+//    if(particles != null) particles.release(); particles = null;
+    if(world     != null) world    .release(); world     = null;  
   }
   
   
@@ -68,7 +72,8 @@ public class box2d_Dominos extends PApplet {
 
     // Renderer
     bodies = new DwBodyGroup(this, world, world.transform);
-
+    particles = new DwParticleRenderGL(this, world, world.transform);
+    
     // create scene: rigid bodies, particles, etc ...
     initScene();
   }
@@ -81,6 +86,7 @@ public class box2d_Dominos extends PApplet {
     
     if(UPDATE_PHYSICS){
       world.update();
+      particles.update();
     }
     
     PGraphics2D canvas = (PGraphics2D) this.g;
@@ -93,6 +99,7 @@ public class box2d_Dominos extends PApplet {
       // DwDebugDraw.display(canvas, world);
     } else {
       bodies.display(canvas);
+      particles.display(canvas);
     }
     canvas.popMatrix();
     
@@ -123,19 +130,28 @@ public class box2d_Dominos extends PApplet {
   // https://github.com/jbox2d/jbox2d/blob/master/jbox2d-testbed/src/main/java/org/jbox2d/testbed/tests/DominoTest.java
   public void initScene() {
     
+    float screen_scale = world.transform.screen_scale;
+    float dimx = world.transform.box2d_dimx;
+    float dimy = world.transform.box2d_dimy;
+    float thick = 20 / screen_scale;
     
     { // Floor
-      FixtureDef fd = new FixtureDef();
-      PolygonShape sd = new PolygonShape();
-      sd.setAsBox(50.0f, 10.0f);
-      fd.shape = sd;
 
       BodyDef bd = new BodyDef();
-      bd.position = new Vec2(0.0f, -10.0f);
-      Body body = world.createBody(bd);
-      body.createFixture(fd);
+      Body ground = world.createBody(bd);
       
-      bodies.add(body, true, color(0), false, color(0), 1f);
+      PolygonShape sd = new PolygonShape();
+      
+      sd.setAsBox(dimx/2, thick);
+      ground.createFixture(sd, 0);
+      
+      sd.setAsBox(thick, dimy/2, new Vec2(-dimx/2, dimy/2), 0);
+      ground.createFixture(sd, 0);
+      
+      sd.setAsBox(thick, dimy/2, new Vec2(+dimx/2, dimy/2), 0);
+      ground.createFixture(sd, 0);
+      
+      bodies.add(ground, true, color(0), false, color(0), 1f);
     }
 
     { // Platforms

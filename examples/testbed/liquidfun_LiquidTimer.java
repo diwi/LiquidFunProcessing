@@ -65,7 +65,9 @@ public class liquidfun_LiquidTimer extends PApplet {
   
   
   public void release(){
-    if(bodies != null) bodies.release(); bodies = null;
+    if(bodies    != null) bodies   .release(); bodies    = null;
+    if(particles != null) particles.release(); particles = null;
+    if(world     != null) world    .release(); world     = null;
   }
   
   
@@ -250,11 +252,13 @@ public class liquidfun_LiquidTimer extends PApplet {
     
     
     world.setParticleRadius(0.15f);
+//    world.setParticleDamping(1f);
     {
       PolygonShape shape = new PolygonShape();
       shape.setAsBox(20, 4, new Vec2(0, 36), 0);
       ParticleGroupDef pd = new ParticleGroupDef();
       pd.flags = ParticleType.b2_waterParticle | ParticleType.b2_viscousParticle;
+//      pd.flags = ParticleType.b2_tensileParticle | ParticleType.b2_viscousParticle;
       pd.shape = shape;
       pd.setColor(new Color3f(1, 0.2f, 0.05f));
       world.createParticleGroup(pd);

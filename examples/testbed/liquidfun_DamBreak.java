@@ -64,7 +64,9 @@ public class liquidfun_DamBreak extends PApplet {
   
   
   public void release(){
-    if(bodies != null) bodies.release(); bodies = null;
+    if(bodies    != null) bodies   .release(); bodies    = null;
+    if(particles != null) particles.release(); particles = null;
+    if(world     != null) world    .release(); world     = null;
   }
   
   
@@ -162,15 +164,19 @@ public class liquidfun_DamBreak extends PApplet {
     
 
     world.setParticleRadius(0.25f);
-    world.setParticleDamping(0.5f);
+//    world.setParticleDamping(0.5f);
     {
       PolygonShape shape = new PolygonShape();
       ParticleGroupDef pd = new ParticleGroupDef();
        
-      pd.flags = ParticleType.b2_waterParticle | 
-                 ParticleType.b2_viscousParticle |
-                 ParticleType.b2_colorMixingParticle
-                 ;
+      pd.flags = 0
+         | ParticleType.b2_waterParticle
+         | ParticleType.b2_viscousParticle
+         | ParticleType.b2_colorMixingParticle
+//         | ParticleType.b2_powderParticle
+//         | ParticleType.b2_springParticle
+//         | ParticleType.b2_tensileParticle
+         ;
       
       float sx = dimxh *0.25f;
       float sy = dimyh *0.95f;

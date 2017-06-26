@@ -67,7 +67,9 @@ public class liquidfun_WaveMachine extends PApplet {
   
   
   public void release(){
-    if(bodies != null) bodies.release(); bodies = null;
+    if(bodies    != null) bodies   .release(); bodies    = null;
+    if(particles != null) particles.release(); particles = null;
+    if(world     != null) world    .release(); world     = null;
   }
   
   

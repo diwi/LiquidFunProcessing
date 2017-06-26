@@ -64,8 +64,10 @@ public class box2d_CircleStressTest extends PApplet {
   
   
   public void release(){
-    if(bodies != null) bodies.release(); bodies = null;
-    if(bullets != null) bullets.release(); bullets = null;
+    if(bodies    != null) bodies   .release(); bodies    = null;
+    if(bullets   != null) bullets  .release(); bullets   = null;
+//    if(particles != null) particles.release(); particles = null;
+    if(world     != null) world    .release(); world     = null;  
   }
   
   
