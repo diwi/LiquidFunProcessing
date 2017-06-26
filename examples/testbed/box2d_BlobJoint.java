@@ -14,9 +14,6 @@
 package testbed;
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
-import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
-import com.thomasdiewald.liquidfun.java.render.DwParticleRenderGL;
-
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
@@ -44,9 +41,7 @@ public class box2d_BlobJoint extends PApplet {
   boolean USE_DEBUG_DRAW = false;
 
   DwWorld world;
-  DwBodyGroup bodies;
-  DwParticleRenderGL particles;
-  
+
   public void settings(){
     size(viewport_w, viewport_h, P2D);
     smooth(8);
@@ -60,9 +55,7 @@ public class box2d_BlobJoint extends PApplet {
   
   
   public void release(){
-    if(bodies    != null) bodies   .release(); bodies    = null;
-    if(particles != null) particles.release(); particles = null;
-    if(world     != null) world    .release(); world     = null;
+    if(world != null) world.release(); world = null;
   }
   
   public void reset(){
@@ -72,10 +65,6 @@ public class box2d_BlobJoint extends PApplet {
     world = new DwWorld(this, 20);
     world.transform.setScreen(width, height, 25, width/2, height);
     
-    // Renderer
-    bodies = new DwBodyGroup(this, world, world.transform);
-    particles = new DwParticleRenderGL(this, world, world.transform);
-    
     // create scene: rigid bodies, particles, etc ...
     initScene();
   }
@@ -84,11 +73,10 @@ public class box2d_BlobJoint extends PApplet {
   
   public void draw(){
     
-    bodies.addBullet(true, color(128), true, color(0), 1f);
+//    world.bodies.addBullet(true, color(128), true, color(0), 1f);
     
     if(UPDATE_PHYSICS){
       world.update();
-      particles.update();
     }
     
     PGraphics2D canvas = (PGraphics2D) this.g;
@@ -102,8 +90,8 @@ public class box2d_BlobJoint extends PApplet {
       world.displayDebugDraw(canvas);
       // DwDebugDraw.display(canvas, world);
     } else {
-      bodies.display(canvas);
-      particles.display(canvas);
+      world.bodies.display(canvas);
+      world.particles.display(canvas);
     }
     canvas.popMatrix();
     
@@ -163,7 +151,7 @@ public class box2d_BlobJoint extends PApplet {
       sd.setAsBox(dimx, 0.4f, new Vec2(0, dimy), 0.0f);
       ground.createFixture(sd, 0f);
       
-      bodies.add(ground, true, color(0), false, color(0), 1f);
+      world.bodies.add(ground, true, color(0), false, color(0), 1f);
     }
 
     { // falling box
@@ -181,7 +169,7 @@ public class box2d_BlobJoint extends PApplet {
       fallingBox.createFixture(fd);
       
       
-      bodies.add(fallingBox, true, color(0), false, color(0), 1f);
+      world.bodies.add(fallingBox, true, color(0), false, color(0), 1f);
     }
     
     
@@ -258,7 +246,7 @@ public class box2d_BlobJoint extends PApplet {
         float hue = abs(2 * inorm - 1) * hue_range + hue_tone;
         hue = hue - (int)hue; // [0, 1]
         
-        bodies.add(joint, false, color(255), true, color(hue, 1, 0.5f), 5);
+        world.bodies.add(joint, false, color(255), true, color(hue, 1, 0.5f), 5);
       }
     }
     
@@ -269,7 +257,7 @@ public class box2d_BlobJoint extends PApplet {
       float hue = abs(2 * inorm - 1) * hue_range + hue_tone;
       hue = hue - (int)hue; // [0, 1]
       
-      bodies.add(bodylist[i], true, color(hue, 1, 1), false, color(0), 1f);
+      world.bodies.add(bodylist[i], true, color(hue, 1, 1), false, color(0), 1f);
     }
     colorMode(RGB, 255);
 

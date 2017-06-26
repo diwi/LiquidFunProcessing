@@ -14,7 +14,6 @@
 package testbed;
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
-import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
 
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -39,7 +38,6 @@ public class box2d_BrickWall extends PApplet {
   boolean USE_DEBUG_DRAW = false;
 
   DwWorld world;
-  DwBodyGroup bodies;
   
   public void settings(){
     size(viewport_w, viewport_h, P2D);
@@ -54,9 +52,7 @@ public class box2d_BrickWall extends PApplet {
   
   
   public void release(){
-    if(bodies    != null) bodies   .release(); bodies    = null;
-//    if(particles != null) particles.release(); particles = null;
-    if(world     != null) world    .release(); world     = null;
+    if(world != null) world.release(); world = null;
   }
   
   public void reset(){
@@ -64,11 +60,7 @@ public class box2d_BrickWall extends PApplet {
     release();
     
     world = new DwWorld(this, 20);
-    world.transform.setScreen(width, height, 20, width/2, height);
-    
-    // Renderer
-    bodies = new DwBodyGroup(this, world, world.transform);
-
+ 
     // create scene: rigid bodies, particles, etc ...
     initScene();
   }
@@ -76,8 +68,6 @@ public class box2d_BrickWall extends PApplet {
   
   
   public void draw(){
-    
-    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
     
     if(UPDATE_PHYSICS){
       world.update();
@@ -95,7 +85,8 @@ public class box2d_BrickWall extends PApplet {
       world.displayDebugDraw(canvas);
       // DwDebugDraw.display(canvas, world);
     } else {
-      bodies.display(canvas);
+      world.bodies.display(canvas);
+      world.particles.display(canvas);
     }
     canvas.popMatrix();
     
@@ -155,7 +146,7 @@ public class box2d_BrickWall extends PApplet {
       Body circle_body = world.createBody(body_def);
       circle_body.createFixture(fixture_def);
       
-      bodies.add(circle_body, true, color(64, 125, 255), true, color(0), 1f);
+      world.bodies.add(circle_body, true, color(64, 125, 255), true, color(0), 1f);
     }
     
     { // Walls
@@ -199,7 +190,7 @@ public class box2d_BrickWall extends PApplet {
       sd.setAsBox(w/2f, h/2f, new Vec2(x, y), 0.0f);
       ground.createFixture(sd, 0f);
 
-      bodies.add(ground, true, color(0), !true, color(0), 1f);
+      world.bodies.add(ground, true, color(0), !true, color(0), 1f);
     }
 
     createWall(10, 20, 40, 20, 0, 10);
@@ -277,7 +268,7 @@ public class box2d_BrickWall extends PApplet {
         float hsb_s = random(70,60);
         float hsb_b = random(70,100);
         fcol = color(hsb_h, hsb_s, hsb_b);
-        bodies.add(brick, true, fcol, true, scol, 0.5f);
+        world.bodies.add(brick, true, fcol, true, scol, 0.5f);
       }
     }
     

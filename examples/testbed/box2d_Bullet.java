@@ -130,7 +130,7 @@ public class box2d_Bullet extends PApplet {
   
   public void mouseReleased(){
     bullet.endSpawn(mouseX, mouseY);
-    bodies.add(bullet.bullet, true, color(255,32,0), true, color(0), 1f);
+    bodies.add(bullet.popBullet(), true, color(255,32,0), true, color(0), 1f);
   }
   
 

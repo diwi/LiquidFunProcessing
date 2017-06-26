@@ -410,9 +410,9 @@ public class Particles_Spawn_LiquidFx extends PApplet {
     if(mouseButton == CENTER){
       spawnParticles(mouseX, mouseY);
     }
-    if(mouseButton == RIGHT){
-      particle_destroyer.destroyParticles(mouseX, mouseY, 30);
-    }
+//    if(mouseButton == RIGHT){
+//      particle_destroyer.destroyParticles(mouseX, mouseY, 30);
+//    }
   }
   
   public void mouseDragged(){
@@ -427,9 +427,9 @@ public class Particles_Spawn_LiquidFx extends PApplet {
         body_dragger    .update(mouseX, mouseY);
         particle_dragger.update(mouseX, mouseY);
       }
-      if(mouseButton == RIGHT){
-        particle_destroyer.destroyParticles(mouseX, mouseY, 30);
-      }
+//      if(mouseButton == RIGHT){
+//        particle_destroyer.destroyParticles(mouseX, mouseY, 30);
+//      }
     }
   }
   

@@ -347,9 +347,9 @@ public class DebugDrawDemo_ParticleIndexBuffer extends PApplet {
     if(mouseButton == CENTER){
       spawnParticles(mouseX, mouseY);
     }
-    if(mouseButton == RIGHT){
-      particle_destroyer.destroyParticles(mouseX, mouseY, 30);
-    }
+//    if(mouseButton == RIGHT){
+//      particle_destroyer.destroyParticles(mouseX, mouseY, 30);
+//    }
   }
   
   public void mouseDragged(){
@@ -360,9 +360,9 @@ public class DebugDrawDemo_ParticleIndexBuffer extends PApplet {
 
   public void mouseDrawAction(){    
     if(mousePressed){
-      if(mouseButton == RIGHT){
-        particle_destroyer.destroyParticles(mouseX, mouseY, 30);
-      }
+//      if(mouseButton == RIGHT){
+//        particle_destroyer.destroyParticles(mouseX, mouseY, 30);
+//      }
     }
   }
   

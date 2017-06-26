@@ -24,32 +24,45 @@ import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.joints.Joint;
 
 import com.thomasdiewald.liquidfun.java.interaction.DwMouseShootBullet;
+import com.thomasdiewald.liquidfun.java.interaction.DwParticleDestroyer;
 import com.thomasdiewald.liquidfun.java.interaction.DwParticleSpawn;
 import com.thomasdiewald.liquidfun.java.interaction.DwInteractionEvent;
 import com.thomasdiewald.liquidfun.java.interaction.DwMouseDragBodies;
 import com.thomasdiewald.liquidfun.java.interaction.DwMouseDragParticles;
 import com.thomasdiewald.liquidfun.java.render.DwBody;
+import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
 import com.thomasdiewald.liquidfun.java.render.DwDebugDraw;
 import com.thomasdiewald.liquidfun.java.render.DwFixture;
 import com.thomasdiewald.liquidfun.java.render.DwJoint;
+import com.thomasdiewald.liquidfun.java.render.DwParticleRender;
+import com.thomasdiewald.liquidfun.java.render.DwParticleRenderGL;
 
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
 import processing.event.KeyEvent;
 import processing.event.MouseEvent;
+import processing.opengl.PGraphics2D;
 
 public class DwWorld extends World{
   
   public PApplet papplet;
   public DwViewportTransform transform;
+  
+  
+  
+ 
   public DwDebugDraw debug_draw;
+  
+  public DwBodyGroup bodies;
+  public DwParticleRender particles;
   
   public final DwMouseDragBodies    mouse_drag_bodies;   
   public final DwMouseDragParticles mouse_drag_particles;
   public final DwMouseShootBullet   mouse_shoot_bullet;
   public final DwParticleSpawn      mouse_spawn_particles;
-
+  public final DwParticleDestroyer  mouse_destroy_particles;
+  
   private String[] registered_methods = 
     {
       "dispose"
@@ -82,20 +95,25 @@ public class DwWorld extends World{
   
     debug_draw = new DwDebugDraw(papplet, this, transform);
       
+    bodies = new DwBodyGroup(papplet, this, transform);
+    particles = new DwParticleRenderGL(papplet, this, transform);
+    
     for(int i = 0; i < registered_methods.length; i++){
       papplet.registerMethod(registered_methods[i], this);
     }
 
     
-    mouse_drag_bodies     = new DwMouseDragBodies   (this, transform);
-    mouse_drag_particles  = new DwMouseDragParticles(this, transform);
-    mouse_shoot_bullet    = new DwMouseShootBullet  (this, transform);
-    mouse_spawn_particles = new DwParticleSpawn     (this, transform);
+    mouse_drag_bodies       = new DwMouseDragBodies   (this, transform);
+    mouse_drag_particles    = new DwMouseDragParticles(this, transform);
+    mouse_shoot_bullet      = new DwMouseShootBullet  (this, transform);
+    mouse_spawn_particles   = new DwParticleSpawn     (this, transform);
+    mouse_destroy_particles = new DwParticleDestroyer (this, transform);
     
-    addMouseAction(mouse_drag_bodies    );
-    addMouseAction(mouse_drag_particles );
-    addMouseAction(mouse_shoot_bullet   );
-    addMouseAction(mouse_spawn_particles);
+    addMouseAction(mouse_drag_bodies      );
+    addMouseAction(mouse_drag_particles   );
+    addMouseAction(mouse_shoot_bullet     );
+    addMouseAction(mouse_spawn_particles  );
+    addMouseAction(mouse_destroy_particles);
   }
   
 
@@ -107,6 +125,9 @@ public class DwWorld extends World{
     for(int i = 0; i < registered_methods.length; i++){
       papplet.unregisterMethod(registered_methods[i], this);
     }
+    
+    if(bodies != null) bodies.release(); bodies = null;
+    if(particles != null) particles.release(); particles = null;
   }
   
   
@@ -138,10 +159,12 @@ public class DwWorld extends World{
    * @param positionIterations for the position constraint solver.
    */
   public void update(float timestep, int iter_velocity, int iter_position){
+    bodies.addBullet(true, 0xFF000000, false, 0xFF000000, 1f);
     mouseUpdateAction();
     super.step(timestep, iter_velocity, iter_position);
     updateBodies();
     updateJoints();
+    particles.update();
   }
 
 
@@ -211,6 +234,10 @@ public class DwWorld extends World{
   //
   //////////////////////////////////////////////////////////////////////////////
   
+  public void display(PGraphics2D canvas){
+    bodies.display(canvas);
+    particles.display(canvas);
+  }
   
   public void displayDebugDraw(PGraphics canvas){
     debug_draw.display(canvas);
@@ -221,6 +248,8 @@ public class DwWorld extends World{
     canvas.applyMatrix(transform.mat_box2screen);
   }
   
+  
+
   
   
   

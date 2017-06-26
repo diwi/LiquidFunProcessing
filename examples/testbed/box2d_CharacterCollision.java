@@ -14,7 +14,6 @@
 package testbed;
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
-import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
 import org.jbox2d.collision.shapes.ChainShape;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.EdgeShape;
@@ -40,7 +39,6 @@ public class box2d_CharacterCollision extends PApplet {
   boolean USE_DEBUG_DRAW = false;
 
   DwWorld world;
-  DwBodyGroup bodies;
   
   public void settings(){
     size(viewport_w, viewport_h, P2D);
@@ -55,9 +53,7 @@ public class box2d_CharacterCollision extends PApplet {
   
   
   public void release(){
-    if(bodies    != null) bodies   .release(); bodies    = null;
-//    if(particles != null) particles.release(); particles = null;
-    if(world     != null) world    .release(); world     = null;  
+    if(world != null) world.release(); world = null;  
   }
   
   public void reset(){
@@ -65,10 +61,6 @@ public class box2d_CharacterCollision extends PApplet {
     release();
     
     world = new DwWorld(this, 30);
-    world.transform.setScreen(width, height, 30, width/2, height-10);
-
-    // Renderer
-    bodies = new DwBodyGroup(this, world, world.transform);
 
     // create scene: rigid bodies, particles, etc ...
     initScene();
@@ -78,8 +70,6 @@ public class box2d_CharacterCollision extends PApplet {
 
   
   public void draw(){
-    
-    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
     
     if(UPDATE_PHYSICS){
       world.update();
@@ -97,7 +87,7 @@ public class box2d_CharacterCollision extends PApplet {
       world.displayDebugDraw(canvas);
       // DwDebugDraw.display(canvas, world);
     } else {
-      bodies.display(canvas);
+      world.display(canvas);
     }
     canvas.popMatrix();
     
@@ -330,7 +320,7 @@ public class box2d_CharacterCollision extends PApplet {
     }
     
     
-    bodies.addAll();
+    world.bodies.addAll();
   }
 
   

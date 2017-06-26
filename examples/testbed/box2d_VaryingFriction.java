@@ -15,7 +15,6 @@ package testbed;
 
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
-import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
 
 import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -39,7 +38,6 @@ public class box2d_VaryingFriction extends PApplet {
   boolean USE_DEBUG_DRAW = false;
 
   DwWorld world;
-  DwBodyGroup bodies;
 
   public void settings(){
     size(viewport_w, viewport_h, P2D);
@@ -54,9 +52,7 @@ public class box2d_VaryingFriction extends PApplet {
   
   
   public void release(){
-    if(bodies    != null) bodies   .release(); bodies    = null;
-//    if(particles != null) particles.release(); particles = null;
-    if(world     != null) world    .release(); world     = null;  
+    if(world != null) world.release(); world = null;  
   }
   
   
@@ -64,11 +60,7 @@ public class box2d_VaryingFriction extends PApplet {
     // release old resources
     release();
     
-    world = new DwWorld(this, 22);
-    world.transform.setScreen(width, height, 15, width/2, height-100);
-    
-    // Renderer
-    bodies = new DwBodyGroup(this, world, world.transform);
+    world = new DwWorld(this, 25);
 
     // create scene: rigid bodies, particles, etc ...
     initScene();
@@ -77,8 +69,6 @@ public class box2d_VaryingFriction extends PApplet {
   
 
   public void draw(){
-    
-    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
     
     if(UPDATE_PHYSICS){
       world.update();
@@ -94,7 +84,7 @@ public class box2d_VaryingFriction extends PApplet {
       world.displayDebugDraw(canvas);
       // DwDebugDraw.display(canvas, world);
     } else {
-      bodies.display(canvas);
+      world.display(canvas);
     }
     canvas.popMatrix();
 
@@ -138,7 +128,7 @@ public class box2d_VaryingFriction extends PApplet {
       shape.set(new Vec2(-40.0f, 0.0f), new Vec2(40.0f, 0.0f));
       ground.createFixture(shape, 0.0f);
       
-      bodies.add(ground, false, color(0), true, color(200), 1f);
+      world.bodies.add(ground, false, color(0), true, color(200), 1f);
     }
 
     {
@@ -218,9 +208,9 @@ public class box2d_VaryingFriction extends PApplet {
         fd.friction = friction[i];
         body.createFixture(fd);
       }
-}
+    }
 
-    bodies.addAll();
+    world.bodies.addAll();
   }
   
   

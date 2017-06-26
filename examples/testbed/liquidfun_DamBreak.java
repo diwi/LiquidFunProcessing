@@ -15,9 +15,6 @@ package testbed;
 
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
-import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
-import com.thomasdiewald.liquidfun.java.render.DwParticleRenderGL;
-
 import org.jbox2d.collision.shapes.ChainShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Color3f;
@@ -42,9 +39,7 @@ public class liquidfun_DamBreak extends PApplet {
   boolean USE_DEBUG_DRAW = false;
 
   DwWorld world;
-  DwBodyGroup bodies;
-  DwParticleRenderGL particles;
-  
+
 //  PImage sprite;
 
   public void settings(){
@@ -55,18 +50,14 @@ public class liquidfun_DamBreak extends PApplet {
   
   public void setup(){ 
     surface.setLocation(viewport_x, viewport_y);
-    
 //    sprite = loadImage("sprite.png");
-    
     reset();
     frameRate(120);
   }
   
   
   public void release(){
-    if(bodies    != null) bodies   .release(); bodies    = null;
-    if(particles != null) particles.release(); particles = null;
-    if(world     != null) world    .release(); world     = null;
+    if(world != null) world.release(); world = null;
   }
   
   
@@ -75,18 +66,7 @@ public class liquidfun_DamBreak extends PApplet {
     release();
     
     world = new DwWorld(this, 18);
-    world.transform.setScreen(width, height, 18, width/2, height);
 
-    // Renderer
-    bodies = new DwBodyGroup(this, world, world.transform);
-    
-    particles = new DwParticleRenderGL(this, world, world.transform);
-//    particles.param.tex_sprite = sprite;
-    particles.param.falloff_exp1 = 1;
-    particles.param.falloff_exp2 = 2;
-    particles.param.radius_scale = 2f;
-    particles.param.falloff_mult = 1;
-    
     // create scene: rigid bodies, particles, etc ...
     initScene();
   }
@@ -94,12 +74,8 @@ public class liquidfun_DamBreak extends PApplet {
   
   
   public void draw(){
-    
-    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
-    
     if(UPDATE_PHYSICS){
       world.update();
-      particles.update();
     }
     
     PGraphics2D canvas = (PGraphics2D) this.g;
@@ -111,8 +87,7 @@ public class liquidfun_DamBreak extends PApplet {
       world.displayDebugDraw(canvas);
       // DwDebugDraw.display(canvas, world);
     } else {
-      bodies.display(canvas);
-      particles.display(canvas);
+      world.display(canvas);
     }
     canvas.popMatrix();
     
@@ -158,13 +133,11 @@ public class liquidfun_DamBreak extends PApplet {
       shape.createLoop(vertices, 4);
       ground.createFixture(shape, 0.0f);
       
-      bodies.add(ground, false, color(0), true, color(0), 1f);
+      world.bodies.add(ground, false, color(0), true, color(0), 1f);
     }
     
     
 
-    world.setParticleRadius(0.25f);
-//    world.setParticleDamping(0.5f);
     {
       PolygonShape shape = new PolygonShape();
       ParticleGroupDef pd = new ParticleGroupDef();
@@ -178,8 +151,8 @@ public class liquidfun_DamBreak extends PApplet {
 //         | ParticleType.b2_tensileParticle
          ;
       
-      float sx = dimxh *0.25f;
-      float sy = dimyh *0.95f;
+      float sx = dimxh * 0.25f;
+      float sy = dimyh * 0.95f;
       
       shape.setAsBox(sx, sy, new Vec2(-dimxh/2, dimyh), 0);
       pd.shape = shape;

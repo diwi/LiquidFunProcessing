@@ -14,7 +14,6 @@
 package testbed;
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
-import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
 
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.EdgeShape;
@@ -44,9 +43,7 @@ public class box2d_TheoJansenWalker extends PApplet {
   boolean UPDATE_PHYSICS = true;
   boolean USE_DEBUG_DRAW = false;
 
-
   DwWorld world;
-  DwBodyGroup bodies;
 
   PFont font;
   
@@ -64,9 +61,7 @@ public class box2d_TheoJansenWalker extends PApplet {
   
   
   public void release(){
-    if(bodies    != null) bodies   .release(); bodies    = null;
-//    if(particles != null) particles.release(); particles = null;
-    if(world     != null) world    .release(); world     = null;  
+    if(world != null) world.release(); world = null;  
   }
   
   
@@ -75,9 +70,6 @@ public class box2d_TheoJansenWalker extends PApplet {
     release();
     
     world = new DwWorld(this, 20);
-
-    // Renderer
-    bodies = new DwBodyGroup(this, world, world.transform);
 
     // create scene: rigid bodies, particles, etc ...
     initScene();
@@ -90,8 +82,6 @@ public class box2d_TheoJansenWalker extends PApplet {
     // set camera
     Vec2 pos = m_chassis.m_xf.p;
     world.transform.setCamera(pos.x/2, pos.y/2 + 10);
-    
-    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
     
     if(UPDATE_PHYSICS){
       world.update();
@@ -107,7 +97,7 @@ public class box2d_TheoJansenWalker extends PApplet {
       world.displayDebugDraw(canvas);
       // DwDebugDraw.display(canvas, world);
     } else {
-      bodies.display(canvas);
+      world.display(canvas);
     }
     canvas.popMatrix();
     
@@ -193,7 +183,7 @@ public class box2d_TheoJansenWalker extends PApplet {
       shape.set(new Vec2(50.0f, 0.0f), new Vec2(50.0f, 10.0f));
       ground.createFixture(shape, 0.0f);
 
-      bodies.add(ground, true, color(0), true, color(0), 2f);
+      world.bodies.add(ground, true, color(0), true, color(0), 2f);
     }
 
     // Balls
@@ -208,7 +198,7 @@ public class box2d_TheoJansenWalker extends PApplet {
       Body body = world.createBody(bd);
       body.createFixture(shape, 1.0f);
       
-      bodies.add(body, true, color(0), true, color(0), 1f);
+      world.bodies.add(body, true, color(0), true, color(0), 1f);
     }
 
     // Chassis
@@ -226,7 +216,7 @@ public class box2d_TheoJansenWalker extends PApplet {
       m_chassis = world.createBody(bd);
       m_chassis.createFixture(sd);
       
-      bodies.add(m_chassis, true, color(0, 255), true, color(0), 1f);
+      world.bodies.add(m_chassis, true, color(0, 255), true, color(0), 1f);
     }
 
     {
@@ -243,7 +233,7 @@ public class box2d_TheoJansenWalker extends PApplet {
       m_wheel = world.createBody(bd);
       m_wheel.createFixture(sd);
       
-      bodies.add(m_wheel, true, color(64), true, color(0), 4f);
+      world.bodies.add(m_wheel, true, color(64), true, color(0), 4f);
     }
 
     {
@@ -273,11 +263,11 @@ public class box2d_TheoJansenWalker extends PApplet {
     createLeg(+1.0f, wheelAnchor, color(32,96,255, 255));
     
     
-    bodies.addAll();
+    world.bodies.addAll();
     
-    int bcount = bodies.debug_countBodiesWithoutShape();
+    int bcount = world.bodies.debug_countBodiesWithoutShape();
     System.out.println("bodies w/o shape: "+bcount);
-    int fcount = bodies.debug_countFixturesWithoutShape();
+    int fcount = world.bodies.debug_countFixturesWithoutShape();
     System.out.println("fixtures w/o shape: "+fcount);
   }
 
@@ -344,8 +334,8 @@ public class box2d_TheoJansenWalker extends PApplet {
     body1.createFixture(fd1);
     body2.createFixture(fd2);
 
-    bodies.add(body1, true, col, true, color(0), 1f);
-    bodies.add(body2, true, col, true, color(0), 1f);
+    world.bodies.add(body1, true, col, true, color(0), 1f);
+    world.bodies.add(body2, true, col, true, color(0), 1f);
 
     DistanceJointDef djd = new DistanceJointDef();
 
@@ -372,10 +362,10 @@ public class box2d_TheoJansenWalker extends PApplet {
     rjd.initialize(body2, m_chassis, p4.add(m_offset));
     world.createJoint(rjd);
     
-    bodies.add(joint1, false, col, true, col, 2f);
-    bodies.add(joint2, false, col, true, col, 2f);
-    bodies.add(joint3, false, col, true, col, 2f);
-    bodies.add(joint4, false, col, true, col, 2f);
+    world.bodies.add(joint1, false, col, true, col, 2f);
+    world.bodies.add(joint2, false, col, true, col, 2f);
+    world.bodies.add(joint3, false, col, true, col, 2f);
+    world.bodies.add(joint4, false, col, true, col, 2f);
   
   }
   

@@ -15,8 +15,6 @@ package testbed;
 
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
-import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
-
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.MathUtils;
@@ -44,7 +42,6 @@ public class box2d_Tumbler extends PApplet {
 
 
   DwWorld world;
-  DwBodyGroup bodies;
 
   public void settings(){
     size(viewport_w, viewport_h, P2D);
@@ -59,9 +56,7 @@ public class box2d_Tumbler extends PApplet {
   
   
   public void release(){
-    if(bodies    != null) bodies   .release(); bodies    = null;
-//    if(particles != null) particles.release(); particles = null;
-    if(world     != null) world    .release(); world     = null;  
+    if(world != null) world.release(); world = null;  
   }
   
   
@@ -71,10 +66,7 @@ public class box2d_Tumbler extends PApplet {
     
     world = new DwWorld(this, 22);
     world.transform.setScreen(width, height, 22, width/2, height/2);
-    
-    // Renderer
-    bodies = new DwBodyGroup(this, world, world.transform);
-
+   
     // create scene: rigid bodies, particles, etc ...
     initScene();
   }
@@ -82,8 +74,6 @@ public class box2d_Tumbler extends PApplet {
   
 
   public void draw(){
-    
-    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
     
     if(UPDATE_PHYSICS){
       if(frameCount % 4 == 0){
@@ -102,7 +92,7 @@ public class box2d_Tumbler extends PApplet {
       world.displayDebugDraw(canvas);
       // DwDebugDraw.display(canvas, world);
     } else {
-      bodies.display(canvas);
+      world.display(canvas);
     }
     canvas.popMatrix();
 
@@ -175,7 +165,7 @@ public class box2d_Tumbler extends PApplet {
 //      body.createFixture(obstacle, 15.0f);
 
 
-      bodies.add(body, true, color(224), true, color(0), 1f);
+      world.bodies.add(body, true, color(224), true, color(0), 1f);
 
       RevoluteJointDef jd = new RevoluteJointDef();
       jd.bodyA = groundbody;
@@ -192,7 +182,7 @@ public class box2d_Tumbler extends PApplet {
    
 
     // creates shapes for all rigid bodies in the world.
-    bodies.addAll();
+    world.bodies.addAll();
   }
   
   
@@ -219,7 +209,7 @@ public class box2d_Tumbler extends PApplet {
       float r = (360 * m_count /(float)MAX_NUM) % 360;
       float g = 100;
       float b = 100;
-      bodies.add(body, true, color(r,g,b), true, color(r, g, b *0.5f), 1f);
+      world.bodies.add(body, true, color(r,g,b), true, color(r, g, b *0.5f), 1f);
       colorMode(RGB, 255, 255, 255);
     }
   }

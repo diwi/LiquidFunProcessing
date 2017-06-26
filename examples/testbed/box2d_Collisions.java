@@ -14,9 +14,7 @@
 package testbed;
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
-import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
 import com.thomasdiewald.liquidfun.java.render.DwJoint;
-import com.thomasdiewald.liquidfun.java.render.DwParticleRenderGL;
 
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -45,9 +43,7 @@ public class box2d_Collisions extends PApplet {
   boolean USE_DEBUG_DRAW = false;
 
   DwWorld world;
-  DwBodyGroup bodies;
-  DwParticleRenderGL particles;
-  
+
   public void settings(){
     size(viewport_w, viewport_h, P2D);
     smooth(8);
@@ -61,9 +57,7 @@ public class box2d_Collisions extends PApplet {
   
   
   public void release(){
-    if(bodies    != null) bodies   .release(); bodies    = null;
-//    if(particles != null) particles.release(); particles = null;
-    if(world     != null) world    .release(); world     = null;  
+    if(world != null) world.release(); world = null;  
   }
   
   public void reset(){
@@ -71,18 +65,12 @@ public class box2d_Collisions extends PApplet {
     release();
     
     world = new DwWorld(this, 20);
-    world.transform.setScreen(width, height, 20, width/2, height);
     world.setGravity(new Vec2(0, -5));
-    
     
     world.mouse_shoot_bullet.density_mult = 0.001f;
     world.mouse_shoot_bullet.cirlce_shape.m_radius = 1;
     world.mouse_shoot_bullet.velocity_mult = 0.6f;
     
-    // Renderer
-    bodies = new DwBodyGroup(this, world, world.transform);
-    particles = new DwParticleRenderGL(this, world, world.transform);
-
     // create scene: rigid bodies, particles, etc ...
     initScene();
   }
@@ -92,14 +80,11 @@ public class box2d_Collisions extends PApplet {
   
   public void draw(){
     
-    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
-    
     if(UPDATE_PHYSICS){
       if(frameCount % 10 == 0){
         addBodies();
       }
       world.update();
-      particles.update();
       doSomethingWithCollisionContactsAndDistanceJoints();
     }
 
@@ -115,8 +100,7 @@ public class box2d_Collisions extends PApplet {
       world.displayDebugDraw(canvas);
       // DwDebugDraw.display(canvas, world);
     } else {
-      bodies.display(canvas);
-      particles.display(canvas);
+      world.display(canvas);
     }
     canvas.popMatrix();
     
@@ -161,7 +145,7 @@ public class box2d_Collisions extends PApplet {
       Joint joint = world.createJoint(djd);
       
       // add joint shape and a style
-      DwJoint dwjoint = bodies.add(joint, false, color(0), true, color(255, 160), 1.0f);
+      DwJoint dwjoint = world.bodies.add(joint, false, color(0), true, color(255, 160), 1.0f);
       
 
 //      // replace the line shape with a rectangle shape
@@ -239,7 +223,7 @@ public class box2d_Collisions extends PApplet {
       Body circle_body = world.createBody(body_def);
       circle_body.createFixture(fixture_def);
       
-      bodies.add(circle_body, true, color(64, 125, 255), true, color(0), 1f);
+      world.bodies.add(circle_body, true, color(64, 125, 255), true, color(0), 1f);
     }
     
     { // Walls
@@ -276,7 +260,7 @@ public class box2d_Collisions extends PApplet {
       sd.setAsBox(w/2f, h/2f, new Vec2(x, y), 0.0f);
       ground.createFixture(sd, 0f);
 
-      bodies.add(ground, true, color(0), !true, color(0), 1f);
+      world.bodies.add(ground, true, color(0), !true, color(0), 1f);
     }
     
     addBodies();
@@ -323,7 +307,7 @@ public class box2d_Collisions extends PApplet {
       float g = 100;
       float b = 100;
       
-      bodies.add(body, true, color(r,g,b), true, color(r, g, b *0.5f), 1f);
+      world.bodies.add(body, true, color(r,g,b), true, color(r, g, b *0.5f), 1f);
       colorMode(RGB, 255, 255, 255);
       
       m_count++;

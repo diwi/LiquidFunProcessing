@@ -14,7 +14,6 @@
 package testbed;
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
-import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
 
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.EdgeShape;
@@ -44,11 +43,9 @@ public class box2d_Car extends PApplet {
   boolean USE_DEBUG_DRAW = false;
 
   DwWorld world;
-  DwBodyGroup bodies;
 
   PFont font;
-  
-  
+
   public void settings(){
     size(viewport_w, viewport_h, P2D);
     smooth(8);
@@ -64,9 +61,7 @@ public class box2d_Car extends PApplet {
   
   
   public void release(){
-    if(bodies    != null) bodies   .release(); bodies    = null;
-//    if(particles != null) particles.release(); particles = null;
-    if(world     != null) world    .release(); world     = null;
+    if(world != null) world.release(); world = null;
   }
   
   
@@ -76,9 +71,6 @@ public class box2d_Car extends PApplet {
     
     world = new DwWorld(this, 20);
     world.mouse_drag_bodies.mult_dragforce = 100f;
-
-    // Renderer
-    bodies = new DwBodyGroup(this, world, world.transform);
 
     // create scene: rigid bodies, particles, etc ...
     initScene();
@@ -90,8 +82,6 @@ public class box2d_Car extends PApplet {
     // set camera
     Vec2 pos = m_car.m_xf.p;
     world.transform.setCamera(pos.x, pos.y/2 + 5);
-    
-    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
     
     if(UPDATE_PHYSICS){
       world.update();
@@ -106,7 +96,7 @@ public class box2d_Car extends PApplet {
       world.displayDebugDraw(canvas);
       // DwDebugDraw.display(canvas, world);
     } else {
-      bodies.display(canvas);
+      world.display(canvas);
     }
     canvas.popMatrix();
     
@@ -399,10 +389,10 @@ public class box2d_Car extends PApplet {
     
    
 
-    bodies.add(m_car, true, color(0,128,255, 160), true, color(0), 1f);
-    bodies.add(m_wheel1, true, color(255,128,0), true, color(0), 1f);
-    bodies.add(m_wheel2, true, color(128,255,0), true, color(0), 1f);
-    bodies.add(ground, false, color(128,255,0), true, color(0), 2f);
+    world.bodies.add(m_car, true, color(0,128,255, 160), true, color(0), 1f);
+    world.bodies.add(m_wheel1, true, color(255,128,0), true, color(0), 1f);
+    world.bodies.add(m_wheel2, true, color(128,255,0), true, color(0), 1f);
+    world.bodies.add(ground, false, color(128,255,0), true, color(0), 2f);
   
     
     // add wheel hub for rendering, no need to create extra box2d bodies for that.
@@ -431,7 +421,7 @@ public class box2d_Car extends PApplet {
     }
     
     
-    bodies.addAll();
+    world.bodies.addAll();
     
   }
   

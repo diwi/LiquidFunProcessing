@@ -15,8 +15,6 @@ package testbed;
 
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
-import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
-
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.common.Vec2;
@@ -40,7 +38,6 @@ public class box2d_VaryingRestitution extends PApplet {
   boolean USE_DEBUG_DRAW = false;
 
   DwWorld world;
-  DwBodyGroup bodies;
 
   public void settings(){
     size(viewport_w, viewport_h, P2D);
@@ -55,9 +52,7 @@ public class box2d_VaryingRestitution extends PApplet {
   
   
   public void release(){
-    if(bodies    != null) bodies   .release(); bodies    = null;
-//    if(particles != null) particles.release(); particles = null;
-    if(world     != null) world    .release(); world     = null;  
+    if(world != null) world.release(); world = null;  
   }
   
   
@@ -65,11 +60,7 @@ public class box2d_VaryingRestitution extends PApplet {
     // release old resources
     release();
     
-    world = new DwWorld(this, 22);
-    world.transform.setScreen(width, height, 15, width/2, height-100);
-    
-    // Renderer
-    bodies = new DwBodyGroup(this, world, world.transform);
+    world = new DwWorld(this, 15);
 
     // create scene: rigid bodies, particles, etc ...
     initScene();
@@ -78,8 +69,6 @@ public class box2d_VaryingRestitution extends PApplet {
   
 
   public void draw(){
-    
-    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
     
     if(UPDATE_PHYSICS){
       world.update();
@@ -95,7 +84,7 @@ public class box2d_VaryingRestitution extends PApplet {
       world.displayDebugDraw(canvas);
       // DwDebugDraw.display(canvas, world);
     } else {
-      bodies.display(canvas);
+      world.display(canvas);
     }
     canvas.popMatrix();
 
@@ -136,10 +125,10 @@ public class box2d_VaryingRestitution extends PApplet {
       Body ground = world.createBody(bd);
 
       EdgeShape shape = new EdgeShape();
-      shape.set(new Vec2(-40.0f, 0.0f), new Vec2(40.0f, 0.0f));
+      shape.set(new Vec2(-40.0f, 5.0f), new Vec2(40.0f, 5.0f));
       ground.createFixture(shape, 0.0f);
       
-      bodies.add(ground, false, color(0), true, color(200), 1f);
+      world.bodies.add(ground, false, color(0), true, color(200), 1f);
     }
 
     {
@@ -155,7 +144,7 @@ public class box2d_VaryingRestitution extends PApplet {
       for (int i = 0; i < count; ++i) {
         BodyDef bd = new BodyDef();
         bd.type = BodyType.DYNAMIC;
-        bd.position.set(-count * 0.8f + 1.6f * i, 20.0f);
+        bd.position.set(-count * 0.8f + 1.6f * i, 40.0f);
 
         Body body = world.createBody(bd);
 
@@ -165,7 +154,7 @@ public class box2d_VaryingRestitution extends PApplet {
         float base = 65;
         float col = (255 - base) * fd.restitution;
         
-        bodies.add(body, true, color(base + col, base, base), false, color(200), 1f);
+        world.bodies.add(body, true, color(base + col, base, base), false, color(200), 1f);
       }
     }
 

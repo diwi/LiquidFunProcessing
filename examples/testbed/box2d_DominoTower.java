@@ -14,7 +14,6 @@
 package testbed;
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
-import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
 
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
@@ -22,7 +21,6 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.FixtureDef;
-import org.jbox2d.dynamics.World;
 
 import processing.core.*;
 import processing.opengl.PGraphics2D;
@@ -39,7 +37,7 @@ public class box2d_DominoTower extends PApplet {
   boolean USE_DEBUG_DRAW = false;
 
   DwWorld world;
-  DwBodyGroup bodies;
+
   
   public void settings(){
     size(viewport_w, viewport_h, P2D);
@@ -54,9 +52,7 @@ public class box2d_DominoTower extends PApplet {
   
   
   public void release(){
-    if(bodies    != null) bodies   .release(); bodies    = null;
-//    if(particles != null) particles.release(); particles = null;
-    if(world     != null) world    .release(); world     = null;  
+    if(world != null) world.release(); world = null;  
   }
   
   public void reset(){
@@ -64,10 +60,7 @@ public class box2d_DominoTower extends PApplet {
     release();
     
     world = new DwWorld(this, 20);
-    world.transform.setScreen(width, height, 20, width/2, height-10);
-    
-    // Renderer
-    bodies = new DwBodyGroup(this, world, world.transform);
+
 
     // create scene: rigid bodies, particles, etc ...
     initScene();
@@ -76,8 +69,6 @@ public class box2d_DominoTower extends PApplet {
   
   
   public void draw(){
-    
-    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
     
     if(UPDATE_PHYSICS){
       world.update();
@@ -93,7 +84,7 @@ public class box2d_DominoTower extends PApplet {
       world.displayDebugDraw(canvas);
       // DwDebugDraw.display(canvas, world);
     } else {
-      bodies.display(canvas);
+      world.display(canvas);
     }
     canvas.popMatrix();
     
@@ -154,7 +145,7 @@ public class box2d_DominoTower extends PApplet {
       sd.setAsBox(thick, dimy/2, new Vec2(+dimx/2, dimy/2), 0);
       ground.createFixture(sd, 0);
       
-      bodies.add(ground, true, color(0), false, color(0), 1f);
+      world.bodies.add(ground, true, color(0), false, color(0), 1f);
     }
 
     { // Bullets
@@ -190,8 +181,8 @@ public class box2d_DominoTower extends PApplet {
       bullet2.setLinearVelocity(new Vec2(35f, -10f));
       bullet2.setAngularVelocity(-8.3f);
       
-      bodies.add(bullet1, true, color(255), false, color(0), 1f);
-      bodies.add(bullet2, true, color(255), false, color(0), 1f);
+      world.bodies.add(bullet1, true, color(255), false, color(0), 1f);
+      world.bodies.add(bullet2, true, color(255), false, color(0), 1f);
     }
 
     {
@@ -199,8 +190,8 @@ public class box2d_DominoTower extends PApplet {
       // Make base
       for (int i = 0; i < baseCount; ++i) {
         currX = i * 1.5f * dheight - (1.5f * dheight * baseCount / 2f);
-        makeDomino(currX, dheight / 2.0f, false, world);
-        makeDomino(currX, dheight + dwidth / 2.0f, true, world);
+        makeDomino(currX, dheight / 2.0f, false);
+        makeDomino(currX, dheight + dwidth / 2.0f, true);
       }
       currX = baseCount * 1.5f * dheight - (1.5f * dheight * baseCount / 2f);
       // Make 'I's
@@ -212,16 +203,16 @@ public class box2d_DominoTower extends PApplet {
           currX = i * 1.5f * dheight - (1.5f * dheight * (baseCount - j) / 2f);// +parent.random(-.05f,.05f);
           ddensity *= 2.5f;
           if (i == 0) {
-            makeDomino(currX - (1.25f * dheight) + .5f * dwidth, currY - dwidth, false, world);
+            makeDomino(currX - (1.25f * dheight) + .5f * dwidth, currY - dwidth, false);
           }
           if (i == baseCount - j - 1) {
             // if (j != 1) //djm: why is this here? it makes it off balance
-            makeDomino(currX + (1.25f * dheight) - .5f * dwidth, currY - dwidth, false, world);
+            makeDomino(currX + (1.25f * dheight) - .5f * dwidth, currY - dwidth, false);
           }
           ddensity /= 2.5f;
-          makeDomino(currX, currY, false, world);
-          makeDomino(currX, currY + .5f * (dwidth + dheight), true, world);
-          makeDomino(currX, currY - .5f * (dwidth + dheight), true, world);
+          makeDomino(currX, currY, false);
+          makeDomino(currX, currY + .5f * (dwidth + dheight), true);
+          makeDomino(currX, currY - .5f * (dwidth + dheight), true);
         }
       }
     }
@@ -230,8 +221,11 @@ public class box2d_DominoTower extends PApplet {
   
   
   int count = 0;
-  public void makeDomino(float x, float y, boolean horizontal, World world) {
-
+  public void makeDomino(float x, float y, boolean horizontal) {
+    
+    float thick = 20 / world.transform.screen_scale;
+    y += thick;
+    
     PolygonShape sd = new PolygonShape();
     sd.setAsBox(.5f * dwidth, .5f * dheight);
     FixtureDef fd = new FixtureDef();
@@ -254,7 +248,7 @@ public class box2d_DominoTower extends PApplet {
     if(horizontal) cb = 50;
     int fcol = color(ch, cs, cb);
     int scol = color(ch, cs*0.5f, cb*0.5f, 128);
-    bodies.add(myBody, true, fcol, true, scol, 1f);
+    world.bodies.add(myBody, true, fcol, true, scol, 1f);
     colorMode(RGB, 255);
     
     count++;

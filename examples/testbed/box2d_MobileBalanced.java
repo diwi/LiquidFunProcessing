@@ -15,8 +15,6 @@ package testbed;
 
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
-import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
-
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -39,9 +37,7 @@ public class box2d_MobileBalanced extends PApplet {
   boolean UPDATE_PHYSICS = true;
   boolean USE_DEBUG_DRAW = false;
 
-
   DwWorld world;
-  DwBodyGroup bodies;
   
   public void settings(){
     size(viewport_w, viewport_h, P2D);
@@ -56,9 +52,7 @@ public class box2d_MobileBalanced extends PApplet {
   
   
   public void release(){
-    if(bodies    != null) bodies   .release(); bodies    = null;
-//    if(particles != null) particles.release(); particles = null;
-    if(world     != null) world    .release(); world     = null;  
+    if(world != null) world.release(); world = null;  
   }
   
   
@@ -68,9 +62,6 @@ public class box2d_MobileBalanced extends PApplet {
     
     world = new DwWorld(this, 50);
     world.transform.setCamera(0, 18, 50);
- 
-    // Renderer
-    bodies = new DwBodyGroup(this, world, world.transform);
 
     // create scene: rigid bodies, particles, etc ...
     initScene();
@@ -79,9 +70,7 @@ public class box2d_MobileBalanced extends PApplet {
   
 
   public void draw(){
-    
-    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
-    
+
     if(UPDATE_PHYSICS){
       world.update();
     }
@@ -96,7 +85,7 @@ public class box2d_MobileBalanced extends PApplet {
       world.displayDebugDraw(canvas);
       // DwDebugDraw.display(canvas, world);
     } else {
-      bodies.display(canvas);
+      world.display(canvas);
     }
     canvas.popMatrix();
 
@@ -157,7 +146,7 @@ public class box2d_MobileBalanced extends PApplet {
     jointDef.localAnchorB = h;
     world.createJoint(jointDef);
     
-    bodies.addAll();
+    world.bodies.addAll();
   }
 
   
@@ -177,12 +166,12 @@ public class box2d_MobileBalanced extends PApplet {
     bodyDef.type = BodyType.DYNAMIC;
     bodyDef.position = p;
     Body body = world.createBody(bodyDef);
-    bodies.add(body, true, color(0), true, color(0), 1f);
+    world.bodies.add(body, true, color(0), true, color(0), 1f);
 
     PolygonShape shape = new PolygonShape();
     shape.setAsBox(0.25f * a, a);
     Fixture fixture1 = body.createFixture(shape, density);
-    bodies.add(fixture1, true, color(hue, fdepth, 1), true, color(0), 1f);
+    world.bodies.add(fixture1, true, color(hue, fdepth, 1), true, color(0), 1f);
 
     if (depth == e_depth){
       return body;
@@ -190,7 +179,7 @@ public class box2d_MobileBalanced extends PApplet {
 
     shape.setAsBox(offset, 0.25f * a, new Vec2(0, -a), 0.0f);
     Fixture fixture2 = body.createFixture(shape, density);
-    bodies.add(fixture2, true, color(hue, fdepth, 1), true, color(0), 1f);
+    world.bodies.add(fixture2, true, color(hue, fdepth, 1), true, color(0), 1f);
     
     Vec2 a1 = new Vec2(offset, -a);
     Vec2 a2 = new Vec2(-offset, -a);

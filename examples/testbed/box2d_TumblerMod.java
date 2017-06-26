@@ -15,8 +15,6 @@ package testbed;
 
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
-import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
-
 import org.jbox2d.collision.shapes.ChainShape;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -44,7 +42,6 @@ public class box2d_TumblerMod extends PApplet {
   boolean USE_DEBUG_DRAW = false;
 
   DwWorld world;
-  DwBodyGroup bodies;
 
   public void settings(){
     size(viewport_w, viewport_h, P2D);
@@ -59,9 +56,7 @@ public class box2d_TumblerMod extends PApplet {
   
   
   public void release(){
-    if(bodies    != null) bodies   .release(); bodies    = null;
-//    if(particles != null) particles.release(); particles = null;
-    if(world     != null) world    .release(); world     = null;  
+    if(world != null) world.release(); world = null;  
   }
   
   
@@ -73,18 +68,13 @@ public class box2d_TumblerMod extends PApplet {
     world = new DwWorld(this, 20);
     world.transform.setScreen(width, height, 22, width/2, height/2);
 
-    // create renderer
-    bodies = new DwBodyGroup(this, world, world.transform);
-
     // create scene: rigid bodies, particles, etc ...
     initScene();
   }
   
   
   public void draw(){
-    
-    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
-    
+
     if(UPDATE_PHYSICS){
       if(frameCount % 4 == 0){
         addBodies();
@@ -102,7 +92,7 @@ public class box2d_TumblerMod extends PApplet {
       world.displayDebugDraw(canvas);
       // DwDebugDraw.display(canvas, world);
     } else {
-      bodies.display(canvas);
+      world.display(canvas);
     }
     canvas.popMatrix();
     
@@ -173,7 +163,7 @@ public class box2d_TumblerMod extends PApplet {
       
       shape.createLoop(vertices, num_verts);
       Fixture wheel = bwheel.createFixture(shape, 15.0f);
-      bodies.add(wheel, true, color(240), false, color(255), 1f);
+      world.bodies.add(wheel, true, color(240), false, color(255), 1f);
       
       // obstacles inside wheel
       CircleShape sobstacle = new CircleShape(); 
@@ -186,7 +176,7 @@ public class box2d_TumblerMod extends PApplet {
         float y = radius * (float) Math.sin(angle);
         sobstacle.m_p.set(x, y);
         Fixture fobstacle = bwheel.createFixture(sobstacle, 150.0f);
-        bodies.add(fobstacle, true, color(64), false, color(255), 1f);
+        world.bodies.add(fobstacle, true, color(64), false, color(255), 1f);
       }
 
       // motor
@@ -227,7 +217,7 @@ public class box2d_TumblerMod extends PApplet {
 
       colorMode(HSB, 360, 100, 100);
       float hue = (360 * m_count /(float)MAX_NUM) % 360;
-      bodies.add(body, true, color(hue, 100, 100), true, color(hue, 100, 50), 1f);
+      world.bodies.add(body, true, color(hue, 100, 100), true, color(hue, 100, 50), 1f);
       colorMode(RGB, 255, 255, 255);
     }
   }

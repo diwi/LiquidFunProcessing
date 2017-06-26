@@ -15,9 +15,6 @@ package testbed;
 
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
-import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
-import com.thomasdiewald.liquidfun.java.render.DwParticleRenderGL;
-
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -40,8 +37,6 @@ public class box2d_Dominos extends PApplet {
   boolean USE_DEBUG_DRAW = false;
 
   DwWorld world;
-  DwBodyGroup bodies;
-  DwParticleRenderGL particles;
 
   public void settings(){
     size(viewport_w, viewport_h, P2D);
@@ -57,9 +52,7 @@ public class box2d_Dominos extends PApplet {
   
   
   public void release(){
-    if(bodies    != null) bodies   .release(); bodies    = null;
-//    if(particles != null) particles.release(); particles = null;
-    if(world     != null) world    .release(); world     = null;  
+    if(world != null) world.release(); world = null;  
   }
   
   
@@ -68,12 +61,7 @@ public class box2d_Dominos extends PApplet {
     release();
     
     world = new DwWorld(this, 25);
-    world.transform.setScreen(width, height, 25, width/2, height-10);
 
-    // Renderer
-    bodies = new DwBodyGroup(this, world, world.transform);
-    particles = new DwParticleRenderGL(this, world, world.transform);
-    
     // create scene: rigid bodies, particles, etc ...
     initScene();
   }
@@ -82,11 +70,8 @@ public class box2d_Dominos extends PApplet {
   
   public void draw(){
     
-    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
-    
     if(UPDATE_PHYSICS){
       world.update();
-      particles.update();
     }
     
     PGraphics2D canvas = (PGraphics2D) this.g;
@@ -98,8 +83,7 @@ public class box2d_Dominos extends PApplet {
       world.displayDebugDraw(canvas);
       // DwDebugDraw.display(canvas, world);
     } else {
-      bodies.display(canvas);
-      particles.display(canvas);
+      world.display(canvas);
     }
     canvas.popMatrix();
     
@@ -151,7 +135,7 @@ public class box2d_Dominos extends PApplet {
       sd.setAsBox(thick, dimy/2, new Vec2(+dimx/2, dimy/2), 0);
       ground.createFixture(sd, 0);
       
-      bodies.add(ground, true, color(0), false, color(0), 1f);
+      world.bodies.add(ground, true, color(0), false, color(0), 1f);
     }
 
     { // Platforms
@@ -166,7 +150,7 @@ public class box2d_Dominos extends PApplet {
         Body body = world.createBody(bd);
         body.createFixture(fd);
         
-        bodies.add(body, true, color(0), false, color(0), 1f);
+        world.bodies.add(body, true, color(0), false, color(0), 1f);
       }
     }
 
@@ -205,7 +189,7 @@ public class box2d_Dominos extends PApplet {
           int fcol = color(hue, 100, 100);
           int scol = color(hue, 50, 50, 128);
 
-          bodies.add(bdomino, true, fcol, true, scol, 1f);
+          world.bodies.add(bdomino, true, fcol, true, scol, 1f);
         }
       }
       

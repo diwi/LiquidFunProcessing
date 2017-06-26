@@ -14,7 +14,6 @@
 package testbed;
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
-import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
 
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -42,8 +41,7 @@ public class box2d_PistonStressTest extends PApplet {
   boolean USE_DEBUG_DRAW = false;
 
   DwWorld world;
-  DwBodyGroup bodies;
-  
+
   public void settings(){
     size(viewport_w, viewport_h, P2D);
     smooth(8);
@@ -57,9 +55,7 @@ public class box2d_PistonStressTest extends PApplet {
   
   
   public void release(){
-    if(bodies    != null) bodies   .release(); bodies    = null;
-//    if(particles != null) particles.release(); particles = null;
-    if(world     != null) world    .release(); world     = null;  
+    if(world != null) world.release(); world = null;  
   }
   
   public void reset(){
@@ -68,9 +64,6 @@ public class box2d_PistonStressTest extends PApplet {
     
     world = new DwWorld(this, 20);
     world.transform.setScreen(width, height, 20, width/2, height+10);
-    
-    // Renderer
-    bodies = new DwBodyGroup(this, world, world.transform);
 
     // create scene: rigid bodies, particles, etc ...
     initScene();
@@ -79,10 +72,7 @@ public class box2d_PistonStressTest extends PApplet {
   
   
   public void draw(){
-    
-    bodies.addBullet(true, color(0), true, color(0), 1f);
-    
-    
+
     if(UPDATE_PHYSICS){
       world.update();
     }
@@ -96,7 +86,7 @@ public class box2d_PistonStressTest extends PApplet {
       world.displayDebugDraw(canvas);
       // DwDebugDraw.display(canvas, world);
     } else {
-      bodies.display(canvas);
+      world.display(canvas);
     }
     canvas.popMatrix();
     
@@ -162,7 +152,7 @@ public class box2d_PistonStressTest extends PApplet {
       shape.setAsBox(5.0f, 100.0f, new Vec2(+10.15f, 50.0f), 0);
       bsides.createFixture(sides);
 
-      bodies.add(bsides, true, color(32), true, color(0), 1f);
+      world.bodies.add(bsides, true, color(32), true, color(0), 1f);
     }
 
     // turney
@@ -188,7 +178,7 @@ public class box2d_PistonStressTest extends PApplet {
 
         body.createFixture(fd);
       }
-      bodies.add(body, true, color(255,64,0), true, color(0), 1f);
+      world.bodies.add(body, true, color(255,64,0), true, color(0), 1f);
       
       RevoluteJointDef rjd = new RevoluteJointDef();
       rjd.initialize(body, ground, body.getPosition());
@@ -221,7 +211,7 @@ public class box2d_PistonStressTest extends PApplet {
         world.createJoint(rjd);
 
         prevBody = body;
-        bodies.add(prevBody, true, color(200,32,0), true, color(0), 1f);
+        world.bodies.add(prevBody, true, color(200,32,0), true, color(0), 1f);
       }
 
       // Define follower.
@@ -241,7 +231,7 @@ public class box2d_PistonStressTest extends PApplet {
         world.createJoint(rjd);
 
         prevBody = body;
-        bodies.add(prevBody, true, color(200,32,0), true, color(0), 1f);
+        world.bodies.add(prevBody, true, color(200,32,0), true, color(0), 1f);
       }
 
       // Define piston
@@ -261,7 +251,7 @@ public class box2d_PistonStressTest extends PApplet {
         body.createFixture(piston);
         body.setBullet(false);
 
-        bodies.add(body, true, color(200,32,0), true, color(0), 1f);
+        world.bodies.add(body, true, color(200,32,0), true, color(0), 1f);
         
         
         RevoluteJointDef rjd = new RevoluteJointDef();
@@ -295,7 +285,7 @@ public class box2d_PistonStressTest extends PApplet {
           fixture.filter.maskBits = 1 | 4 | 2;
           body.createFixture(fixture);
           
-          bodies.add(body, true, color(32,128,255), true, color(0), 1f);
+          world.bodies.add(body, true, color(32,128,255), true, color(0), 1f);
         }
 
         
@@ -311,7 +301,7 @@ public class box2d_PistonStressTest extends PApplet {
           Body body = world.createBody(bd);
           body.createFixture(fixture);
 
-          bodies.add(body, true, color(32,255,128), true, color(0), 1f);
+          world.bodies.add(body, true, color(32,255,128), true, color(0), 1f);
         }
         
 
@@ -338,7 +328,7 @@ public class box2d_PistonStressTest extends PApplet {
           Body body = world.createBody(bd);
           body.createFixture(fixture);
           
-          bodies.add(body, true, color(255,255,32), true, color(0), 1f);
+          world.bodies.add(body, true, color(255,255,32), true, color(0), 1f);
         }
       }
     }

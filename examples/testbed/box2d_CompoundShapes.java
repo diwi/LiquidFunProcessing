@@ -15,8 +15,6 @@ package testbed;
 
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
-import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
-
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.MathUtils;
@@ -42,7 +40,6 @@ public class box2d_CompoundShapes extends PApplet {
   boolean USE_DEBUG_DRAW = false;
 
   DwWorld world;
-  DwBodyGroup bodies;
 
   public void settings(){
     size(viewport_w, viewport_h, P2D);
@@ -58,9 +55,7 @@ public class box2d_CompoundShapes extends PApplet {
   
   
   public void release(){
-    if(bodies    != null) bodies   .release(); bodies    = null;
-//    if(particles != null) particles.release(); particles = null;
-    if(world     != null) world    .release(); world     = null;  
+    if(world != null) world.release(); world = null;  
   }
   
   
@@ -69,10 +64,6 @@ public class box2d_CompoundShapes extends PApplet {
     release();
     
     world = new DwWorld(this, 25);
-    world.transform.setScreen(width, height, 25, width/2, height-10);
-
-    // Renderer
-    bodies = new DwBodyGroup(this, world, world.transform);
 
     // create scene: rigid bodies, particles, etc ...
     initScene();
@@ -81,9 +72,7 @@ public class box2d_CompoundShapes extends PApplet {
   
   
   public void draw(){
-    
-    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
-    
+
     if(UPDATE_PHYSICS){
       world.update();
     }
@@ -97,7 +86,7 @@ public class box2d_CompoundShapes extends PApplet {
       world.displayDebugDraw(canvas);
       // DwDebugDraw.display(canvas, world);
     } else {
-      bodies.display(canvas);
+      world.display(canvas);
     }
     canvas.popMatrix();
     
@@ -131,6 +120,7 @@ public class box2d_CompoundShapes extends PApplet {
     float dimx = world.transform.box2d_dimx;
     float dimy = world.transform.box2d_dimy;
     float thick = 20f /world.transform.screen_scale;
+    
     {
       BodyDef bd = new BodyDef();
       bd.position.set(0.0f, 0.0f);
@@ -141,7 +131,7 @@ public class box2d_CompoundShapes extends PApplet {
 
       body.createFixture(shape, 0.0f);
       
-      bodies.add(body, true, color(0), false, color(0), 1);
+      world.bodies.add(body, true, color(0), false, color(0), 1);
     }
 
     {
@@ -166,7 +156,7 @@ public class box2d_CompoundShapes extends PApplet {
         float r = random(128, 255);
         float g = r/2;
         float b = 0;
-        bodies.add(body, true, color(r,g,b), true, color(0), 1);
+        world.bodies.add(body, true, color(r,g,b), true, color(0), 1);
       }
     }
 
@@ -190,7 +180,7 @@ public class box2d_CompoundShapes extends PApplet {
         float b = random(128, 255);
         float g = b/2;
         float r = 0;
-        bodies.add(body, true, color(r,g,b), true, color(0), 1);
+        world.bodies.add(body, true, color(r,g,b), true, color(0), 1);
       }
     }
 
@@ -230,7 +220,7 @@ public class box2d_CompoundShapes extends PApplet {
         float g = random(180, 255);
         float r = g * 0.9f;
         float b = 0;
-        bodies.add(body, true, color(r,g,b), true, color(0), 1);
+        world.bodies.add(body, true, color(r,g,b), true, color(0), 1);
       }
     }
 
@@ -252,13 +242,13 @@ public class box2d_CompoundShapes extends PApplet {
       Fixture fixture2 = body.createFixture(left, 4.0f);
       Fixture fixture3 = body.createFixture(right, 4.0f);
       
-      bodies.add(fixture1, true, color(255,0,0), true, color(0), 1);
-      bodies.add(fixture2, true, color(0,255,0), true, color(0), 1);
-      bodies.add(fixture3, true, color(0,0,255), true, color(0), 1);
+      world.bodies.add(fixture1, true, color(255,0,0), true, color(0), 1);
+      world.bodies.add(fixture2, true, color(0,255,0), true, color(0), 1);
+      world.bodies.add(fixture3, true, color(0,0,255), true, color(0), 1);
     }
     
     
-    bodies.addAll();
+    world.bodies.addAll();
   }
   
   

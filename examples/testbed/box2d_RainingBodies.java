@@ -14,8 +14,6 @@
 package testbed;
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
-import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
-
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.collision.shapes.Shape;
@@ -40,7 +38,6 @@ public class box2d_RainingBodies extends PApplet {
   boolean USE_DEBUG_DRAW = false;
 
   DwWorld world;
-  DwBodyGroup bodies;
   
   public void settings(){
     size(viewport_w, viewport_h, P2D);
@@ -55,9 +52,7 @@ public class box2d_RainingBodies extends PApplet {
   
   
   public void release(){
-    if(bodies    != null) bodies   .release(); bodies    = null;
-//    if(particles != null) particles.release(); particles = null;
-    if(world     != null) world    .release(); world     = null;  
+    if(world != null) world.release(); world = null;  
   }
   
   public void reset(){
@@ -65,10 +60,6 @@ public class box2d_RainingBodies extends PApplet {
     release();
     
     world = new DwWorld(this, 20);
-    world.transform.setScreen(width, height, 20, width/2, height);
-    
-    // Renderer
-    bodies = new DwBodyGroup(this, world, world.transform);
 
     // create scene: rigid bodies, particles, etc ...
     initScene();
@@ -78,9 +69,7 @@ public class box2d_RainingBodies extends PApplet {
   
   public void draw(){
     
-    
-    bodies.addBullet(true, color(220), true, color(0), 1f);
-    
+
     if(UPDATE_PHYSICS){
       removeLostBodies();
       if(frameCount % 10 == 0){
@@ -101,7 +90,7 @@ public class box2d_RainingBodies extends PApplet {
       world.displayDebugDraw(canvas);
       // DwDebugDraw.display(canvas, world);
     } else {
-      bodies.display(canvas);
+      world.display(canvas);
     }
     canvas.popMatrix();
     
@@ -173,7 +162,7 @@ public class box2d_RainingBodies extends PApplet {
         ground.createFixture(sd, 0);
       }
 
-      bodies.add(ground, true, color(0), !true, color(0), 1f);
+      world.bodies.add(ground, true, color(0), !true, color(0), 1f);
     }
   }
   
@@ -219,7 +208,7 @@ public class box2d_RainingBodies extends PApplet {
       float g = 100;
       float b = 100;
       
-      bodies.add(body, true, color(r,g,b), true, color(r, g, b *0.5f), 1f);
+      world.bodies.add(body, true, color(r,g,b), true, color(r, g, b *0.5f), 1f);
       colorMode(RGB, 255, 255, 255);
       
       m_count++;
