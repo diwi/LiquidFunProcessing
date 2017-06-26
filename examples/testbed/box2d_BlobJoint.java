@@ -20,6 +20,7 @@ import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
+import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.joints.ConstantVolumeJointDef;
 import org.jbox2d.dynamics.joints.Joint;
@@ -132,7 +133,7 @@ public class box2d_BlobJoint extends PApplet {
       BodyDef bd = new BodyDef();
       bd.position.set(0.0f, 0.0f);
       Body ground = world.createBody(bd);
-      
+
       PolygonShape sd = new PolygonShape();
       
       // bottom
@@ -149,7 +150,7 @@ public class box2d_BlobJoint extends PApplet {
       
       // top
       sd.setAsBox(dimx, 0.4f, new Vec2(0, dimy), 0.0f);
-      ground.createFixture(sd, 0f);
+      Fixture ftop = ground.createFixture(sd, 0f);
       
       world.bodies.add(ground, true, color(0), false, color(0), 1f);
     }

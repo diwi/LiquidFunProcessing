@@ -15,6 +15,9 @@ package testbed;
 
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
+import com.thomasdiewald.liquidfun.java.render.DwBodyGroup;
+import com.thomasdiewald.liquidfun.java.render.DwParticleRenderGL;
+
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Color3f;
 import org.jbox2d.common.MathUtils;
@@ -31,7 +34,7 @@ import processing.core.*;
 import processing.opengl.PGraphics2D;
 
 
-public class liquidfun_WaveMachine extends PApplet {
+public class TODO_liquidfun_BoxInteractions extends PApplet {
 
   int viewport_w = 1280;
   int viewport_h = 720;
@@ -41,7 +44,10 @@ public class liquidfun_WaveMachine extends PApplet {
   boolean UPDATE_PHYSICS = true;
   boolean USE_DEBUG_DRAW = false;
 
-  DwWorld world;  
+  DwWorld world;
+  DwBodyGroup bodies;
+  DwParticleRenderGL particles;
+  
 //  PImage sprite;
 
   public void settings(){
@@ -52,14 +58,17 @@ public class liquidfun_WaveMachine extends PApplet {
   
   public void setup(){ 
     surface.setLocation(viewport_x, viewport_y);
+    
 //    sprite = loadImage("sprite.png");
+    
     reset();
     frameRate(120);
   }
   
   
   public void release(){
-    if(world != null) world.release(); world = null;
+    if(bodies != null) bodies.release(); bodies = null;
+    if(particles != null) particles.release(); particles = null;
   }
   
   
@@ -67,9 +76,19 @@ public class liquidfun_WaveMachine extends PApplet {
     // release old resources
     release();
     
-    world = new DwWorld(this, 20);
-    world.transform.setScreen(width, height, 20, width/2, height/2);
+    world = new DwWorld(this, 18);
+    world.transform.setScreen(width, height, 18, width/2, height/2);
 
+    // Renderer
+    bodies = new DwBodyGroup(this, world, world.transform);
+    
+    particles = new DwParticleRenderGL(this, world, world.transform);
+//    particles.param.tex_sprite = sprite;
+    particles.param.falloff_exp1 = 1;
+    particles.param.falloff_exp2 = 2;
+    particles.param.radius_scale = 2f;
+    particles.param.falloff_mult = 1;
+    
     // create scene: rigid bodies, particles, etc ...
     initScene();
   }
@@ -78,9 +97,12 @@ public class liquidfun_WaveMachine extends PApplet {
   
   public void draw(){
     
+    bodies.addBullet(true, color(200, 0, 0), true, color(0), 1f);
+    
     if(UPDATE_PHYSICS){
       wave();
       world.update();
+      particles.update();
     }
     
     PGraphics2D canvas = (PGraphics2D) this.g;
@@ -92,7 +114,8 @@ public class liquidfun_WaveMachine extends PApplet {
       world.displayDebugDraw(canvas);
       // DwDebugDraw.display(canvas, world);
     } else {
-      world.display(canvas);
+      bodies.display(canvas);
+      particles.display(canvas);
     }
     canvas.popMatrix();
     
@@ -151,7 +174,7 @@ public class liquidfun_WaveMachine extends PApplet {
       shape.setAsBox(20.0f, 1, new Vec2(0.0f, -11.0f), 0.0f);
       body.createFixture(shape, 5.0f);
       
-      world.bodies.add(body, true, color(0), true, color(0), 1f);
+      bodies.add(body, true, color(0), true, color(0), 1f);
 
       RevoluteJointDef jd = new RevoluteJointDef();
       jd.bodyA = ground;
@@ -165,7 +188,7 @@ public class liquidfun_WaveMachine extends PApplet {
       m_joint = (RevoluteJoint) world.createJoint(jd);
     }
     
-    world.bodies.addAll();
+    bodies.addAll();
 
     
     
@@ -192,7 +215,7 @@ public class liquidfun_WaveMachine extends PApplet {
   
 
   public static void main(String args[]) {
-    PApplet.main(new String[] { liquidfun_WaveMachine.class.getName() });
+    PApplet.main(new String[] { TODO_liquidfun_BoxInteractions.class.getName() });
   }
   
 }

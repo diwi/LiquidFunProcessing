@@ -70,7 +70,7 @@ public class liquidfun_DrawingParticles extends PApplet {
     world = new DwWorld(this, 18);
 
 
-    setParticleProperties(spawn_type);
+    setParticleSpawnProperties(spawn_type);
 
     // create scene: rigid bodies, particles, etc ...
     initScene();
@@ -129,7 +129,7 @@ public class liquidfun_DrawingParticles extends PApplet {
     if(key == 't') UPDATE_PHYSICS = !UPDATE_PHYSICS;
     if(key == 'r') reset();
     if(key == 'f') USE_DEBUG_DRAW = !USE_DEBUG_DRAW;
-    if(key >= '1' && key <= '6') setParticleProperties(key - '1');
+    if(key >= '1' && key <= '6') setParticleSpawnProperties(key - '1');
   }
 
   
@@ -140,7 +140,7 @@ public class liquidfun_DrawingParticles extends PApplet {
 
   int spawn_type = 0;
  
-  public void setParticleProperties(int type){
+  public void setParticleSpawnProperties(int type){
     
     spawn_type = type;
 
@@ -216,7 +216,7 @@ public class liquidfun_DrawingParticles extends PApplet {
       world.mouse_spawn_particles.setBoxShape(size_x, size_y);
       world.mouse_spawn_particles.spawn(screen_x, screen_y);
       
-      setParticleProperties(spawn_type);
+      setParticleSpawnProperties(spawn_type);
     }
   }
 

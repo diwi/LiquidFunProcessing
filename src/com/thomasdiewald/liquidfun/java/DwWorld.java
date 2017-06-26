@@ -16,10 +16,14 @@ package com.thomasdiewald.liquidfun.java;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jbox2d.collision.broadphase.BroadPhase;
+import org.jbox2d.collision.shapes.Shape;
 import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.Fixture;
+import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.joints.Joint;
 
@@ -36,6 +40,7 @@ import com.thomasdiewald.liquidfun.java.render.DwFixture;
 import com.thomasdiewald.liquidfun.java.render.DwJoint;
 import com.thomasdiewald.liquidfun.java.render.DwParticleRender;
 import com.thomasdiewald.liquidfun.java.render.DwParticleRenderGL;
+import com.thomasdiewald.liquidfun.java.render.ShapeStyle;
 
 import processing.core.PApplet;
 import processing.core.PGraphics;
@@ -448,6 +453,7 @@ public class DwWorld extends World{
       , float   stroke_weight
   ){
     DwBody dwbody = getShape(body);
+    dwbody.style.set(fill_enabled, fill_color, stroke_enabled, stroke_color, stroke_weight);
     return setStyle(dwbody.shape, fill_enabled, fill_color, stroke_enabled, stroke_color, stroke_weight);
   }
   
@@ -490,6 +496,72 @@ public class DwWorld extends World{
   }
 
   
+  
+  
+  
+//  public Body createBody(BodyDef def) {
+//    Body body = super.createBody(def);
+//    
+////    body.createFixture(def)
+//    bodies.add(body); 
+//    return body;
+//  }
+//  
+//  public Body createBody(BodyDef def, ShapeStyle style) {
+//    Body body = super.createBody(def);
+//    bodies.add(body, style);
+//    return body;
+//  }
+//  
+//  public Body createBody(BodyDef def, boolean fill_enabled, int fill_color, boolean stroke_enabled, int stroke_color, float stroke_weight) {
+//    Body body = super.createBody(def);
+//    bodies.add(body, fill_enabled, fill_color, stroke_enabled, stroke_color, stroke_weight);
+//    return body;
+//  }
+//  
+//  
+//  
+//  
+//  // exact copy off Body.createFixture();
+//  public final Fixture createFixture(Body body, FixtureDef def) {
+//    assert (this.isLocked() == false);
+//
+//    if (this.isLocked() == true) {
+//      return null;
+//    }
+//
+//    Fixture fixture = new Fixture();
+//    fixture.create(body, def);
+//
+//    if ((m_flags & Body.e_activeFlag) == Body.e_activeFlag) {
+//      BroadPhase broadPhase = this.m_contactManager.m_broadPhase;
+//      fixture.createProxies(broadPhase, body.m_xf);
+//    }
+//
+//    fixture.m_next = body.m_fixtureList;
+//    body.m_fixtureList = fixture;
+//    ++body.m_fixtureCount;
+//
+//    fixture.m_body = body;
+//
+//    // Adjust mass properties if needed.
+//    if (fixture.m_density > 0.0f) {
+//      body.resetMassData();
+//    }
+//
+//    // Let the world know we have a new fixture. This will cause new contacts
+//    // to be created at the beginning of the next time step.
+//    this.m_flags |= World.NEW_FIXTURE;
+//
+//    return fixture;
+//  }
+//  
+//  public final Fixture createFixture(Body body, Shape shape, float density) {
+//    FixtureDef fixDef = new FixtureDef();
+//    fixDef.shape = shape;
+//    fixDef.density = density;
+//    return createFixture(body, fixDef);
+//  }
   
   
 }
