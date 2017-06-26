@@ -159,7 +159,11 @@ public class DwWorld extends World{
    * @param positionIterations for the position constraint solver.
    */
   public void update(float timestep, int iter_velocity, int iter_position){
-    bodies.addBullet(true, 0xFF000000, false, 0xFF000000, 1f);
+    
+//    bodies.addBullet(true, 0xFF000000, false, 0xFF000000, 1f);
+    bodies.addBullet(true, 0xFF806040, false, 0xFF000000, 1f);
+//    bodies.addBullet(true, papplet.color(128), true, papplet.color(0), 1f);
+    
     mouseUpdateAction();
     super.step(timestep, iter_velocity, iter_position);
     updateBodies();
@@ -238,6 +242,7 @@ public class DwWorld extends World{
     bodies.display(canvas);
     particles.display(canvas);
   }
+  
   
   public void displayDebugDraw(PGraphics canvas){
     debug_draw.display(canvas);
