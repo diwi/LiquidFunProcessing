@@ -212,29 +212,42 @@ public class box2d_BlobJoint_LiquidFx extends PApplet {
       world.bodies.add(ground, true, color(0), false, color(0), 1f);
     }
 
-    { // falling box
-      BodyDef bd2 = new BodyDef();
-      bd2.type = BodyType.DYNAMIC;
-      PolygonShape psd = new PolygonShape();
-      psd.setAsBox(3.0f, 1.5f, new Vec2(0, dimy-2), 0.0f);
-      Body fallingBox = world.createBody(bd2);
-      
+    { // some rigid ojects
       FixtureDef fd = new FixtureDef();
-      fd.shape = psd;
       fd.density = 1.0f;
       fd.restitution = 0.2f;
       fd.friction = 0.1f;
-      fallingBox.createFixture(fd);
       
+      BodyDef bd2 = new BodyDef();
+      bd2.type = BodyType.DYNAMIC;
+
+      // box
+      PolygonShape boxshape = new PolygonShape();
+      boxshape.setAsBox(3.0f, 1.5f, new Vec2(0, dimy-2), 0.0f);
+      fd.shape = boxshape;
+      Body box = world.createBody(bd2);
+      box.createFixture(fd);
       
-      world.bodies.add(fallingBox, true, color(255,32,180), false, color(0), 1f);
+      // circle
+      CircleShape cirlceshape = new CircleShape();
+      cirlceshape.m_p.set(0, dimy);
+      cirlceshape.m_radius = 2;
+      fd.shape = cirlceshape;
+      Body circle = world.createBody(bd2);
+      circle.createFixture(fd);
+      
+      world.bodies.add(box   , true, color(255,32,180), false, color(0), 1f);
+      world.bodies.add(circle, true, color(255,32,180), false, color(0), 1f);
     }
     
     
+    float vertex_rad = 0.5f * 30 / world.transform.screen_scale;
+
+    
     // createBlobJoint(count, radius, posx, posy, radiusx, radiusy,   hue)
-    createBlobJoint(20, 0.6f,     0, 10, 5, 5,     0 / 360f);
-    createBlobJoint(20, 0.6f,   +15, 16, 5, 5,   170 / 360f);
-    createBlobJoint(20, 0.6f,   -15, 20, 5, 5,    80 / 360f);
+    createBlobJoint(20, vertex_rad,     0, 10, 5, 5,     0 / 360f);
+    createBlobJoint(20, vertex_rad,   +15, 16, 5, 5,   170 / 360f);
+    createBlobJoint(20, vertex_rad,   -15, 20, 5, 5,    80 / 360f);
     
     
     
@@ -274,6 +287,7 @@ public class box2d_BlobJoint_LiquidFx extends PApplet {
       body.createFixture(fd);
       
       cvjd.addBody(body);
+
       
       bodylist[i] = body;
     }
@@ -314,7 +328,7 @@ public class box2d_BlobJoint_LiquidFx extends PApplet {
         float hue = abs(2 * inorm - 1) * hue_range + hue_tone;
         hue = hue - (int)hue; // [0, 1]
         
-        world.bodies.add(joint, false, color(255), true, color(hue, 1, 0.5f), 5);
+        world.bodies.add(joint, false, color(255), true, color(hue, 1, 1f, 0.75f), 20);
       }
     }
     

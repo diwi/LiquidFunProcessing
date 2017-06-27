@@ -153,22 +153,34 @@ public class box2d_BlobJoint extends PApplet {
       world.bodies.add(ground, true, color(0), false, color(0), 1f);
     }
 
-    { // falling box
-      BodyDef bd2 = new BodyDef();
-      bd2.type = BodyType.DYNAMIC;
-      PolygonShape psd = new PolygonShape();
-      psd.setAsBox(3.0f, 1.5f, new Vec2(0, dimy-2), 0.0f);
-      Body fallingBox = world.createBody(bd2);
-      
+    { // some rigid ojects
       FixtureDef fd = new FixtureDef();
-      fd.shape = psd;
       fd.density = 1.0f;
       fd.restitution = 0.2f;
       fd.friction = 0.1f;
-      fallingBox.createFixture(fd);
       
-      world.bodies.add(fallingBox, true, color(255,32,180), false, color(0), 1f);
+      BodyDef bd2 = new BodyDef();
+      bd2.type = BodyType.DYNAMIC;
+
+      // box
+      PolygonShape boxshape = new PolygonShape();
+      boxshape.setAsBox(3.0f, 1.5f, new Vec2(0, dimy-2), 0.0f);
+      fd.shape = boxshape;
+      Body box = world.createBody(bd2);
+      box.createFixture(fd);
+      
+      // circle
+      CircleShape cirlceshape = new CircleShape();
+      cirlceshape.m_p.set(0, dimy);
+      cirlceshape.m_radius = 2;
+      fd.shape = cirlceshape;
+      Body circle = world.createBody(bd2);
+      circle.createFixture(fd);
+      
+      world.bodies.add(box   , true, color(255,32,180), false, color(0), 1f);
+      world.bodies.add(circle, true, color(255,32,180), false, color(0), 1f);
     }
+    
     
     
     // createBlobJoint(count, radius, posx, posy, radiusx, radiusy,   hue)

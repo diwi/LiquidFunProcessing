@@ -16,12 +16,14 @@ package com.thomasdiewald.liquidfun.java;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jbox2d.collision.AABB;
 import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.joints.Joint;
+import org.jbox2d.particle.ParticleType;
 
 import com.thomasdiewald.liquidfun.java.interaction.DwMouseShootBullet;
 import com.thomasdiewald.liquidfun.java.interaction.DwParticleDestroyer;
@@ -164,6 +166,9 @@ public class DwWorld extends World{
 //    bodies.addBullet(true, papplet.color(128), true, papplet.color(0), 1f);
     
     mouseUpdateAction();
+    if(particle_zombie_aabb_enabled){
+      removeLostParticles();
+    }
     super.step(timestep, iter_velocity, iter_position);
     updateBodies();
     updateJoints();
@@ -228,6 +233,81 @@ public class DwWorld extends World{
     }
 
   }
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  //////////////////////////////////////////////////////////////////////////////
+  //
+  // Particle Bounds, for removing lost particles (b2_zombieParticle);
+  //
+  //////////////////////////////////////////////////////////////////////////////
+  
+  public boolean particle_zombie_aabb_enabled = true;
+  protected AABB particle_zombie_aabb;
+  
+  
+
+  
+  public void enableParticleZombieBounds(boolean enable){
+    particle_zombie_aabb_enabled = enable;
+  }
+  
+  /**
+   * custom AABB, which is used for removing particles
+   * outside that AABB.
+   */
+  public void setParticleZombieWorldBounds(AABB aabb_world){
+    particle_zombie_aabb.set(aabb_world);
+  }
+
+  /**
+   * creates an screen-sized AABB + 50 border, which is used for removing particles
+   * outside that AABB.
+   */
+  public void createParticleZombieBounds(){
+    particle_zombie_aabb = new AABB();
+
+    float off = +200; // border around the screen
+    float screenw = transform.screen_dimx;
+    float screenh = transform.screen_dimy;
+    
+    transform.getScreen2box(      0-off, screenh+off, particle_zombie_aabb.lowerBound);
+    transform.getScreen2box(screenw+off,       0-off, particle_zombie_aabb.upperBound);
+  }
+  
+  /**
+   * removes particles outside the particle_zombie_aabb from the world.
+   */
+  public void removeLostParticles(){
+    
+    if(particle_zombie_aabb == null){
+      createParticleZombieBounds();
+    }
+    
+    int    pcount = getParticleCount();
+    Vec2[] pverts = getParticlePositionBuffer();
+    int[]  pflags = getParticleFlagsBuffer();
+    
+    for(int i = 0; i < pcount; i++){
+      Vec2 vert = pverts[i];
+      if(vert.x < particle_zombie_aabb.lowerBound.x || vert.x > particle_zombie_aabb.upperBound.x ||
+         vert.y < particle_zombie_aabb.lowerBound.y || vert.y > particle_zombie_aabb.upperBound.y)
+      {
+        pflags[i] |= ParticleType.b2_zombieParticle;
+        // world.destroyParticle(i); // works also
+      }
+    }
+  }
+  
+  
+  
   
   
 
