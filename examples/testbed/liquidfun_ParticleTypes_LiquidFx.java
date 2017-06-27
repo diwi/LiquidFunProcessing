@@ -16,14 +16,15 @@ package testbed;
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
 import com.thomasdiewald.liquidfun.java.interaction.DwParticleSpawn;
+import com.thomasdiewald.pixelflow.java.DwPixelFlow;
+import com.thomasdiewald.pixelflow.java.imageprocessing.filter.DwLiquidFX;
+
 import org.jbox2d.collision.shapes.ChainShape;
-import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
-import org.jbox2d.dynamics.BodyType;
-import org.jbox2d.dynamics.FixtureDef;
+import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.particle.ParticleGroupType;
 import org.jbox2d.particle.ParticleType;
 
@@ -31,7 +32,7 @@ import processing.core.*;
 import processing.opengl.PGraphics2D;
 
 
-public class liquidfun_DrawingParticles extends PApplet {
+public class liquidfun_ParticleTypes_LiquidFx extends PApplet {
 
   int viewport_w = 1280;
   int viewport_h = 720;
@@ -40,10 +41,15 @@ public class liquidfun_DrawingParticles extends PApplet {
 
   boolean UPDATE_PHYSICS = true;
   boolean USE_DEBUG_DRAW = false;
-
-  DwWorld world;
+  boolean APPLY_LIQUID_FX = true;
   
+  DwWorld world;
 //  PImage sprite;
+  
+  DwPixelFlow pixelflow;
+  DwLiquidFX liquidfx;
+  
+  PGraphics2D pg_particles;
   
   PFont font;
 
@@ -57,6 +63,12 @@ public class liquidfun_DrawingParticles extends PApplet {
     surface.setLocation(viewport_x, viewport_y);
 //    sprite = loadImage("sprite.png");
     font = createFont("data/SourceCodePro-Regular.ttf", 12);
+    
+    pixelflow = new DwPixelFlow(this);
+    liquidfx = new DwLiquidFX(pixelflow);
+    
+    pg_particles = (PGraphics2D) createGraphics(width, height, P2D);
+    
     reset();
     frameRate(120);
   }
@@ -72,13 +84,14 @@ public class liquidfun_DrawingParticles extends PApplet {
     release();
 
     world = new DwWorld(this, 18);
-
+    world.particles.param.falloff_exp1 = 3;
+    world.particles.param.falloff_exp2 = 1;
+    world.particles.param.radius_scale = 2;
 
     setParticleSpawnProperties(spawn_type);
-
+    
     // create scene: rigid bodies, particles, etc ...
     initScene();
-    
   }
 
 
@@ -88,25 +101,59 @@ public class liquidfun_DrawingParticles extends PApplet {
     if(UPDATE_PHYSICS){
       world.update();
     }
+    
+    
+    int BACKGROUND = 32;
 
-    PGraphics2D canvas = (PGraphics2D) this.g;
-    canvas.background(32);
-    canvas.pushMatrix();
-    world.applyTransform(canvas);
-    world.drawBulletSpawnTrack(canvas);
     if(USE_DEBUG_DRAW){
+      PGraphics2D canvas = (PGraphics2D) this.g;
+      
+      canvas.background(BACKGROUND);
+      canvas.pushMatrix();
+      world.applyTransform(canvas);
+      world.drawBulletSpawnTrack(canvas);
       world.displayDebugDraw(canvas);
-      // DwDebugDraw.display(canvas, world);
+      canvas.popMatrix();
     } else {
-      world.display(canvas);
+      PGraphics2D canvas = (PGraphics2D) pg_particles;
+
+      canvas.beginDraw();
+      canvas.clear();
+      canvas.background(BACKGROUND, 0);
+      world.applyTransform(canvas);
+      world.particles.display(canvas, 0);
+      canvas.endDraw();
+      
+      if(APPLY_LIQUID_FX)
+      {
+        liquidfx.param.base_LoD = 1;
+        liquidfx.param.base_blur_radius = 2;
+        liquidfx.param.base_threshold = 0.7f;
+        liquidfx.param.highlight_enabled = true;
+        liquidfx.param.highlight_LoD = 1;
+        liquidfx.param.highlight_decay = 0.6f;
+        liquidfx.param.sss_enabled = true;
+        liquidfx.param.sss_LoD = 3;
+        liquidfx.param.sss_decay = 0.5f;
+        liquidfx.apply(canvas);
+      }
+      
+      background(BACKGROUND);
+      image(canvas, 0, 0);
+      pushMatrix();
+      world.applyTransform(this.g);
+      world.bodies.display((PGraphics2D) this.g);
+      world.drawBulletSpawnTrack(this.g);
+      popMatrix();
     }
-    canvas.popMatrix();
     
     int tx = 16;
     int ty = 16;
     int gy = 14;
+
     textFont(font);
     fill(220);
+    textAlign(LEFT);
     text("LMB + SHIFT   shoot bullet" , tx, ty+=gy);
     text("MMB           draw particles"  , tx, ty+=gy);
     text("RMB           delete particles", tx, ty+=gy);
@@ -115,8 +162,18 @@ public class liquidfun_DrawingParticles extends PApplet {
     text("'2'  viscous" , tx, ty+=gy);
     text("'3'  tensile" , tx, ty+=gy);
     text("'4'  powder"  , tx, ty+=gy);
-    ty+=gy;
-    text("'5'  wall"    , tx, ty+=gy);
+    text("'5'  elastic"  , tx, ty+=gy);
+    text("'6'  wall"    , tx, ty+=gy);
+    
+    float bucket_w = width / (float) (num_buckets);
+    tx = (int) (bucket_w/2);
+    ty = height-10;
+    textAlign(CENTER);
+    text("water"   , tx, ty);
+    text("viscous" , tx+=bucket_w, ty);
+    text("tensile" , tx+=bucket_w, ty);
+    text("powder"  , tx+=bucket_w, ty);
+    text("elastic" , tx+=bucket_w, ty);
     
     // info
     int num_bodies    = world.getBodyCount();
@@ -134,9 +191,11 @@ public class liquidfun_DrawingParticles extends PApplet {
     if(key == 'r') reset();
     if(key == 'f') USE_DEBUG_DRAW = !USE_DEBUG_DRAW;
     if(key >= '1' && key <= '6') setParticleSpawnProperties(key - '1');
+    if(key == 'g') APPLY_LIQUID_FX = !APPLY_LIQUID_FX;
   }
 
   
+
   
   //////////////////////////////////////////////////////////////////////////////
   // Scene Setup
@@ -154,36 +213,43 @@ public class liquidfun_DrawingParticles extends PApplet {
     DwParticleSpawn particle_spawn = world.mouse_spawn_particles;
     particle_spawn.join_groups = false;
     particle_spawn.setCircleShape(40);
-    
-    colorMode(HSB, 360, 100, 100);
 
+    colorMode(HSB, 360, 100, 100);
+    
     switch (type) {
       case 0:
-        particle_spawn.group_def.setColor(color(225, 100, 100));
+        particle_spawn.group_def.setColor(color(225, 96, 96));
         particle_spawn.group_def.flags = ParticleType.b2_waterParticle | COLOR_MIX;
         particle_spawn.group_def.groupFlags = 0;
         break;
       case 1:
-        particle_spawn.group_def.setColor(color(100, 100, 100));
+        particle_spawn.group_def.setColor(color(100, 96, 96));
         particle_spawn.group_def.flags = ParticleType.b2_viscousParticle | COLOR_MIX;
         particle_spawn.group_def.groupFlags = 0;
         break;
       case 2:
-        particle_spawn.group_def.setColor(color(0, 100, 100));
+        particle_spawn.group_def.setColor(color(5, 96, 96));
         particle_spawn.group_def.flags = ParticleType.b2_tensileParticle | COLOR_MIX;
         particle_spawn.group_def.groupFlags = 0;
         break;
       case 3:
-        particle_spawn.group_def.setColor(color(60, 50, 100));
+        particle_spawn.group_def.setColor(color(70, 50, 96));
         particle_spawn.group_def.flags = ParticleType.b2_powderParticle | COLOR_MIX;
         particle_spawn.group_def.groupFlags = 0;
         break;
       case 4:
-        particle_spawn.group_def.setColor(color(330, 100, 100));
+        particle_spawn.group_def.setColor(color(300, 96, 96));
+//        particle_spawn.group_def.flags = ParticleType.b2_elasticParticle | ParticleType.b2_springParticle | COLOR_MIX;
+        particle_spawn.group_def.flags = ParticleType.b2_elasticParticle | COLOR_MIX;
+
+        particle_spawn.group_def.groupFlags = 0;
+        break;
+      case 5:
+        particle_spawn.group_def.setColor(color(120, 90, 50));
         particle_spawn.group_def.flags = ParticleType.b2_wallParticle;
         particle_spawn.group_def.groupFlags = ParticleGroupType.b2_solidParticleGroup;
         particle_spawn.join_groups = true;
-        particle_spawn.setCircleShape(20);
+        particle_spawn.setCircleShape(15);
         break;
     }
     
@@ -191,15 +257,20 @@ public class liquidfun_DrawingParticles extends PApplet {
 
   }
 
-
-
+  
+  int num_buckets = 5;
+  
   public void initScene() {
-
+    
     float dimx = world.transform.box2d_dimx;
     float dimy = world.transform.box2d_dimy;
+    float thick = 30f / world.transform.screen_scale;
 
     float dimxh = dimx/2;
     float dimyh = dimy/2;
+    
+    float bucket_w = dimx / num_buckets;
+
     {
       BodyDef bd = new BodyDef();
       Body ground = world.createBody(bd);
@@ -207,62 +278,52 @@ public class liquidfun_DrawingParticles extends PApplet {
       ChainShape shape = new ChainShape();
       Vec2[] vertices = {new Vec2(-dimxh, 0), new Vec2(dimxh, 0), new Vec2(dimxh, dimy), new Vec2(-dimxh, dimy)};
       shape.createLoop(vertices, 4);
-      ground.createFixture(shape, 0.0f);
+      Fixture boundary = ground.createFixture(shape, 0.0f);
+      
+      PolygonShape pshape = new PolygonShape();
+      pshape.setAsBox(dimxh, thick);
+      Fixture bottom = ground.createFixture(pshape, 0.0f);
+  
+      float shift_x = -dimxh + bucket_w;
+      for(int i = 0; i < num_buckets - 1; i++){        
+        float w = thick / 6;
+        float h = 5f * dimy / 6f;
+        pshape.setAsBox(w, h/2, new Vec2(shift_x + i * bucket_w, h/2), 0);
+        Fixture separes = ground.createFixture(pshape, 0.0f);
+      }
 
-      world.bodies.add(ground, false, color(0), true, color(0), 1f);
+      world.bodies.add(ground, true, color(0), false, color(0), 1f);
+      world.setStyle(boundary, false, color(0), false, color(0), 1f);
     }
     
-    FixtureDef fixture_def = new FixtureDef();
-    fixture_def.density = 10f;
-    fixture_def.friction = 0.30f;
-    fixture_def.restitution = 0.30f;
-    
-    BodyDef bd = new BodyDef();
-    bd.type = BodyType.DYNAMIC;
-    
-    {
-      Body body = world.createBody(bd);
-      
-      PolygonShape shape = new PolygonShape();
-      shape.setAsBox(2, 4, new Vec2(0, 4), 0);
-      
-      fixture_def.shape = shape;
-      body.createFixture(fixture_def);
-      
-      world.bodies.add(body, true, color(200), false, color(0), 1f);
-    }
-    
-    
-    {
-      Body body = world.createBody(bd);
 
-      CircleShape shape = new CircleShape();
-      shape.m_p.set(dimxh/2, dimyh);
-      shape.m_radius = 2.0f;
-      
-      fixture_def.shape = shape;
-      body.createFixture(fixture_def);
-      
-      world.bodies.add(body, true, color(200), false, color(0), 1f);
-    }
+    // save current spawn type
+    int spawn_type_cpy = spawn_type;
     
     
-    {
-      float screen_x = width/2;
-      float screen_y = height/2;
-      float size_x = width/2;
-      float size_y = height/2;
+    float bucket_w_screen = width / (float) num_buckets;
+    for(int i = 0; i < num_buckets; i++){
+      float cx = i * bucket_w_screen + bucket_w_screen * 0.5f;
+      float cy = 1 * height / 3f;
+      
+      setParticleSpawnProperties(i);
+
+      float screen_x = cx;
+      float screen_y = cy;
+      float size_x = bucket_w_screen * 0.66f;
+      float size_y = size_x * 2;
       world.mouse_spawn_particles.setBoxShape(size_x, size_y);
       world.mouse_spawn_particles.spawn(screen_x, screen_y);
-      
-      setParticleSpawnProperties(spawn_type);
     }
+    
+    // reset type/color to last used type
+    setParticleSpawnProperties(spawn_type_cpy);
   }
 
 
   
   public static void main(String args[]) {
-    PApplet.main(new String[] { liquidfun_DrawingParticles.class.getName() });
+    PApplet.main(new String[] { liquidfun_ParticleTypes_LiquidFx.class.getName() });
   }
 
 }

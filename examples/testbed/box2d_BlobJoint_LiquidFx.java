@@ -14,6 +14,9 @@
 package testbed;
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
+import com.thomasdiewald.pixelflow.java.DwPixelFlow;
+import com.thomasdiewald.pixelflow.java.imageprocessing.filter.DwLiquidFX;
+
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
@@ -30,7 +33,7 @@ import processing.core.*;
 import processing.opengl.PGraphics2D;
 
 
-public class box2d_BlobJoint extends PApplet {
+public class box2d_BlobJoint_LiquidFx extends PApplet {
 
   int viewport_w = 1280;
   int viewport_h = 720;
@@ -39,8 +42,15 @@ public class box2d_BlobJoint extends PApplet {
   
   boolean UPDATE_PHYSICS = true;
   boolean USE_DEBUG_DRAW = false;
-
+  boolean APPLY_LIQUID_FX = true;
+  
   DwWorld world;
+  
+  DwPixelFlow pixelflow;
+  DwLiquidFX liquidfx;
+  
+  PGraphics2D pg_particles;
+  PGraphics2D pg_bodies;
 
   public void settings(){
     size(viewport_w, viewport_h, P2D);
@@ -49,6 +59,12 @@ public class box2d_BlobJoint extends PApplet {
   
   public void setup(){ 
     surface.setLocation(viewport_x, viewport_y);
+    
+    pixelflow = new DwPixelFlow(this);
+    liquidfx = new DwLiquidFX(pixelflow);
+    
+    pg_particles = (PGraphics2D) createGraphics(width, height, P2D);
+    pg_bodies = (PGraphics2D) createGraphics(width, height, P2D);
     reset();
     frameRate(120);
   }
@@ -63,6 +79,10 @@ public class box2d_BlobJoint extends PApplet {
     release();
     
     world = new DwWorld(this, 25);
+
+    world.particles.param.falloff_exp1 = 3;
+    world.particles.param.falloff_exp2 = 1;
+    world.particles.param.radius_scale = 2;
     
     // create scene: rigid bodies, particles, etc ...
     initScene();
@@ -78,21 +98,59 @@ public class box2d_BlobJoint extends PApplet {
       world.update();
     }
     
-    PGraphics2D canvas = (PGraphics2D) this.g;
-    
-    canvas.background(32);
-    canvas.pushMatrix();
-    world.applyTransform(canvas);
-    world.drawBulletSpawnTrack(canvas);
-    
+    int BACKGROUND = 32;
+
     if(USE_DEBUG_DRAW){
+      PGraphics2D canvas = (PGraphics2D) this.g;
+      
+      background(BACKGROUND);
+      pushMatrix();
+      world.applyTransform(canvas);
+      world.drawBulletSpawnTrack(canvas);
       world.displayDebugDraw(canvas);
-      // DwDebugDraw.display(canvas, world);
+      popMatrix();
     } else {
-      world.bodies.display(canvas);
-      world.particles.display(canvas);
+
+      pg_particles.beginDraw();
+      pg_particles.clear();
+      pg_particles.background(BACKGROUND, 0);
+      world.applyTransform(pg_particles);
+      world.particles.display(pg_particles, 0);
+      pg_particles.endDraw();
+      
+      pg_bodies.beginDraw();
+      pg_bodies.clear();
+      pg_bodies.background(BACKGROUND, 0);
+      world.applyTransform(pg_bodies);
+      world.bodies.display(pg_bodies);
+      pg_bodies.endDraw();
+      
+   
+      if(APPLY_LIQUID_FX)
+      {
+        liquidfx.param.base_LoD = 0;
+        liquidfx.param.base_blur_radius = 2;
+        liquidfx.param.base_threshold = 0.7f;
+        liquidfx.param.highlight_enabled = true;
+        liquidfx.param.highlight_LoD = 1;
+        liquidfx.param.highlight_decay = 0.6f;
+        liquidfx.param.sss_enabled = true;
+        liquidfx.param.sss_LoD = 2;
+        liquidfx.param.sss_decay = 0.5f;
+        
+        liquidfx.apply(pg_particles);
+  
+        liquidfx.apply(pg_bodies);
+      }
+      
+      background(BACKGROUND);
+      image(pg_particles, 0, 0);
+      image(pg_bodies, 0, 0);
+      pushMatrix();
+      world.applyTransform(this.g);
+      world.drawBulletSpawnTrack(this.g);
+      popMatrix();
     }
-    canvas.popMatrix();
     
     // info
     int num_bodies    = world.getBodyCount();
@@ -113,6 +171,7 @@ public class box2d_BlobJoint extends PApplet {
     if(key == 'r') reset();
     if(key == 't') UPDATE_PHYSICS = !UPDATE_PHYSICS;
     if(key == 'f') USE_DEBUG_DRAW = !USE_DEBUG_DRAW;
+    if(key == 'g') APPLY_LIQUID_FX = !APPLY_LIQUID_FX;
   }
   
 
@@ -167,6 +226,7 @@ public class box2d_BlobJoint extends PApplet {
       fd.friction = 0.1f;
       fallingBox.createFixture(fd);
       
+      
       world.bodies.add(fallingBox, true, color(255,32,180), false, color(0), 1f);
     }
     
@@ -175,6 +235,16 @@ public class box2d_BlobJoint extends PApplet {
     createBlobJoint(20, 0.6f,     0, 10, 5, 5,     0 / 360f);
     createBlobJoint(20, 0.6f,   +15, 16, 5, 5,   170 / 360f);
     createBlobJoint(20, 0.6f,   -15, 20, 5, 5,    80 / 360f);
+    
+    
+    
+
+    world.mouse_spawn_particles.setBoxShape(400, 200); 
+    world.mouse_spawn_particles.spawn(220,height-200);
+    
+    
+    
+    world.mouse_spawn_particles.setCircleShape(50); 
   }
   
   
@@ -268,7 +338,7 @@ public class box2d_BlobJoint extends PApplet {
   
    
   public static void main(String args[]) {
-    PApplet.main(new String[] { box2d_BlobJoint.class.getName() });
+    PApplet.main(new String[] { box2d_BlobJoint_LiquidFx.class.getName() });
   }
   
 }

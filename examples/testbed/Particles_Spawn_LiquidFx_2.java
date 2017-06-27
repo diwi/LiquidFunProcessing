@@ -25,7 +25,7 @@ import com.thomasdiewald.liquidfun.java.render.deprecated.DwBodyRenderP5;
 import com.thomasdiewald.liquidfun.java.DwUtils;
 
 import com.thomasdiewald.pixelflow.java.DwPixelFlow;
-import com.thomasdiewald.pixelflow.java.imageprocessing.filter.DwParticleFluidFX;
+import com.thomasdiewald.pixelflow.java.imageprocessing.filter.DwLiquidFX;
 
 import org.jbox2d.collision.shapes.ChainShape;
 import org.jbox2d.collision.shapes.CircleShape;
@@ -66,7 +66,7 @@ public class Particles_Spawn_LiquidFx_2 extends PApplet {
   DwParticleDestroyer  particle_destroyer;
   DwParticleSpawn      particle_spawn;
 
-  DwParticleFluidFX particle_fluidfx;
+  DwLiquidFX particle_fluidfx;
   
   PGraphics2D pg_particles;
   PGraphics2D pg_bodies;
@@ -91,7 +91,7 @@ public class Particles_Spawn_LiquidFx_2 extends PApplet {
     
     pixelflow = new DwPixelFlow(this);
 
-    particle_fluidfx = new DwParticleFluidFX(pixelflow);
+    particle_fluidfx = new DwLiquidFX(pixelflow);
     
     pg_checker = DwUtils.createCheckerBoard(this, width, height, 128, color(16, 0), color(64, 0));
     

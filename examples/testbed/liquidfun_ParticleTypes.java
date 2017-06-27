@@ -17,7 +17,6 @@ package testbed;
 import com.thomasdiewald.liquidfun.java.DwWorld;
 import com.thomasdiewald.liquidfun.java.interaction.DwParticleSpawn;
 import org.jbox2d.collision.shapes.ChainShape;
-import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
@@ -228,26 +227,22 @@ public class liquidfun_ParticleTypes extends PApplet {
       ChainShape shape = new ChainShape();
       Vec2[] vertices = {new Vec2(-dimxh, 0), new Vec2(dimxh, 0), new Vec2(dimxh, dimy), new Vec2(-dimxh, dimy)};
       shape.createLoop(vertices, 4);
-      ground.createFixture(shape, 0.0f);
+      Fixture boundary = ground.createFixture(shape, 0.0f);
       
- 
       PolygonShape pshape = new PolygonShape();
       pshape.setAsBox(dimxh, thick);
-      Fixture solid_bottom = ground.createFixture(pshape, 0.0f);
-      
-      EdgeShape eshape = new EdgeShape();
-      
+      Fixture bottom = ground.createFixture(pshape, 0.0f);
+  
       float shift_x = -dimxh + bucket_w;
-      for(int i = 0; i < num_buckets - 1; i++){
-        Vec2 p1 = new Vec2(shift_x + i * bucket_w, 0);
-        Vec2 p2 = new Vec2(shift_x + i * bucket_w, 5f * dimy / 6f);
-        eshape.set(p1, p2);
-        
-        ground.createFixture(eshape, 0.0f);
+      for(int i = 0; i < num_buckets - 1; i++){        
+        float w = thick / 6;
+        float h = 5f * dimy / 6f;
+        pshape.setAsBox(w, h/2, new Vec2(shift_x + i * bucket_w, h/2), 0);
+        Fixture separes = ground.createFixture(pshape, 0.0f);
       }
 
-      world.bodies.add(ground, false, color(0), true, color(0), 2f);
-      world.setStyle(solid_bottom, true, color(0), false, color(0), 1f);
+      world.bodies.add(ground, true, color(0), false, color(0), 1f);
+      world.setStyle(boundary, false, color(0), false, color(0), 1f);
     }
     
 

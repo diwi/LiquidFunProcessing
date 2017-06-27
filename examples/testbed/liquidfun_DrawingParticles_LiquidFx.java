@@ -16,6 +16,9 @@ package testbed;
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
 import com.thomasdiewald.liquidfun.java.interaction.DwParticleSpawn;
+import com.thomasdiewald.pixelflow.java.DwPixelFlow;
+import com.thomasdiewald.pixelflow.java.imageprocessing.filter.DwLiquidFX;
+
 import org.jbox2d.collision.shapes.ChainShape;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -31,7 +34,7 @@ import processing.core.*;
 import processing.opengl.PGraphics2D;
 
 
-public class liquidfun_DrawingParticles extends PApplet {
+public class liquidfun_DrawingParticles_LiquidFx extends PApplet {
 
   int viewport_w = 1280;
   int viewport_h = 720;
@@ -40,10 +43,16 @@ public class liquidfun_DrawingParticles extends PApplet {
 
   boolean UPDATE_PHYSICS = true;
   boolean USE_DEBUG_DRAW = false;
-
+  boolean APPLY_LIQUID_FX = true;
+  
   DwWorld world;
   
 //  PImage sprite;
+  
+  DwPixelFlow pixelflow;
+  DwLiquidFX liquidfx;
+  
+  PGraphics2D pg_particles;
   
   PFont font;
 
@@ -57,6 +66,12 @@ public class liquidfun_DrawingParticles extends PApplet {
     surface.setLocation(viewport_x, viewport_y);
 //    sprite = loadImage("sprite.png");
     font = createFont("data/SourceCodePro-Regular.ttf", 12);
+   
+    pixelflow = new DwPixelFlow(this);
+    liquidfx = new DwLiquidFX(pixelflow);
+    
+    pg_particles = (PGraphics2D) createGraphics(width, height, P2D);
+    
     reset();
     frameRate(120);
   }
@@ -72,7 +87,9 @@ public class liquidfun_DrawingParticles extends PApplet {
     release();
 
     world = new DwWorld(this, 18);
-
+    world.particles.param.falloff_exp1 = 3;
+    world.particles.param.falloff_exp2 = 1;
+    world.particles.param.radius_scale = 2;
 
     setParticleSpawnProperties(spawn_type);
 
@@ -89,18 +106,52 @@ public class liquidfun_DrawingParticles extends PApplet {
       world.update();
     }
 
-    PGraphics2D canvas = (PGraphics2D) this.g;
-    canvas.background(32);
-    canvas.pushMatrix();
-    world.applyTransform(canvas);
-    world.drawBulletSpawnTrack(canvas);
+    int BACKGROUND = 32;
+
     if(USE_DEBUG_DRAW){
+      PGraphics2D canvas = (PGraphics2D) this.g;
+      
+      canvas.background(BACKGROUND);
+      canvas.pushMatrix();
+      world.applyTransform(canvas);
+      world.drawBulletSpawnTrack(canvas);
       world.displayDebugDraw(canvas);
-      // DwDebugDraw.display(canvas, world);
+      canvas.popMatrix();
     } else {
-      world.display(canvas);
+      PGraphics2D canvas = (PGraphics2D) pg_particles;
+
+      canvas.beginDraw();
+      canvas.clear();
+      canvas.background(BACKGROUND, 0);
+      world.applyTransform(canvas);
+//      world.bodies.display(canvas);
+      world.particles.display(canvas, 0);
+      canvas.endDraw();
+      
+      if(APPLY_LIQUID_FX)
+      {
+        liquidfx.param.base_LoD = 1;
+        liquidfx.param.base_blur_radius = 2;
+        liquidfx.param.base_threshold = 0.7f;
+        liquidfx.param.highlight_enabled = true;
+        liquidfx.param.highlight_LoD = 1;
+        liquidfx.param.highlight_decay = 0.6f;
+        liquidfx.param.sss_enabled = true;
+        liquidfx.param.sss_LoD = 3;
+        liquidfx.param.sss_decay = 0.5f;
+        liquidfx.apply(canvas);
+      }
+      
+      background(BACKGROUND);
+      image(canvas, 0, 0);
+      pushMatrix();
+      world.applyTransform(this.g);
+      world.bodies.display((PGraphics2D) this.g);
+      world.drawBulletSpawnTrack(this.g);
+      popMatrix();
     }
-    canvas.popMatrix();
+    
+    
     
     int tx = 16;
     int ty = 16;
@@ -134,6 +185,7 @@ public class liquidfun_DrawingParticles extends PApplet {
     if(key == 'r') reset();
     if(key == 'f') USE_DEBUG_DRAW = !USE_DEBUG_DRAW;
     if(key >= '1' && key <= '6') setParticleSpawnProperties(key - '1');
+    if(key == 'g') APPLY_LIQUID_FX = !APPLY_LIQUID_FX;
   }
 
   
@@ -246,7 +298,6 @@ public class liquidfun_DrawingParticles extends PApplet {
       world.bodies.add(body, true, color(200), false, color(0), 1f);
     }
     
-    
     {
       float screen_x = width/2;
       float screen_y = height/2;
@@ -262,7 +313,7 @@ public class liquidfun_DrawingParticles extends PApplet {
 
   
   public static void main(String args[]) {
-    PApplet.main(new String[] { liquidfun_DrawingParticles.class.getName() });
+    PApplet.main(new String[] { liquidfun_DrawingParticles_LiquidFx.class.getName() });
   }
 
 }

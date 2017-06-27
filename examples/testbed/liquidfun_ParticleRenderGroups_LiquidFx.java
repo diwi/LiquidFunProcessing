@@ -29,13 +29,13 @@ import com.thomasdiewald.liquidfun.java.DwWorld;
 import com.thomasdiewald.liquidfun.java.interaction.DwParticleSpawn;
 import com.thomasdiewald.liquidfun.java.render.DwParticleRender.ParticleRenderGroupCallback;
 import com.thomasdiewald.pixelflow.java.DwPixelFlow;
-import com.thomasdiewald.pixelflow.java.imageprocessing.filter.DwParticleFluidFX;
+import com.thomasdiewald.pixelflow.java.imageprocessing.filter.DwLiquidFX;
 
 import processing.core.*;
 import processing.opengl.PGraphics2D;
 
 
-public class liquidfun_ParticleRenderGroups extends PApplet {
+public class liquidfun_ParticleRenderGroups_LiquidFx extends PApplet {
 
   int viewport_w = 1280;
   int viewport_h = 720;
@@ -49,7 +49,7 @@ public class liquidfun_ParticleRenderGroups extends PApplet {
   DwWorld world;
 
   DwPixelFlow pixelflow;
-  DwParticleFluidFX particle_fluidfx;
+  DwLiquidFX particle_fluidfx;
   
   PGraphics2D pg_liquid;
   PGraphics2D pg_prigid;
@@ -79,7 +79,7 @@ public class liquidfun_ParticleRenderGroups extends PApplet {
     
     // liquid effect
     pixelflow = new DwPixelFlow(this);
-    particle_fluidfx = new DwParticleFluidFX(pixelflow);
+    particle_fluidfx = new DwLiquidFX(pixelflow);
     
     // different render-targets for different bodies/particles/etc...
     pg_liquid = (PGraphics2D) createGraphics(width, height, P2D);
@@ -98,9 +98,10 @@ public class liquidfun_ParticleRenderGroups extends PApplet {
     world = new DwWorld(this, 15);
     
     // particle render settings
-    world.particles.param.radius_scale = 2;
+    
     world.particles.param.falloff_exp1 = 3f;
     world.particles.param.falloff_exp2 = 1f;
+    world.particles.param.radius_scale = 2;
     
     // callback to group particles by their properties (flags)
     world.particles.setParticleRenderGroupCallback(new ParticleRenderGroupCallback() {
@@ -146,7 +147,7 @@ public class liquidfun_ParticleRenderGroups extends PApplet {
     }
 
 
-    int BACKGROUND = 16;
+    int BACKGROUND = 32;
     
     if(USE_DEBUG_DRAW){
       background(BACKGROUND);
@@ -477,7 +478,7 @@ public class liquidfun_ParticleRenderGroups extends PApplet {
   
    
   public static void main(String args[]) {
-    PApplet.main(new String[] { liquidfun_ParticleRenderGroups.class.getName() });
+    PApplet.main(new String[] { liquidfun_ParticleRenderGroups_LiquidFx.class.getName() });
   }
   
 }

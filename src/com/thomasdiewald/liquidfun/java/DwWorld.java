@@ -16,14 +16,10 @@ package com.thomasdiewald.liquidfun.java;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jbox2d.collision.broadphase.BroadPhase;
-import org.jbox2d.collision.shapes.Shape;
 import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
-import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.Fixture;
-import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.joints.Joint;
 
@@ -40,8 +36,6 @@ import com.thomasdiewald.liquidfun.java.render.DwFixture;
 import com.thomasdiewald.liquidfun.java.render.DwJoint;
 import com.thomasdiewald.liquidfun.java.render.DwParticleRender;
 import com.thomasdiewald.liquidfun.java.render.DwParticleRenderGL;
-import com.thomasdiewald.liquidfun.java.render.ShapeStyle;
-
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -382,30 +376,35 @@ public class DwWorld extends World{
     super.destroyJoint(joint);
   }
   
+  public void destroyFixture(Fixture fixture){
+    release(fixture);
+    Body body = fixture.getBody();
+    body.destroyFixture(fixture);
+   
+  }
   
   
 
-  
   static public void release(Body body){
-    DwBody dwbody = getShape(body);
-    if(dwbody != null){
-      dwbody.parent.release(body);
+    DwBody shp = getShape(body);
+    if(shp != null){
+      shp.release();
     }
   }
   
   static public void release(Joint joint){
-    DwJoint dwjoint = getShape(joint);
-    if(dwjoint != null){
-      dwjoint.parent.release(joint);
+    DwJoint shp = getShape(joint);
+    if(shp != null){
+      shp.release();
     }
   }
   
-//  static public void release(Fixture fixture){
-//    DwFixtureShape dwfixture = getShape(fixture);
-//    if(dwfixture != null){
-//      dwfixture.parent.release(fixture);
-//    }
-//  }
+  static public void release(Fixture fixture){
+    DwFixture shp = getShape(fixture);
+    if(shp != null){
+      shp.release();
+    }
+  }
 
   
   

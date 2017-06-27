@@ -22,13 +22,11 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Arrays;
 
-import org.jbox2d.common.Color3f;
 import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.World;
-import org.jbox2d.particle.ParticleColor;
 import org.jbox2d.particle.ParticleType;
 
 import processing.core.PApplet;
