@@ -17,7 +17,6 @@ import com.thomasdiewald.liquidfun.java.DwWorld;
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.collision.shapes.Shape;
-import org.jbox2d.common.Transform;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
@@ -69,9 +68,7 @@ public class box2d_RainingBodies extends PApplet {
   
   public void draw(){
     
-
     if(UPDATE_PHYSICS){
-      removeLostBodies();
       if(frameCount % 10 == 0){
         addBodies();
       }
@@ -102,18 +99,7 @@ public class box2d_RainingBodies extends PApplet {
   }
   
 
-  
-  public void removeLostBodies(){
-    for (Body body = world.getBodyList(); body != null; body = body.getNext()) {
-      Transform xf = body.getTransform();
-      if(xf.p.y < -10.0){
-        world.destroyBody(body);
-      }
-    }
-  }
-  
-  
-  
+
   
   //////////////////////////////////////////////////////////////////////////////
   // User Interaction
@@ -185,7 +171,6 @@ public class box2d_RainingBodies extends PApplet {
       bd.position.set(x, y);
       Body body = world.createBody(bd);
       
-
       Shape shape = null;
       if(random(1) < 0.5){
         PolygonShape pshape = new PolygonShape();

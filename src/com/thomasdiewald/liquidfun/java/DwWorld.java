@@ -93,8 +93,11 @@ public class DwWorld extends World{
     transform = new DwViewportTransform(papplet);
     transform.setScreen(w, h, scale, w/2, h);
     
+    
+    createZombieBounds();
   
     debug_draw = new DwDebugDraw(papplet, this, transform);
+    
       
     bodies = new DwBodyGroup(papplet, this, transform);
     particles = new DwParticleRenderGL(papplet, this, transform);
@@ -166,9 +169,12 @@ public class DwWorld extends World{
 //    bodies.addBullet(true, papplet.color(128), true, papplet.color(0), 1f);
     
     mouseUpdateAction();
-    if(particle_zombie_aabb_enabled){
+    
+    if(zombie_aabb_enabled){
       removeLostParticles();
+      removeLostBodies();
     }
+    
     super.step(timestep, iter_velocity, iter_position);
     updateBodies();
     updateJoints();
@@ -245,50 +251,49 @@ public class DwWorld extends World{
   
   //////////////////////////////////////////////////////////////////////////////
   //
-  // Particle Bounds, for removing lost particles (b2_zombieParticle);
+  // Bounds, for removing lost particles/bodies (b2_zombieParticle);
   //
   //////////////////////////////////////////////////////////////////////////////
   
-  public boolean particle_zombie_aabb_enabled = true;
-  protected AABB particle_zombie_aabb;
+  public boolean zombie_aabb_enabled = true;
+  public AABB zombie_aabb;
   
   
 
   
-  public void enableParticleZombieBounds(boolean enable){
-    particle_zombie_aabb_enabled = enable;
+  public void enableZombieBounds(boolean enable){
+    zombie_aabb_enabled = enable;
   }
   
   /**
-   * custom AABB, which is used for removing particles
-   * outside that AABB.
+   * custom AABB, which is used for removing bodies/particles outside that AABB.
    */
-  public void setParticleZombieWorldBounds(AABB aabb_world){
-    particle_zombie_aabb.set(aabb_world);
+  public void createZombieBounds(AABB aabb_world){
+    zombie_aabb.set(aabb_world);
   }
 
   /**
-   * creates an screen-sized AABB + 50 border, which is used for removing particles
-   * outside that AABB.
+   * creates an screen-sized AABB + 50 border, which is used for removing 
+   * bodies/particles outside that AABB.
    */
-  public void createParticleZombieBounds(){
-    particle_zombie_aabb = new AABB();
+  public void createZombieBounds(){
+    zombie_aabb = new AABB();
 
-    float off = +200; // border around the screen
     float screenw = transform.screen_dimx;
     float screenh = transform.screen_dimy;
+    float off = (screenh + screenw) * 0.5f; // border around the screen
     
-    transform.getScreen2box(      0-off, screenh+off, particle_zombie_aabb.lowerBound);
-    transform.getScreen2box(screenw+off,       0-off, particle_zombie_aabb.upperBound);
+    transform.getScreen2box(      0-off, screenh+off, zombie_aabb.lowerBound);
+    transform.getScreen2box(screenw+off,       0-off, zombie_aabb.upperBound);
   }
   
   /**
-   * removes particles outside the particle_zombie_aabb from the world.
+   * removes particles outside the zombie_aabb from the world.
    */
   public void removeLostParticles(){
     
-    if(particle_zombie_aabb == null){
-      createParticleZombieBounds();
+    if(zombie_aabb == null){
+      createZombieBounds();
     }
     
     int    pcount = getParticleCount();
@@ -297,14 +302,33 @@ public class DwWorld extends World{
     
     for(int i = 0; i < pcount; i++){
       Vec2 vert = pverts[i];
-      if(vert.x < particle_zombie_aabb.lowerBound.x || vert.x > particle_zombie_aabb.upperBound.x ||
-         vert.y < particle_zombie_aabb.lowerBound.y || vert.y > particle_zombie_aabb.upperBound.y)
+      if(vert.x < zombie_aabb.lowerBound.x || vert.x > zombie_aabb.upperBound.x ||
+         vert.y < zombie_aabb.lowerBound.y || vert.y > zombie_aabb.upperBound.y)
       {
         pflags[i] |= ParticleType.b2_zombieParticle;
         // world.destroyParticle(i); // works also
       }
     }
   }
+  
+  
+  /**
+   * removes bodies outside the zombie_aabb from the world.
+   */
+  public void removeLostBodies(){
+    for (Body body = getBodyList(); body != null; body = body.getNext()) {
+      Vec2 vert = body.getTransform().p;
+      if(vert.x < zombie_aabb.lowerBound.x || vert.x > zombie_aabb.upperBound.x ||
+         vert.y < zombie_aabb.lowerBound.y || vert.y > zombie_aabb.upperBound.y)
+      {
+        destroyBody(body);
+      }
+    }
+  }
+  
+  
+  
+  
   
   
   

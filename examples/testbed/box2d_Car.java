@@ -71,6 +71,8 @@ public class box2d_Car extends PApplet {
     
     world = new DwWorld(this, 20);
     world.mouse_drag_bodies.mult_dragforce = 100f;
+    world.zombie_aabb.lowerBound.x = -Float.MAX_VALUE;
+    world.zombie_aabb.upperBound.x = +Float.MAX_VALUE;
 
     // create scene: rigid bodies, particles, etc ...
     initScene();

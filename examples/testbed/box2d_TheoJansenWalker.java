@@ -262,13 +262,7 @@ public class box2d_TheoJansenWalker extends PApplet {
     createLeg(-1.0f, wheelAnchor, color(32,96,255, 255));
     createLeg(+1.0f, wheelAnchor, color(32,96,255, 255));
     
-    
     world.bodies.addAll();
-    
-    int bcount = world.bodies.debug_countBodiesWithoutShape();
-    System.out.println("bodies w/o shape: "+bcount);
-    int fcount = world.bodies.debug_countFixturesWithoutShape();
-    System.out.println("fixtures w/o shape: "+fcount);
   }
 
   
