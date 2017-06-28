@@ -23,6 +23,8 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.Fixture;
 import org.jbox2d.dynamics.World;
 import org.jbox2d.dynamics.joints.Joint;
+import org.jbox2d.dynamics.joints.JointType;
+import org.jbox2d.dynamics.joints.PulleyJoint;
 import org.jbox2d.particle.ParticleType;
 
 import com.thomasdiewald.liquidfun.java.interaction.DwMouseShootBullet;
@@ -220,34 +222,52 @@ public class DwWorld extends World{
  
     for (Joint joint = super.getJointList(); joint != null; joint = joint.getNext()) {
       
-//      Body bodyA = joint.getBodyA();
-//      Body bodyB = joint.getBodyB();
-//      Transform xfA = bodyA.getTransform();
-//      Transform xfB = bodyB.getTransform();
-//      Vec2 posA = xfA.p;
-//      Vec2 posB = xfB.p;
-      
-      joint.getAnchorA(ancA);
-      joint.getAnchorB(ancB);
-      // TODO: different joint types
-      
       DwJoint dwjoint = getShape(joint);
       if(dwjoint != null){
+        PShape shape = dwjoint.shape;
         
-        Vec2 AB = ancB.sub(ancA);
+        JointType type = joint.getType();
         
-        // https://github.com/processing/processing/blob/master/core/src/processing/opengl/PShapeOpenGL.java#L1348
-        float ab_len = AB.length() + 0.0000001f; 
+        joint.getAnchorA(ancA);
+        joint.getAnchorB(ancB);
         
-        dwjoint.shape.resetMatrix();
-        dwjoint.shape.scale(ab_len, 1);
-        dwjoint.shape.rotate((float) Math.atan2(AB.y, AB.x));
-        dwjoint.shape.translate(ancA.x, ancA.y);
+//        Body bodyA = joint.getBodyA();
+//        Body bodyB = joint.getBodyB();
+//        Transform xfA = bodyA.getTransform();
+//        Transform xfB = bodyB.getTransform();
+//        Vec2 posA = xfA.p;
+//        Vec2 posB = xfB.p;
+        
+        if(type == JointType.PULLEY){
+          PulleyJoint pulley = (PulleyJoint) joint;
+          Vec2 gancA = pulley.getGroundAnchorA();
+          Vec2 gancB = pulley.getGroundAnchorB();
+
+          updateLineShape(shape.getChild(0), ancA, gancA);
+          updateLineShape(shape.getChild(1), ancB, gancB);
+          updateLineShape(shape.getChild(2), gancA, gancB);
+        } else {
+          updateLineShape(shape, ancA, ancB);
+        }
       }
       
     }
 
   }
+  
+  
+  protected void updateLineShape(PShape shp, Vec2 p0, Vec2 p1){
+    Vec2 AB = p1.sub(p0);
+    
+    // https://github.com/processing/processing/blob/master/core/src/processing/opengl/PShapeOpenGL.java#L1348
+    float ab_len = AB.length() + 0.0000001f; 
+    
+    shp.resetMatrix();
+    shp.scale(ab_len, 1);
+    shp.rotate((float) Math.atan2(AB.y, AB.x));
+    shp.translate(p0.x, p0.y);
+  }
+  
   
   
   
