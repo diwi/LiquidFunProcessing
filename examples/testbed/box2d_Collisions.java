@@ -123,6 +123,9 @@ public class box2d_Collisions extends PApplet {
     djd.dampingRatio = 0.5f;
     djd.frequencyHz = 20.0f;
     djd.collideConnected = false; // default anyways
+    
+//    RopeJointDef rjd = new RopeJointDef();
+
  
     // iterate through all contacts since the previous world-update-step
     for(Contact contact = world.getContactList(); contact != null; contact = contact.m_next){
@@ -143,6 +146,15 @@ public class box2d_Collisions extends PApplet {
       // create joint bodyA <-> bodyB
       djd.initialize(bodyA, bodyB, posA, posB);
       Joint joint = world.createJoint(djd);
+      
+//      Vec2 distAB = posA.sub(posB);
+// 
+//      rjd.bodyA = bodyA;
+//      rjd.bodyB = bodyB;
+//      rjd.localAnchorA.set(bodyA.getLocalPoint(posA));
+//      rjd.localAnchorB.set(bodyB.getLocalPoint(posB));
+//      rjd.maxLength = distAB.length();
+//      Joint joint = world.createJoint(rjd);
       
       // add joint shape and a style
       DwJoint dwjoint = world.bodies.add(joint, false, color(0), true, color(255, 160), 1.0f);
@@ -297,9 +309,9 @@ public class box2d_Collisions extends PApplet {
         shape = cshape;
       }
  
-      Fixture fixture = body.createFixture(shape, 0.01f);
-      fixture.m_friction = 0.1f;
-      fixture.m_restitution = 0.1f;
+      Fixture fixture = body.createFixture(shape, 1);
+      fixture.m_friction = 0.0f;
+      fixture.m_restitution = 0.0f;
       
       colorMode(HSB, 360, 100, 100);
 

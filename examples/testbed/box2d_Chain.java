@@ -22,6 +22,7 @@ import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
 import org.jbox2d.dynamics.BodyType;
 import org.jbox2d.dynamics.FixtureDef;
+import org.jbox2d.dynamics.joints.Joint;
 import org.jbox2d.dynamics.joints.RevoluteJointDef;
 
 import processing.core.*;
@@ -128,7 +129,7 @@ public class box2d_Chain extends PApplet {
 
     {
       PolygonShape shape = new PolygonShape();
-      shape.setAsBox(0.6f, 0.125f);
+      shape.setAsBox(0.6f, 0.225f);
 
       FixtureDef fd = new FixtureDef();
       fd.shape = shape;
@@ -138,9 +139,10 @@ public class box2d_Chain extends PApplet {
       RevoluteJointDef jd = new RevoluteJointDef();
       jd.collideConnected = false;
 
+      int count = 30;
       final float y = 25.0f;
       Body prevBody = ground;
-      for (int i = 0; i < 30; ++i) {
+      for (int i = 0; i < count; ++i) {
         BodyDef bd = new BodyDef();
         bd.type = BodyType.DYNAMIC;
         bd.position.set(0.5f + i, y);
@@ -149,8 +151,16 @@ public class box2d_Chain extends PApplet {
 
         Vec2 anchor = new Vec2(i, y);
         jd.initialize(prevBody, body, anchor);
-        world.createJoint(jd);
-
+        Joint joint = world.createJoint(jd);
+        
+        float base = 64;
+        float inorm = i / (float) count;
+        float r = base + (255-base) * inorm;
+        float g = base; 
+        float b = 255-r;
+        world.bodies.add(joint, false, color(0), true, color(base, 255, base), 1);
+        world.bodies.add(body, true, color(r,g,b), true, color(0), 1);
+        
         prevBody = body;
       }
     }

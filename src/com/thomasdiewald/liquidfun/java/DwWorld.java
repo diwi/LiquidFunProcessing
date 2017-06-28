@@ -45,6 +45,15 @@ import processing.event.KeyEvent;
 import processing.event.MouseEvent;
 import processing.opengl.PGraphics2D;
 
+
+
+/**
+ * https://google.github.io/liquidfun/Programmers-Guide/html/md__chapter11__particles.html
+ * 
+ * 
+ * @author Thomas
+ *
+ */
 public class DwWorld extends World{
   
   public PApplet papplet;
