@@ -17,6 +17,9 @@ package testbed;
 import com.thomasdiewald.liquidfun.java.DwWorld;
 import com.thomasdiewald.pixelflow.java.DwPixelFlow;
 import com.thomasdiewald.pixelflow.java.imageprocessing.filter.DwLiquidFX;
+import com.thomasdiewald.pixelflow.java.sampling.DwSampling;
+
+import java.util.Random;
 
 import org.jbox2d.collision.AABB;
 import org.jbox2d.collision.shapes.CircleShape;
@@ -77,6 +80,7 @@ public class liquidfun_Scene extends PApplet {
     
     
     reset();
+//    frameRate(1000);
     frameRate(120);
   }
   
@@ -98,7 +102,7 @@ public class liquidfun_Scene extends PApplet {
     
     world.particles.param.falloff_exp1 = 1;
     world.particles.param.falloff_exp2 = 2;
-    world.particles.param.radius_scale = 3;
+    world.particles.param.radius_scale = 4;
 
     // create scene: rigid bodies, particles, etc ...
     initScene();
@@ -182,6 +186,12 @@ public class liquidfun_Scene extends PApplet {
     if(key == 'g') APPLY_LIQUID_FX = !APPLY_LIQUID_FX;
   }
   
+  
+  public void mouseReleased(){
+    Vec2 mworld = new Vec2();
+    world.transform.getScreen2box(mouseX, mouseY, mworld);
+    System.out.println("mouse: "+mouseX+", "+mouseY+", "+mworld);
+  }
 
   
   //////////////////////////////////////////////////////////////////////////////
@@ -234,14 +244,14 @@ public class liquidfun_Scene extends PApplet {
       ground.createFixture(shape, 0);
       
       
-      world.bodies.add(ground, true, color(220), !true, color(0), 1f);
+      world.bodies.add(ground, true, color(160), true, color(0), 1f);
     }
     
     
     {
       BodyDef bd = new BodyDef();
       bd.type = BodyType.DYNAMIC;
-      bd.position.set(-15, 20);
+      bd.position.set(-14, 24);
       Body body = world.createBody(bd);
     
       PolygonShape shape = new PolygonShape();
@@ -251,7 +261,7 @@ public class liquidfun_Scene extends PApplet {
       shape.setAsBox(5, 0.5f);
       body.createFixture(shape, 0.5f);
       
-      world.bodies.add(body, true, color(220), !true, color(0), 1f);
+      world.bodies.add(body, true, color(220), true, color(0), 1f);
       
       RevoluteJointDef jd = new RevoluteJointDef();
       jd.bodyA = ground;
@@ -270,7 +280,7 @@ public class liquidfun_Scene extends PApplet {
     {
       BodyDef bd = new BodyDef();
       bd.type = BodyType.DYNAMIC;
-      bd.position.set(-6, 22);
+      bd.position.set(-4, 22);
       Body body = world.createBody(bd);
     
       PolygonShape shape = new PolygonShape();
@@ -280,7 +290,7 @@ public class liquidfun_Scene extends PApplet {
       shape.setAsBox(5, 0.5f);
       body.createFixture(shape, 0.5f);
       
-      world.bodies.add(body, true, color(220), !true, color(0), 1f);
+      world.bodies.add(body, true, color(220), true, color(0), 1f);
       
       RevoluteJointDef jd = new RevoluteJointDef();
       jd.bodyA = ground;
@@ -299,7 +309,32 @@ public class liquidfun_Scene extends PApplet {
     
     
     
+    {
+      BodyDef bd = new BodyDef();
+      bd.type = BodyType.DYNAMIC;
+      bd.position.set(-2,3);
+      Body body = world.createBody(bd);
     
+      PolygonShape shape = new PolygonShape();
+      shape.setAsBox(0.5f, 8.0f);
+      body.createFixture(shape, 1);
+      
+      shape.setAsBox(8, 0.5f);
+      body.createFixture(shape, 0.5f);
+      
+      world.bodies.add(body, true, color(220), true, color(0), 1f);
+      
+      RevoluteJointDef jd = new RevoluteJointDef();
+      jd.bodyA = ground;
+      jd.bodyB = body;
+      jd.localAnchorA.set(bd.position);
+      jd.localAnchorB.set(0.0f, 0.0f);
+      jd.referenceAngle = 0.0f;
+      jd.motorSpeed = -0.2f * MathUtils.PI;
+      jd.maxMotorTorque = 100000;
+      jd.enableMotor = true;
+      m_joint = (RevoluteJoint) world.createJoint(jd);
+    }
     
     
     
@@ -309,6 +344,7 @@ public class liquidfun_Scene extends PApplet {
     world.setParticleDamping(0.6f);
 
     {
+      ParticleGroupDef pgroup_def = new ParticleGroupDef();
       pgroup_def.flags = ParticleType.b2_waterParticle | ParticleType.b2_viscousParticle;
       pgroup_def.setColor(new Color3f(1, 0.15f, 0.05f));
       pgroup_def.linearVelocity.set(0,0);
@@ -322,67 +358,122 @@ public class liquidfun_Scene extends PApplet {
     }
 
     m_time = 0;
-
+    
+    int flags = 0;
+    flags |= ParticleType.b2_waterParticle;
+    flags |= ParticleType.b2_viscousParticle;
+//    flags |= ParticleType.b2_colorMixingParticle;
+    
+    emitter0 = new ParticleEmitter(world, 800, 100);
+    emitter0.emit_angle = -170 * TO_RAD;
+    emitter0.emit_velocity = 15;
+    emitter0.pdef.color.set(color(32,255,0));
+    emitter0.pdef.flags = flags;
+    
+    emitter1 = new ParticleEmitter(world, 100, 100);
+    emitter1.emit_angle = 0;
+    emitter1.emit_velocity = 10;
+    emitter1.pdef.color.set(color(255,16,0));
+    emitter1.pdef.flags = flags;
+    
+    emitter2 = new ParticleEmitter(world, 131, 315);
+    emitter2.emit_angle = +40 * TO_RAD;
+    emitter2.emit_velocity = 15;
+    emitter2.pdef.color.set(color(255,64,0));
+    emitter2.pdef.flags = flags;
   }
   
   
-  ParticleGroupDef pgroup_def = new ParticleGroupDef();
-
+  ParticleEmitter emitter0;
+  ParticleEmitter emitter1;
+  ParticleEmitter emitter2;
 
   int counter = 0;
   public void addParticles(){
-    
-    float screen_scale = world.transform.screen_scale;
-    
-    
-    float srandnoise = noise(counter / 100f) * 2 - 1;
-    
-    float rot_angle = 0 + srandnoise * 0.1f;
-    float vel_mag   = 10 + srandnoise * 5f;
-    
-    float velx = (float) (Math.cos(rot_angle) * vel_mag);
-    float vely = (float) (Math.sin(rot_angle) * vel_mag);
-    
-    Vec2 vel = new Vec2();
-    vel.x = (float) (Math.cos(rot_angle) * vel_mag);
-    vel.y = (float) (Math.sin(rot_angle) * vel_mag);
-    
-    Vec2 pos = new Vec2();
-    world.transform.getScreen2box(200, 200, pos);
-    pos.x += random(-1,1) * 1f;
-    pos.y += random(-1,1) * 1f;
-    
-    
-//    CircleShape shape = new CircleShape();
-//    world.transform.getScreen2box(200, 200, shape.m_p);
-//    shape.m_radius = 30 / screen_scale;
-    
-    
-
-//    PolygonShape shape = new PolygonShape();
-//    shape.setAsBox(10 / screen_scale, 2, pos, rot);
-//    
-//    world.mouse_destroy_particles.destroyParticles(shape);
-    
-//    pgroup_def.shape = shape;
-    pgroup_def.angularVelocity = rot_angle;
-    pgroup_def.linearVelocity.set(vel);
-//    world.createParticleGroup(pgroup_def);
-    
-    
-
-    ParticleDef pdef = new ParticleDef();
-    pdef.position.set(pos);
-    pdef.velocity.set(vel);
-    pdef.color = pgroup_def.color;
-    pdef.flags = pgroup_def.flags;
-    
-    world.createParticle(pdef);
-    
-    
+    if(counter % 2 == 0){
+      emitter0.emitParticles(1);
+      emitter1.emitParticles(1);
+      emitter2.emitParticles(1);
+    }
     counter++;
   }
 
+  
+  static final float TO_RAD = (float) (Math.PI / 180.0);
+  
+  
+  
+  
+  static class ParticleEmitter {
+    public PApplet papplet;
+    public DwWorld world;
+
+    public ParticleDef pdef = new ParticleDef();
+    
+    public float emit_angle = (float) (Math.PI * 0.5f);
+    public float emit_velocity = 20;
+    
+    public float mult_jitter_radius = 1.0f; // radius, world-space
+    public float mult_jitter_velmag = 0.5f; // noise mult
+    public float mult_jitter_velrot = 0.2f; // [0, PI*2]
+
+
+    protected Random rand = new Random();
+    protected int counter = 0;
+    
+    protected Vec2 emit_pos_screen = new Vec2();
+    protected Vec2 emit_pos_world = new Vec2();
+    
+    
+    public ParticleEmitter(DwWorld world, float screen_x, float screen_y){
+      this.papplet = world.papplet;
+      this.world = world;
+      
+      pdef.flags = ParticleType.b2_waterParticle | ParticleType.b2_viscousParticle;
+      pdef.setColor(new Color3f(1, 0.15f, 0.05f));
+      
+      setPosition(screen_x, screen_y);
+    }
+
+    
+    public void emitParticles(int count){
+      for(int i = 0; i < count; i++){
+        emitSingleParticle(i);
+      }
+    }
+
+    public void setPosition(float screen_x, float screen_y){
+      world.transform.getScreen2box(screen_x, screen_y, emit_pos_world);
+    }
+    
+    protected void emitSingleParticle(int idx){
+
+      // velocity (noise)
+      float srandnoise = papplet.noise(counter / 100f) * 2 - 1;
+      
+      float rot_angle = emit_angle     + srandnoise * mult_jitter_velrot;
+      float vel_mag   = emit_velocity  + srandnoise * mult_jitter_velmag;
+      
+      float vel_x = (float) (Math.cos(rot_angle) * vel_mag);
+      float vel_y = (float) (Math.sin(rot_angle) * vel_mag);
+      
+      // position
+      float[] jitter = DwSampling.sampleDisk_Halton(counter, 0.5f);
+
+      float pos_x = emit_pos_world.x + jitter[0] * mult_jitter_radius;
+      float pos_y = emit_pos_world.y + jitter[1] * mult_jitter_radius;
+
+
+      // create Particle
+      pdef.position.set(pos_x, pos_y);
+      pdef.velocity.set(vel_x, vel_y);
+      world.createParticle(pdef);
+      
+      counter++;
+    }
+    
+    
+  }
 
 
   

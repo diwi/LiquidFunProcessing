@@ -337,7 +337,23 @@ public class liquidfun_ParticleRenderGroups_LiquidFx extends PApplet {
     world.mouse_spawn_particles.setBoxShape(size_x, size_y);
     world.mouse_spawn_particles.spawn(screen_x, screen_y);
     
-    setParticleSpawnProperties(spawn_type);
+    
+    
+    
+    // add some rigid particles.
+    // those will be rendered with another render-group into another render-target.
+    // This makes it possible to apply different post-processing effects on
+    // different particle render-groups.
+    int spawn_type_cpy = spawn_type;
+
+    setParticleSpawnProperties(4);
+    
+    screen_x = width/4;
+    screen_y = height/2;
+    world.mouse_spawn_particles.setBoxShape(500, 20);
+    world.mouse_spawn_particles.spawn(screen_x, screen_y);
+    
+    setParticleSpawnProperties(spawn_type_cpy);
     
   }
   
@@ -363,7 +379,7 @@ public class liquidfun_ParticleRenderGroups_LiquidFx extends PApplet {
     fixture_def.shape = brick_shape;
     fixture_def.density = 30;
     fixture_def.friction = 0.50f;
-    fixture_def.restitution = 0.5f;
+    fixture_def.restitution = 0.2f;
     
     BodyDef body_def = new BodyDef();
     body_def.type = BodyType.DYNAMIC;

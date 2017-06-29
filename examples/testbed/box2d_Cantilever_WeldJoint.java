@@ -16,6 +16,8 @@ package testbed;
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
 
+import java.util.Objects;
+
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -30,7 +32,7 @@ import processing.core.*;
 import processing.opengl.PGraphics2D;
 
 
-public class box2d_CantileverJoint extends PApplet {
+public class box2d_Cantilever_WeldJoint extends PApplet {
 
   int viewport_w = 1280;
   int viewport_h = 720;
@@ -151,6 +153,7 @@ public class box2d_CantileverJoint extends PApplet {
         Vec2 anchor = new Vec2(-15.0f + 1.0f * i, 5.0f);
         jd.initialize(prevBody, body, anchor);
         world.createJoint(jd);
+        
 
         prevBody = body;
       }
@@ -276,13 +279,15 @@ public class box2d_CantileverJoint extends PApplet {
       Body body = world.createBody(bd);
       body.createFixture(fd);
     }
+    
+    
     world.bodies.addAll();
   }
   
   
 
   public static void main(String args[]) {
-    PApplet.main(new String[] { box2d_CantileverJoint.class.getName() });
+    PApplet.main(new String[] { box2d_Cantilever_WeldJoint.class.getName() });
   }
   
 }

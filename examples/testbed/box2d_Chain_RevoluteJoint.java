@@ -29,7 +29,7 @@ import processing.core.*;
 import processing.opengl.PGraphics2D;
 
 
-public class box2d_Chain extends PApplet {
+public class box2d_Chain_RevoluteJoint extends PApplet {
 
   int viewport_w = 1280;
   int viewport_h = 720;
@@ -171,7 +171,7 @@ public class box2d_Chain extends PApplet {
   
 
   public static void main(String args[]) {
-    PApplet.main(new String[] { box2d_Chain.class.getName() });
+    PApplet.main(new String[] { box2d_Chain_RevoluteJoint.class.getName() });
   }
   
 }
