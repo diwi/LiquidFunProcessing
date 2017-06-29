@@ -16,8 +16,6 @@ package testbed;
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
 
-import java.util.Objects;
-
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.EdgeShape;
 import org.jbox2d.collision.shapes.PolygonShape;

@@ -473,7 +473,7 @@ public class DwUtils {
   
   
   
-  
+  final static public float TO_RAD = (float) (Math.PI / 180.0);
   
   final static public double _1_DIV_3 = 1.0 / 3.0;
   
@@ -522,6 +522,34 @@ public class DwUtils {
     int a = bbuf[off++] & 0xFF;
     return (a << 24 | r << 16 | g << 8 | b);
   }
+  
+  
+  
+  
+//https://github.com/diwi/PixelFlow/blob/master/src/com/thomasdiewald/pixelflow/java/sampling/DwSampling.java
+  static public double halton(int index, int base){
+    double result = 0;
+    double f = 1f / base;
+    int i = index;
+    while (i > 0){
+      result += f * (i % base);
+      i /= base;
+      f /= base;
+    }
+    return result;
+  }
+  
+  // https://github.com/diwi/PixelFlow/blob/master/src/com/thomasdiewald/pixelflow/java/sampling/DwSampling.java
+  public static float[] sampleDisk_Halton(int index, float pow_dist){
+    double phi = halton(index, 2) * Math.PI * 2 ;
+    double rnd = halton(index, 3);
+    double rad = Math.pow(rnd, pow_dist);
+    double X   = Math.cos(phi) * rad;
+    double Y   = Math.sin(phi) * rad;
+    return new float[]{(float)X,(float)Y};
+  }
+  
+  
   
 
 }
