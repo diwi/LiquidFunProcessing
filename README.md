@@ -36,15 +36,30 @@ Of course, each of those can be altered, overwritten or disabled/removed.
 
 
 ## Rendermodes
-Default renderer, no postprocessing, particles are rendered as point-sprites, rigid bodies are rendered using the PShape tree structure.
+
+#### Default renderer, no postprocessing 
+
+particles are rendered as point-sprites and rigid bodies are rendered using the PShape tree structure.
+
 ![Default](https://github.com/diwi/LiquidFunProcessing/blob/master/screenshots/rendermodes/diewald_LiquidFunProcessing_RenderRaw.jpg)
 
-Default renderer + Postprocessing to get a liquid effect and some fake shading.
-PixelFlow (https://github.com/diwi/PixelFlow) needs to be installed to use it.
+<br>
+
+#### Default renderer + Postprocessing 
+
+LiquidFx adds some liquid effect and fake shading. [PixelFlow](https://github.com/diwi/PixelFlow) needs to be installed to use it.
+
 ![LiquidFx](https://github.com/diwi/LiquidFunProcessing/blob/master/screenshots/rendermodes/diewald_LiquidFunProcessing_RenderLiquidFx.jpg)
 
-Debug Draw, using the box2d world for rendering.
+<br>
+
+#### Debug Draw 
+
+using the box2d world for rendering and basic processing draw calls.
+
 ![Debug](https://github.com/diwi/LiquidFunProcessing/blob/master/screenshots/rendermodes/diewald_LiquidFunProcessing_RenderDebug.jpg)
+
+<br>
 
 ## Resources
 
