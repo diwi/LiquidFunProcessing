@@ -21,7 +21,7 @@ JavaDoc: http://thomasdiewald.com/processing/libraries/liquidfun/reference/index
 ![LiquidFunProcessing](https://github.com/diwi/LiquidFunProcessing/blob/master/screenshots/examples/diewald_LiquidFunProcessing_Examples2.jpg)
 
 ## Examples
-The library includes a lot of examples from the original ![jbox2d testbed](https://github.com/jbox2d/jbox2d/tree/master/jbox2d-testbed/src/main/java/org/jbox2d/testbed/tests).
+The library includes a lot of examples from the original ![jbox2d testbed](https://github.com/jbox2d/jbox2d/tree/master/jbox2d-testbed/src/main/java/org/jbox2d/testbed/tests).<br>
 For a quick start, each sketch has a couple of default eventhandlers:
 
 - LMB: drag rigid bodies / particles
@@ -29,8 +29,8 @@ For a quick start, each sketch has a couple of default eventhandlers:
 - MMB: spawn particles
 - RMB: destroy particles
 
-as well as some key-mapping, e.g. to display the debug-draw, restart, pause/resume.
-of course, each of those can be altered, overwritten or disabled/removed.
+... ss well as some key-mapping, e.g. to display the debug-draw, restart, pause/resume.<br>
+Of course, each of those can be altered, overwritten or disabled/removed.
 
 <br>
 
