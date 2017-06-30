@@ -251,8 +251,8 @@ public class liquidfun_WaveMachine_LiquidFx extends PApplet {
     {
       ParticleGroupDef pd = new ParticleGroupDef();
       pd.flags = ParticleType.b2_waterParticle | ParticleType.b2_viscousParticle;
-//      pd.setColor(new Color3f(1, 0.15f, 0.05f));
-      pd.setColor(new Color3f(0.05f, 0.15f, 1));
+//      pd.setColor(new Color3f(1, 0.10f, 0.01f));
+//      pd.setColor(new Color3f(0.05f, 0.15f, 1));
       pd.setColor(new Color3f(0.15f, 1, 0.05f));
       PolygonShape shape = new PolygonShape();
       shape.setAsBox(17.0f, 9.0f, new Vec2(0.0f, 0.0f), 0.0f);
