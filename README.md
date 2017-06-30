@@ -30,7 +30,8 @@ For a quick start, each sketch has a couple of default eventhandlers:
 - RMB: destroy particles
 
 as well as some key-mapping, e.g. to display the debug-draw, restart, pause/resume.
-of course, each of those can be altered, overwritten or disable/removed.
+of course, each of those can be altered, overwritten or disabled/removed.
+
 <br>
 
 ### Useful resources:
