@@ -75,7 +75,7 @@ using the box2d world for rendering and basic processing draw calls.
 
 - Download [Processing 3](https://processing.org/download/?processing)
 - Install liquidFunProcessing via the Library Manager.
-- Or manually, unzip and put the extracted PixelFlow folder into the libraries folder of your Processing sketches. Reference and examples are included in the PixelFlow folder. 
+- Or manually, unzip and put the extracted LiquidFunProcessing folder into the libraries folder of your Processing sketches. Reference and examples are included in the LiquidFunProcessing folder. 
 
 - Also make sure you have the latest graphics card driver installed!
 
