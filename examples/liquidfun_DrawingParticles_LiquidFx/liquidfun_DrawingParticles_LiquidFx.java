@@ -86,7 +86,7 @@ public class liquidfun_DrawingParticles_LiquidFx extends PApplet {
   public void setup(){ 
     surface.setLocation(viewport_x, viewport_y);
 //    sprite = loadImage("sprite.png");
-    font = createFont("data/SourceCodePro-Regular.ttf", 12);
+    font = createFont("../data/SourceCodePro-Regular.ttf", 12);
    
     pixelflow = new DwPixelFlow(this);
     liquidfx = new DwLiquidFX(pixelflow);

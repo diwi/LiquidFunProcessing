@@ -72,7 +72,7 @@ public class liquidfun_ParticleTypes extends PApplet {
   public void setup(){ 
     surface.setLocation(viewport_x, viewport_y);
 //    sprite = loadImage("sprite.png");
-    font = createFont("data/SourceCodePro-Regular.ttf", 12);
+    font = createFont("../data/SourceCodePro-Regular.ttf", 12);
     reset();
     frameRate(120);
   }

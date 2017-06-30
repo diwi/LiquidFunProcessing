@@ -49,9 +49,9 @@ public class box2d_Car extends PApplet {
   // 'r'         ... reset
   // 't'         ... update/pause physics
   // 'f'         ... toggle debug draw
-  // 'a'         ... move backwards 
+  // 'a'         ... move backward
   // 's'         ... stop
-  // 'd'         ... move forwards
+  // 'd'         ... move forward
   // 'q'         ... dec damping
   // 'e'         ... inc damping
 
@@ -75,7 +75,7 @@ public class box2d_Car extends PApplet {
   
   public void setup(){ 
     surface.setLocation(viewport_x, viewport_y);
-    font = createFont("SourceCodePro-Regular.ttf", 12);
+    font = createFont("../data/SourceCodePro-Regular.ttf", 12);
     reset();
     frameRate(120);
   }
@@ -128,14 +128,14 @@ public class box2d_Car extends PApplet {
     int gy = 14;
     textFont(font);
     fill(0);
-    text("'a' move backwards", tx, ty+=gy);
-    text("'s' stop"          , tx, ty+=gy);
-    text("'d' move forwards" , tx, ty+=gy);
-    text("'q' dec damping"   , tx, ty+=gy);
-    text("'e' inc damping"   , tx, ty+=gy);
-    text("'r' reset"         , tx, ty+=gy);
-    text("'t' pause"         , tx, ty+=gy);
-    text("'f' debugdraw"     , tx, ty+=gy);
+    text("'a' move backward", tx, ty+=gy);
+    text("'s' stop"         , tx, ty+=gy);
+    text("'d' move forward" , tx, ty+=gy);
+    text("'q' dec damping"  , tx, ty+=gy);
+    text("'e' inc damping"  , tx, ty+=gy);
+    text("'r' reset"        , tx, ty+=gy);
+    text("'t' pause"        , tx, ty+=gy);
+    text("'f' debugdraw"    , tx, ty+=gy);
     
     // info
     int num_bodies    = world.getBodyCount();

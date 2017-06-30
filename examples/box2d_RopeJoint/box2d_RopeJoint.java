@@ -44,6 +44,7 @@ public class box2d_RopeJoint extends PApplet {
   // 'r'         ... reset
   // 't'         ... update/pause physics
   // 'f'         ... toggle debug draw
+  // 'j'         ... toggle joint
   //
 
   int viewport_w = 1280;

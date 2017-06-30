@@ -20,6 +20,14 @@ import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PMatrix2D;
 
+/**
+ * 
+ * 
+ * Coordinate transformation box2d-world <-> screen
+ * 
+ * @author Thomas Diewald
+ *
+ */
 public class DwViewportTransform implements IViewportTransform {
 
   // flip vertically

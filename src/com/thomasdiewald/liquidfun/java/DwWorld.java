@@ -51,13 +51,13 @@ import processing.opengl.PGraphics2D;
 
 /**
  * 
- * Main box2d world.
+ * Main box2d world.<br>
  * 
- *
+ * <br>
  * https://github.com/jbox2d/jbox2d/blob/master/jbox2d-library/src/main/java/org/jbox2d/dynamics/World.java
- * 
+ * <br>
  * https://google.github.io/liquidfun/Programmers-Guide/html/md__chapter11__particles.html
- * 
+ * <br>
  * 
  * @author Thomas Diewald
  *

@@ -203,7 +203,6 @@ public class liquidfun_ParticleEmitter_LiquidFx extends PApplet {
   //////////////////////////////////////////////////////////////////////////////
   
 
-
   public void initScene() {
     
     

@@ -13,6 +13,10 @@
 
 package liquidfun_ParticleColors_LiquidFx;
 
+import com.thomasdiewald.liquidfun.java.DwUtils;
+import com.thomasdiewald.liquidfun.java.DwWorld;
+import com.thomasdiewald.pixelflow.java.DwPixelFlow;
+import com.thomasdiewald.pixelflow.java.imageprocessing.filter.DwLiquidFX;
 
 import org.jbox2d.collision.shapes.ChainShape;
 import org.jbox2d.collision.shapes.PolygonShape;
@@ -23,11 +27,6 @@ import org.jbox2d.particle.ParticleColor;
 import org.jbox2d.particle.ParticleGroup;
 import org.jbox2d.particle.ParticleGroupDef;
 import org.jbox2d.particle.ParticleType;
-
-import com.thomasdiewald.liquidfun.java.DwUtils;
-import com.thomasdiewald.liquidfun.java.DwWorld;
-import com.thomasdiewald.pixelflow.java.DwPixelFlow;
-import com.thomasdiewald.pixelflow.java.imageprocessing.filter.DwLiquidFX;
 
 import processing.core.PApplet;
 import processing.opengl.PGraphics2D;

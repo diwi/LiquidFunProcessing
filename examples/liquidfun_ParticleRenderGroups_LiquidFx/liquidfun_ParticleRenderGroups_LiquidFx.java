@@ -14,6 +14,12 @@
 package liquidfun_ParticleRenderGroups_LiquidFx;
 
 
+import com.thomasdiewald.liquidfun.java.DwWorld;
+import com.thomasdiewald.liquidfun.java.interaction.DwParticleSpawn;
+import com.thomasdiewald.liquidfun.java.render.DwParticleRenderGroupCallback;
+import com.thomasdiewald.pixelflow.java.DwPixelFlow;
+import com.thomasdiewald.pixelflow.java.imageprocessing.filter.DwLiquidFX;
+
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.Vec2;
@@ -24,12 +30,6 @@ import org.jbox2d.dynamics.FixtureDef;
 import org.jbox2d.particle.ParticleGroup;
 import org.jbox2d.particle.ParticleGroupType;
 import org.jbox2d.particle.ParticleType;
-
-import com.thomasdiewald.liquidfun.java.DwWorld;
-import com.thomasdiewald.liquidfun.java.interaction.DwParticleSpawn;
-import com.thomasdiewald.liquidfun.java.render.DwParticleRender.ParticleRenderGroupCallback;
-import com.thomasdiewald.pixelflow.java.DwPixelFlow;
-import com.thomasdiewald.pixelflow.java.imageprocessing.filter.DwLiquidFX;
 
 import processing.core.*;
 import processing.opengl.PGraphics2D;
@@ -132,7 +132,7 @@ public class liquidfun_ParticleRenderGroups_LiquidFx extends PApplet {
     world.particles.param.radius_scale = 2;
     
     // callback to group particles by their properties (flags)
-    world.particles.setParticleRenderGroupCallback(new ParticleRenderGroupCallback() {
+    world.particles.setParticleRenderGroupCallback(new DwParticleRenderGroupCallback() {
       @Override
       public int getRenderGroupIndex(int particle_idx, ParticleGroup group, int particle_flag) {
         int group_flag = group.getGroupFlags();
