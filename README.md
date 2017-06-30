@@ -1,21 +1,41 @@
-# LiquidFunProcessing
-Box2D/LiquidFun Library for Processing.
+![LiquidFunProcessing](https://github.com/diwi/LiquidFunProcessing/blob/master/screenshots/examples/diewald_LiquidFunProcessing_Chains.jpg)
 
-... WIP ...
+
+# LiquidFunProcessing
+**Box2D/LiquidFun Library for Processing.**
 
 Particle based fluid simulation and rigid body simulation using [jBox2D/LiquidFun](https://github.com/jbox2d/jbox2d)
 
 
-Until the exampels are done and the library can be used via the PDE ... here aresome first impressions.
+JavaDoc: http://thomasdiewald.com/processing/libraries/liquidfun/reference/index.html
+
+<br>
+
+## Download
++ [Releases](https://github.com/diwi/LiquidFunProcessing/releases)
++ [LiquidFunProcessing Website](http://thomasdiewald.com/processing/libraries/liquidfun)
++ Processing IDE -> Library Manager
+
+<br>
+
+![LiquidFunProcessing](https://github.com/diwi/LiquidFunProcessing/blob/master/screenshots/examples/diewald_LiquidFunProcessing_Examples2.jpg)
 
 
+## Installation, Processing IDE
 
-![LiquidFunProcessing_DebugDraw](https://github.com/diwi/LiquidFunProcessing/blob/master/screenshots/LiquidFunProcessing_DebugDraw1.png)
+- Download [Processing 3](https://processing.org/download/?processing)
+- Install liquidFunProcessing via the Library Manager.
+- Or manually, unzip and put the extracted PixelFlow folder into the libraries folder of your Processing sketches. Reference and examples are included in the PixelFlow folder. 
 
-![LiquidFunProcessing_Draw](https://github.com/diwi/LiquidFunProcessing/blob/master/screenshots/LiquidFunProcessing_Draw.png)
+- Also make sure you have the latest graphics card driver installed!
 
-![LiquidFunProcessing_Orange](https://github.com/diwi/LiquidFunProcessing/blob/master/screenshots/LiquidFunProcessing_Orange.png)
+#### Platforms
+Windows, Linux, MacOSX
 
-![LiquidFunProcessing_Timer](https://github.com/diwi/LiquidFunProcessing/blob/master/screenshots/LiquidFunProcessing_Timer.png)
 
-![LiquidFunProcessing_Wavemaschine](https://github.com/diwi/LiquidFunProcessing/blob/master/screenshots/LiquidFunProcessing_Wavemaschine.png)
+<br>
+
+## Dependencies, to run the examples
+
+ - **PixelFlow: https://github.com/diwi/PixelFlow**
+
