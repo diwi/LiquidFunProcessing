@@ -50,10 +50,16 @@ import processing.opengl.PGraphics2D;
 
 
 /**
+ * 
+ * Main box2d world.
+ * 
+ *
+ * https://github.com/jbox2d/jbox2d/blob/master/jbox2d-library/src/main/java/org/jbox2d/dynamics/World.java
+ * 
  * https://google.github.io/liquidfun/Programmers-Guide/html/md__chapter11__particles.html
  * 
  * 
- * @author Thomas
+ * @author Thomas Diewald
  *
  */
 public class DwWorld extends World{
@@ -62,8 +68,6 @@ public class DwWorld extends World{
   public DwViewportTransform transform;
   
   
-  
- 
   public DwDebugDraw debug_draw;
   
   public DwBodyGroup bodies;
