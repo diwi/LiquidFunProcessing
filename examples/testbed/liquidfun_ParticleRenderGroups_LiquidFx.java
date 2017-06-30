@@ -191,7 +191,7 @@ public class liquidfun_ParticleRenderGroups_LiquidFx extends PApplet {
         particle_fluidfx.param.highlight_decay = 0.6f;
         particle_fluidfx.param.sss_enabled = true;
         particle_fluidfx.param.sss_LoD = 3;
-        particle_fluidfx.param.sss_decay = 0.5f;
+        particle_fluidfx.param.sss_decay = 0.7f;
         particle_fluidfx.apply(pg_liquid);
         
         particle_fluidfx.apply(pg_prigid);
@@ -379,7 +379,7 @@ public class liquidfun_ParticleRenderGroups_LiquidFx extends PApplet {
     fixture_def.shape = brick_shape;
     fixture_def.density = 30;
     fixture_def.friction = 0.50f;
-    fixture_def.restitution = 0.2f;
+    fixture_def.restitution = 0.05f;
     
     BodyDef body_def = new BodyDef();
     body_def.type = BodyType.DYNAMIC;

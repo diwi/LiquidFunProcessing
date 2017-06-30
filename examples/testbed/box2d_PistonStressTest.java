@@ -78,7 +78,7 @@ public class box2d_PistonStressTest extends PApplet {
     }
   
     PGraphics2D canvas = (PGraphics2D) this.g;
-    canvas.background(255);
+    canvas.background(32);
     canvas.pushMatrix();
     world.applyTransform(canvas);
     world.drawBulletSpawnTrack(canvas);
@@ -152,7 +152,7 @@ public class box2d_PistonStressTest extends PApplet {
       shape.setAsBox(5.0f, 100.0f, new Vec2(+10.15f, 50.0f), 0);
       bsides.createFixture(sides);
 
-      world.bodies.add(bsides, true, color(32), true, color(0), 1f);
+      world.bodies.add(bsides, true, color(0), true, color(0), 1f);
     }
 
     // turney

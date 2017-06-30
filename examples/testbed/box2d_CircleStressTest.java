@@ -86,7 +86,7 @@ public class box2d_CircleStressTest extends PApplet {
 
     
     PGraphics2D canvas = (PGraphics2D) this.g;
-    canvas.background(255);
+    canvas.background(32);
     canvas.pushMatrix();
     world.applyTransform(canvas);
     world.drawBulletSpawnTrack(canvas);
@@ -103,7 +103,7 @@ public class box2d_CircleStressTest extends PApplet {
     int ty = 16;
     int gy = 14;
     textFont(font);
-    fill(0);
+    fill(220);
     text("'0-9' motor speed", tx, ty+=gy);
     text("'r'   reset"      , tx, ty+=gy);
     text("'t'   pause"      , tx, ty+=gy);
@@ -197,15 +197,16 @@ public class box2d_CircleStressTest extends PApplet {
       fd.friction = 1.0f;
       bwall_T.createFixture(fd);
       
+      int col = color(220);
       
-      world.bodies.add(bwall_L, true, color(32), true, color(0), 1f);
-      world.bodies.add(bwall_R, true, color(32), true, color(0), 1f);
+      world.bodies.add(bwall_L, true, col, true, color(0), 1f);
+      world.bodies.add(bwall_R, true, col, true, color(0), 1f);
       
-      world.bodies.add(bwall_B, true, color(32), true, color(0), 1f);
-      world.bodies.add(bwall_T, true, color(32), true, color(0), 1f);
+      world.bodies.add(bwall_B, true, col, true, color(0), 1f);
+      world.bodies.add(bwall_T, true, col, true, color(0), 1f);
       
-      world.bodies.add(bchamfer_L, true, color(32), true, color(0), 1f);
-      world.bodies.add(bchamfer_R, true, color(32), true, color(0), 1f);
+      world.bodies.add(bchamfer_L, true, col, true, color(0), 1f);
+      world.bodies.add(bchamfer_R, true, col, true, color(0), 1f);
     }
 
     CircleShape cd;
@@ -263,7 +264,7 @@ public class box2d_CircleStressTest extends PApplet {
           Body myBody = world.createBody(bod);
           myBody.createFixture(fd2);
 
-          world.bodies.add(myBody, true, color(32,128,255,180), false,  color(0), 1f);
+          world.bodies.add(myBody, true, color(32,170,255, 220), false,  color(0), 1f);
 
         }
       }

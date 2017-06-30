@@ -18,6 +18,7 @@ import com.thomasdiewald.liquidfun.java.DwWorld;
 import com.thomasdiewald.liquidfun.java.ParticleEmitter;
 import com.thomasdiewald.pixelflow.java.DwPixelFlow;
 import com.thomasdiewald.pixelflow.java.imageprocessing.filter.DwLiquidFX;
+
 import org.jbox2d.collision.shapes.PolygonShape;
 import org.jbox2d.common.MathUtils;
 import org.jbox2d.common.Vec2;
@@ -229,7 +230,7 @@ public class liquidfun_ParticleEmitter extends PApplet {
       jd.localAnchorB.set(0.0f, 0.0f);
       jd.referenceAngle = 0.0f;
       jd.motorSpeed = 0.1f * MathUtils.PI;
-      jd.maxMotorTorque = 1e7f;
+      jd.maxMotorTorque = 100000;
       jd.enableMotor = !true;
       world.createJoint(jd);
     }
@@ -257,27 +258,35 @@ public class liquidfun_ParticleEmitter extends PApplet {
       jd.localAnchorB.set(0.0f, 0.0f);
       jd.referenceAngle = 0.0f;
       jd.motorSpeed = -0.2f * MathUtils.PI;
-      jd.maxMotorTorque = 1e7f;
+      jd.maxMotorTorque = 100000;
       jd.enableMotor = !true;
       world.createJoint(jd);
     }
     
 
-
-    int flags = 0;
-    flags |= ParticleType.b2_waterParticle;
-    flags |= ParticleType.b2_viscousParticle;
-//    flags |= ParticleType.b2_colorMixingParticle;
     
     emitter0 = new ParticleEmitter(world, world.transform);
     emitter1 = new ParticleEmitter(world, world.transform);
     emitter2 = new ParticleEmitter(world, world.transform);
     emitter3 = new ParticleEmitter(world, world.transform);
-
-    emitter0.setInScreen( 131, 315, 300,   40, color(255,64,0), flags);
-    emitter1.setInScreen( 100, 100, 300,  -10, color(255,16,0), flags);
-    emitter2.setInScreen(1000, 100, 300, -175, color(32,255,0), flags);
-    emitter3.setInScreen(1200, 400, 300,  140, color(0,64,255), flags);
+    
+    
+    int flags = 0;
+    flags |= ParticleType.b2_waterParticle;
+    flags |= ParticleType.b2_viscousParticle;
+//    flags |= ParticleType.b2_colorMixingParticle;
+    
+    
+    float hsb_s = 100;
+    float hsb_b = 100;
+    colorMode(HSB, 360, 100, 100);
+    
+    emitter0.setInScreen( 131, 315, 300,   40, color(  5, hsb_s, hsb_b), flags);
+    emitter1.setInScreen( 100, 100, 300,    0, color( 55, hsb_s, hsb_b), flags);
+    emitter2.setInScreen(1000, 100, 300, -175, color(115, hsb_s, hsb_b), flags);
+    emitter3.setInScreen(1200, 400, 300,  140, color(230, hsb_s, hsb_b), flags);
+    
+    colorMode(RGB, 255);
   }
   
   
@@ -286,23 +295,24 @@ public class liquidfun_ParticleEmitter extends PApplet {
   ParticleEmitter emitter2;
   ParticleEmitter emitter3;
   
-  int counter = 0;
+  int particle_counter = 0;
   public void addParticles(){
     
-    emitter2.emit_vel = 25 * (sin(counter/200f) * 0.5f  + 0.5f);
-    emitter3.emit_vel = 25 * (sin(counter/200f) * 0.5f  + 0.5f);
+    emitter2.emit_vel = 25 * (sin(particle_counter/200f + PI) * 0.5f  + 0.5f);
+    emitter3.emit_vel = 25 * (sin(particle_counter/200f) * 0.5f  + 0.5f);
     
-    if(counter % 1 == 0)
+    if(particle_counter % 1 == 0)
     {
       emitter0.emitParticles(2);
       emitter1.emitParticles(2);
       emitter2.emitParticles(2);
       emitter3.emitParticles(2);
     }
-    counter++;
+    particle_counter++;
   }
 
   
+
 
 
   public static void main(String args[]) {

@@ -219,7 +219,7 @@ public class box2d_BrickWall extends PApplet {
     fixture_def.shape = brick_shape;
     fixture_def.density = 30;
     fixture_def.friction = 0.50f;
-    fixture_def.restitution = 0.5f;
+    fixture_def.restitution = 0.05f;
     
     BodyDef body_def = new BodyDef();
     body_def.type = BodyType.DYNAMIC;
