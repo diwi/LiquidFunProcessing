@@ -4,7 +4,7 @@
 # LiquidFunProcessing
 **Box2D/LiquidFun Library for Processing.**
 
-Particle based fluid simulation and rigid body simulation using [jBox2D/LiquidFun](https://github.com/jbox2d/jbox2d)
+Particle based fluid simulation and rigid body simulation using [jBox2D/LiquidFun 2.3.0+](https://github.com/jbox2d/jbox2d).
 
 
 JavaDoc: http://thomasdiewald.com/processing/libraries/liquidfun/reference/index.html
@@ -34,7 +34,7 @@ of course, each of those can be altered, overwritten or disabled/removed.
 
 <br>
 
-### Useful resources:
+## Resources
 
 - jBox2d web: http://www.jbox2d.org/
 - jBox2d Testbed: https://github.com/jbox2d/jbox2d/tree/master/jbox2d-testbed
