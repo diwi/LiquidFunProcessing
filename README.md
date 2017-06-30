@@ -20,6 +20,29 @@ JavaDoc: http://thomasdiewald.com/processing/libraries/liquidfun/reference/index
 
 ![LiquidFunProcessing](https://github.com/diwi/LiquidFunProcessing/blob/master/screenshots/examples/diewald_LiquidFunProcessing_Examples2.jpg)
 
+## Examples
+The library includes a lot of examples from the original jbox2d testbed:
+https://github.com/jbox2d/jbox2d/tree/master/jbox2d-testbed/src/main/java/org/jbox2d/testbed/tests
+
+For a quick start, each sketch has a couple of default eventhandlers:
+
+- LMB: drag rigid bodies / particles
+- LMB + SHIFT: shoot a bullet
+- MMB: spawn particles
+- RMB: destroy particles
+
+as well as some key-mapping, e.g. to display the debug-draw.
+
+of course, each of those can be altered, overwritten or disable/removed.
+
+Useful resources:
+- jBox2d web: http://www.jbox2d.org/
+- jBox2d Testbed: https://github.com/jbox2d/jbox2d/tree/master/jbox2d-testbed
+- Box2d Testbed: https://github.com/erincatto/Box2D/tree/master/Box2D/Testbed
+- LiquidFun: http://google.github.io/liquidfun/
+- **LiquidFun Programmers Guide: http://google.github.io/liquidfun/Programmers-Guide/html/index.html**
+
+<br>
 
 ## Installation, Processing IDE
 
