@@ -26,7 +26,7 @@ JavaDoc: http://thomasdiewald.com/processing/libraries/liquidfun/reference/index
 
 [<img src="https://i.vimeocdn.com/video/642746926.jpg" alt="" width="49%">](https://vimeo.com/223843930 "LiquidFunProcessing - Chains")
 [<img src="https://i.vimeocdn.com/video/642746415.jpg" alt="" width="49%">](https://vimeo.com/223843846 "LiquidFunProcessing - Bricks")
-[<img src="https://i.vimeocdn.com/video/642746223.jpg" alt="" width="49%">](https://vimeo.com/223843609 "LiquidFunProcessing - WaveMachine")
+[<img src="https://i.vimeocdn.com/video/642746223.jpg" alt="" width="49%">](https://vimeo.com/223843490 "LiquidFunProcessing - WaveMachine")
 [<img src="https://i.vimeocdn.com/video/642746084.jpg" alt="" width="49%">](https://vimeo.com/223843609 "LiquidFunProcessing - ParticleTypes")
 
 <br>
