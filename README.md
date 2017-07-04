@@ -16,7 +16,6 @@ Particle based fluid simulation and rigid body simulation using [jBox2D/LiquidFu
  - Box2D: http://www.iforce2d.net/b2dtut
  - LiquidFun: http://google.github.io/liquidfun/Programmers-Guide/html/index.html
 
-
 <br>
 
 ## Download
