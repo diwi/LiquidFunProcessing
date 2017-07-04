@@ -436,6 +436,9 @@ public class DwWorld extends World{
     }
   }
   
+  
+  
+  
   public void addMouseAction(DwInteractionEvent mouse_action){
     if(!mouse_actions.contains(mouse_action)){
       mouse_actions.add(mouse_action);
@@ -485,8 +488,10 @@ public class DwWorld extends World{
     }
     return list;
   }
-  
 
+  public List<DwInteractionEvent> getMouseActions(){
+    return mouse_actions;
+  }
   
   
   

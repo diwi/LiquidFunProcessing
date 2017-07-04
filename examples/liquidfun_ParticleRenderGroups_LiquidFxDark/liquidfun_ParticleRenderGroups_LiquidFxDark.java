@@ -11,7 +11,7 @@
 
 
 
-package liquidfun_ParticleRenderGroups_LiquidFx;
+package liquidfun_ParticleRenderGroups_LiquidFxDark;
 
 
 import com.thomasdiewald.liquidfun.java.DwUtils;
@@ -36,7 +36,7 @@ import processing.core.*;
 import processing.opengl.PGraphics2D;
 
 
-public class liquidfun_ParticleRenderGroups_LiquidFx extends PApplet {
+public class liquidfun_ParticleRenderGroups_LiquidFxDark extends PApplet {
 
   
   //
@@ -472,8 +472,8 @@ public class liquidfun_ParticleRenderGroups_LiquidFx extends PApplet {
         float hsb_h = 20 + random(-3, 3);
 //        float hsb_s = random(70,60);
 //        float hsb_b = random(70,100);
-        float hsb_s = 60 + random(-1,1) * 5;
-        float hsb_b = 85 + random(-1,1) * 15;
+        float hsb_s = 10 + random(-1,1) * 5;
+        float hsb_b = 40 + random(-1,1) * 10;
         fcol = color(hsb_h, hsb_s, hsb_b);
         
         world.bodies.add(brick, true, fcol, true, scol, 0.5f);
@@ -504,8 +504,8 @@ public class liquidfun_ParticleRenderGroups_LiquidFx extends PApplet {
     
     colorMode(HSB, 360, 100, 100);
     
-    float hsb_s = 100;
-    float hsb_b = 100;
+    float hsb_s = 10;
+    float hsb_b = 20;
 
     switch (type) {
       case 0:
@@ -546,7 +546,7 @@ public class liquidfun_ParticleRenderGroups_LiquidFx extends PApplet {
   
    
   public static void main(String args[]) {
-    PApplet.main(new String[] { liquidfun_ParticleRenderGroups_LiquidFx.class.getName() });
+    PApplet.main(new String[] { liquidfun_ParticleRenderGroups_LiquidFxDark.class.getName() });
   }
   
 }
