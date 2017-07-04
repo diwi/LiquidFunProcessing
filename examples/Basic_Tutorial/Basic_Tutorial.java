@@ -11,14 +11,13 @@
 
 
 
-package _Get_Started_;
+package Basic_Tutorial;
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
 
 
 import org.jbox2d.collision.shapes.CircleShape;
 import org.jbox2d.collision.shapes.PolygonShape;
-import org.jbox2d.common.Color3f;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.BodyDef;
@@ -31,10 +30,10 @@ import processing.core.*;
 import processing.opengl.PGraphics2D;
 
 
-public class _Get_Started_ extends PApplet {
+public class Basic_Tutorial extends PApplet {
   
   //
-  // A more detailed documented example to get started.
+  // A more detailed example to get started.
   // All other examples of this library follow the exact same structure as shown here.
   // 
   // setup:
@@ -48,18 +47,23 @@ public class _Get_Started_ extends PApplet {
   //   2) render
   //
   //
-  // references, tutorials:
+  // References: 
+  // 
+  // - jBox2d Reference:
+  //   http://thomasdiewald.com/processing/libraries/jbox2d-2.3.0/doc/index.html
   
+  // - LiquidFunProcessing Reference:
+  //   http://thomasdiewald.com/processing/libraries/liquidfun/reference/index.html
+  //
+  //
+  // Tutorials:
+  //
   // - Box2D tutorial:
   //   http://www.iforce2d.net/b2dtut/
   //
   // - LiquidFun guide:
   //   http://google.github.io/liquidfun/Programmers-Guide/html/index.html
   //
-  // - jBox2d Reference:
-  //   TODO
-  // - LiquidFunProcessing Reference:
-  //   http://thomasdiewald.com/processing/libraries/liquidfun/reference/index.html
   //
   //
   // Controls:
@@ -322,8 +326,9 @@ public class _Get_Started_ extends PApplet {
       world.particles.param.radius_scale = 1f;
       world.particles.param.color_mult   = 1f;
       
-      
+      // set a custom color for mouse-spawned particles
       world.mouse_spawn_particles.group_def.setColor(color(64,255,0));
+      
       
       
       // 3) create particles (or particle-groups)
@@ -454,7 +459,7 @@ public class _Get_Started_ extends PApplet {
  
    
   public static void main(String args[]) {
-    PApplet.main(new String[] { _Get_Started_.class.getName() });
+    PApplet.main(new String[] { Basic_Tutorial.class.getName() });
   }
   
 }
