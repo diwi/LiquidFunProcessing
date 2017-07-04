@@ -20,6 +20,17 @@ JavaDoc: http://thomasdiewald.com/processing/libraries/liquidfun/reference/index
 
 ![LiquidFunProcessing](https://github.com/diwi/LiquidFunProcessing/blob/master/screenshots/examples/diewald_LiquidFunProcessing_Examples2.jpg)
 
+<br>
+
+## Videos
+
+[<img src="https://i.vimeocdn.com/video/642746926.jpg" alt="" width="49%">](https://vimeo.com/223843930 "LiquidFunProcessing - Chains")
+[<img src="https://i.vimeocdn.com/video/642746415.jpg" alt="" width="49%">](https://vimeo.com/223843846 "LiquidFunProcessing - Bricks")
+[<img src="https://i.vimeocdn.com/video/642746223.jpg" alt="" width="49%">](https://vimeo.com/223843490 "LiquidFunProcessing - WaveMachine")
+[<img src="https://i.vimeocdn.com/video/642746084.jpg" alt="" width="49%">](https://vimeo.com/223843609 "LiquidFunProcessing - ParticleTypes")
+
+<br>
+
 ## Examples
 The library includes a lot of examples from the original [jbox2d testbed](https://github.com/jbox2d/jbox2d/tree/master/jbox2d-testbed/src/main/java/org/jbox2d/testbed/tests).<br>
 For a quick start, each sketch has a couple of default mouse-actions:
@@ -75,7 +86,7 @@ using the box2d world for rendering and basic processing draw calls.
 
 - Download [Processing 3](https://processing.org/download/?processing)
 - Install liquidFunProcessing via the Library Manager.
-- Or manually, unzip and put the extracted PixelFlow folder into the libraries folder of your Processing sketches. Reference and examples are included in the PixelFlow folder. 
+- Or manually, unzip and put the extracted LiquidFunProcessing folder into the libraries folder of your Processing sketches. Reference and examples are included in the LiquidFunProcessing folder. 
 
 - Also make sure you have the latest graphics card driver installed!
 
