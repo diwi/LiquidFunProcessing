@@ -136,25 +136,7 @@ public class DwWorld extends World{
   }
   
 
-  public void setParticleRender(DwParticleRender particle_render){
-    if(particle_render == null){
-      return;
-    }
-    if(particles != null){
-      particles.release();
-    }
-    particles = particle_render;
-  }
   
-  public void setBodyRender(DwBodyGroup body_render){
-    if(body_render == null){
-      return;
-    }
-    if(bodies != null){
-      bodies.release();
-    }
-    bodies = body_render;
-  }
 
   /**
    * called by processing
@@ -517,7 +499,39 @@ public class DwWorld extends World{
   
   
   
+
+
   
+  
+  
+  
+  /**
+   * replace the default particle renderer.
+   * @param particle_render
+   */
+  public void setParticleRender(DwParticleRender particle_render){
+    if(particle_render == null){
+      return;
+    }
+    if(particles != null){
+      particles.release();
+    }
+    particles = particle_render;
+  }
+  
+  /**
+   * replace the default body renderer.
+   * @param particle_render
+   */
+  public void setBodyRender(DwBodyGroup body_render){
+    if(body_render == null){
+      return;
+    }
+    if(bodies != null){
+      bodies.release();
+    }
+    bodies = body_render;
+  }
   
   
   

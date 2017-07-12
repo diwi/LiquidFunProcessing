@@ -26,7 +26,6 @@ import com.thomasdiewald.liquidfun.java.DwViewportTransform;
 import processing.core.PApplet;
 import processing.core.PImage;
 import processing.opengl.PGraphics2D;
-import processing.opengl.PGraphicsOpenGL;
 
 
 /**

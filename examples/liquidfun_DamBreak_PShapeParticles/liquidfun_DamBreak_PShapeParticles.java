@@ -89,10 +89,10 @@ public class liquidfun_DamBreak_PShapeParticles extends PApplet {
     world = new DwWorld(this, 18);
     
     
-    // this replaces the default particle renderer (OpenGL) by a alternative 
-    // renderer, where particles are rendered s PShape Quads.
+    // this replaces the default particle renderer (OpenGL) with an alternative 
+    // renderer where particles are rendered as PShape-Quads.
     // It renders a bit slower then the OpenGL version and grouped rendering
-    // is not possible.
+    // is also not possible.
     world.setParticleRender(new DwParticleRenderP5(this, world, world.transform));
 
     // create scene: rigid bodies, particles, etc ...
