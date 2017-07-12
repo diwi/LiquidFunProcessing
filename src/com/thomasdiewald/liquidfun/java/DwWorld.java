@@ -40,6 +40,8 @@ import com.thomasdiewald.liquidfun.java.render.DwFixture;
 import com.thomasdiewald.liquidfun.java.render.DwJoint;
 import com.thomasdiewald.liquidfun.java.render.DwParticleRender;
 import com.thomasdiewald.liquidfun.java.render.DwParticleRenderGL;
+import com.thomasdiewald.liquidfun.java.render.DwParticleRenderP5;
+
 import processing.core.PApplet;
 import processing.core.PGraphics;
 import processing.core.PShape;
@@ -67,6 +69,12 @@ public class DwWorld extends World{
   public PApplet papplet;
   public DwViewportTransform transform;
   
+  /**
+   * if true, particles is an instance of {@link DwParticleRenderGL}
+   * otheriwse {@link DwParticleRenderP5} is instantiated.
+   */
+  static public boolean INIT_GL_PARTICLES = true;
+  
   
   public DwDebugDraw debug_draw;
   
@@ -90,6 +98,8 @@ public class DwWorld extends World{
   public DwWorld(PApplet papplet){
     this(papplet, 20);
   }
+  
+
   
   public DwWorld(PApplet papplet, float scale){
     super(new Vec2(0, -10f));
@@ -115,7 +125,12 @@ public class DwWorld extends World{
     
       
     bodies = new DwBodyGroup(papplet, this, transform);
-    particles = new DwParticleRenderGL(papplet, this, transform);
+    
+    if(INIT_GL_PARTICLES){
+      particles = new DwParticleRenderGL(papplet, this, transform);
+    } else {
+      particles = new DwParticleRenderP5(papplet, this, transform);
+    }
     
     for(int i = 0; i < registered_methods.length; i++){
       papplet.registerMethod(registered_methods[i], this);

@@ -15,6 +15,7 @@ package liquidfun_DamBreak_PShapeParticles;
 
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
+import com.thomasdiewald.liquidfun.java.render.DwParticleRenderGL;
 import com.thomasdiewald.liquidfun.java.render.DwParticleRenderP5;
 
 import org.jbox2d.collision.shapes.ChainShape;
@@ -86,15 +87,20 @@ public class liquidfun_DamBreak_PShapeParticles extends PApplet {
     // release old resources
     release();
     
-    world = new DwWorld(this, 18);
-    
-    
+    // if false, PShape-Quads are used for particles, instead of openGL points.
     // this replaces the default particle renderer (OpenGL) with an alternative 
     // renderer where particles are rendered as PShape-Quads.
     // It renders a bit slower then the OpenGL version and grouped rendering
     // is also not possible.
-    world.setParticleRender(new DwParticleRenderP5(this, world, world.transform));
-
+    DwWorld.INIT_GL_PARTICLES = false;
+    
+    // create world
+    world = new DwWorld(this, 18);
+    
+    // just for checking
+    System.out.println("PShape Particles = "+(world.particles instanceof DwParticleRenderP5));
+    System.out.println("OpenGL Particles = "+(world.particles instanceof DwParticleRenderGL));
+    
     // create scene: rigid bodies, particles, etc ...
     initScene();
   }
