@@ -68,6 +68,8 @@ public class liquidfun_DamBreak extends PApplet {
   public void setup(){ 
     surface.setLocation(viewport_x, viewport_y);
 //    sprite = loadImage("sprite.png");
+    
+
     reset();
     frameRate(120);
   }

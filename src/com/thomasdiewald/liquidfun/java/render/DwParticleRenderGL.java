@@ -23,6 +23,7 @@ import com.jogamp.opengl.GL3;
 import com.thomasdiewald.liquidfun.java.DwViewportTransform;
 
 import processing.core.PApplet;
+import processing.core.PGraphics;
 import processing.core.PMatrix3D;
 import processing.opengl.PGraphics2D;
 import processing.opengl.PJOGL;
@@ -44,7 +45,8 @@ public class DwParticleRenderGL extends DwParticleRender{
   static public final String SHADER_DIR = "/com/thomasdiewald/liquidfun/glsl/";
   
   // GL
-  public GL3 gl;
+  protected GL3 gl;
+  protected PJOGL pgl;
   
   // Shader
   public PShader shader_particles;
@@ -52,9 +54,9 @@ public class DwParticleRenderGL extends DwParticleRender{
 
   // GL: VBO HANDLES
   public int[] HANDLE_vbo_pos = {0};
-  public int[] HANDLE_vbo_vel = {0};
+//  public int[] HANDLE_vbo_vel = {0};
   public int[] HANDLE_vbo_col = {0};
-  public int[] HANDLE_vbo_con = {0};
+//  public int[] HANDLE_vbo_con = {0};
   
   // GL: VBO Index Handle
   public int[] HANDLE_vbo_idx = {0};
@@ -116,6 +118,7 @@ public class DwParticleRenderGL extends DwParticleRender{
     gl.glDeleteBuffers(1, HANDLE_vbo_col, 0); HANDLE_vbo_col[0] = 0;
 //    gl.glDeleteBuffers(1, HANDLE_vbo_vel, 0); HANDLE_vbo_vel[0] = 0;
 //    gl.glDeleteBuffers(1, HANDLE_vbo_con, 0); HANDLE_vbo_con[0] = 0;
+    errCheck("DwParticleRenderGL.release");
     endGL();
     
     super.release();
@@ -161,6 +164,8 @@ public class DwParticleRenderGL extends DwParticleRender{
       gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0);
     }
     
+    errCheck("DwParticleRenderGL.updateVBOs");
+    
     endGL();
   }
   
@@ -193,8 +198,10 @@ public class DwParticleRenderGL extends DwParticleRender{
 
     PShader shader = shader_particles;
     shader.bind();
+
     shader.set("mat_mvp", mat_mvp);
     shader.set("tex_sprite", param.tex_sprite);
+    errCheck("DwParticleRenderGL.display-uniforms");
     
     // shader vertex attribute: position
     int LOC_pos = gl.glGetAttribLocation(shader.glProgram, "pos");
@@ -213,23 +220,23 @@ public class DwParticleRenderGL extends DwParticleRender{
     }
     
     // shader vertex attribute: velocity
-    int LOC_vel = gl.glGetAttribLocation(shader.glProgram, "vel");
-    if(LOC_vel != -1){
-      gl.glBindBuffer(GL.GL_ARRAY_BUFFER, HANDLE_vbo_vel[0]);
-      gl.glEnableVertexAttribArray(LOC_vel);
-      gl.glVertexAttribPointer(LOC_vel, 2, GL.GL_FLOAT, false, 0, 0);
-    }
+//    int LOC_vel = gl.glGetAttribLocation(shader.glProgram, "vel");
+//    if(LOC_vel != -1){
+//      gl.glBindBuffer(GL.GL_ARRAY_BUFFER, HANDLE_vbo_vel[0]);
+//      gl.glEnableVertexAttribArray(LOC_vel);
+//      gl.glVertexAttribPointer(LOC_vel, 2, GL.GL_FLOAT, false, 0, 0);
+//    }
     
     // shader vertex attribute: contact
-    int LOC_con = gl.glGetAttribLocation(shader.glProgram, "con");
-    if(LOC_con != -1){
-      gl.glBindBuffer(GL.GL_ARRAY_BUFFER, HANDLE_vbo_con[0]);
-      gl.glEnableVertexAttribArray(LOC_con);
-      gl.glVertexAttribPointer(LOC_con, 2, GL.GL_FLOAT, false, 0, 0);
-    }
+//    int LOC_con = gl.glGetAttribLocation(shader.glProgram, "con");
+//    if(LOC_con != -1){
+//      gl.glBindBuffer(GL.GL_ARRAY_BUFFER, HANDLE_vbo_con[0]);
+//      gl.glEnableVertexAttribArray(LOC_con);
+//      gl.glVertexAttribPointer(LOC_con, 2, GL.GL_FLOAT, false, 0, 0);
+//    }
 
     gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
-    
+    errCheck("DwParticleRenderGL.display-buffers");
 
     
     // settings
@@ -239,6 +246,7 @@ public class DwParticleRenderGL extends DwParticleRender{
     gl.glEnable(GL3.GL_VERTEX_PROGRAM_POINT_SIZE);
     gl.glEnable(GL2ES1.GL_POINT_SPRITE);
     gl.glPointSize(particle_rad_screen * 2);
+    errCheck("DwParticleRenderGL.display-pointRendering");
   
     
     
@@ -258,31 +266,32 @@ public class DwParticleRenderGL extends DwParticleRender{
         gl.glDrawElements(GL3.GL_POINTS, len, GL.GL_UNSIGNED_INT, off * 4);
       }
       gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0);
+      errCheck("DwParticleRenderGL.display-glDrawElements");
     } 
     else {
       gl.glDrawArrays(GL3.GL_POINTS, 0, particle_num);
+      errCheck("DwParticleRenderGL.display-glDrawArrays");
     }
     
     
-    
-
     // cleanup
     if(LOC_pos != -1) gl.glDisableVertexAttribArray(LOC_pos);
     if(LOC_col != -1) gl.glDisableVertexAttribArray(LOC_col);
-    if(LOC_vel != -1) gl.glDisableVertexAttribArray(LOC_vel);
-    if(LOC_con != -1) gl.glDisableVertexAttribArray(LOC_con);
+//    if(LOC_vel != -1) gl.glDisableVertexAttribArray(LOC_vel);
+//    if(LOC_con != -1) gl.glDisableVertexAttribArray(LOC_con);
     
     shader.unbind();
-    
+    errCheck("DwParticleRenderGL.shader.unbind()");
+
     endGL();
   }
   
-  
+
 
 
   protected void beginGL(){
     if(gl == null){
-      PJOGL pgl = (PJOGL) papplet.beginPGL();  
+      pgl = (PJOGL) papplet.beginPGL();  
       gl = pgl.gl.getGL3();
     }
   }
@@ -291,6 +300,15 @@ public class DwParticleRenderGL extends DwParticleRender{
     if(gl != null){
       papplet.endPGL();
       gl = null;
+    }
+  }
+  
+  protected void errCheck(String user_msg){
+    int err = pgl.getError();
+    if (err != 0) {
+      String errString = pgl.errorString(err);
+      String msg = "OpenGL error " + err + " at " + user_msg + ": " + errString;
+      PGraphics.showWarning(msg);
     }
   }
   
