@@ -95,7 +95,7 @@ public class liquidfun_ParticleRenderGroups_LiquidFxDark extends PApplet {
     pg_checkerboard = DwUtils.createCheckerBoard(this, width, height, 100, color(32, 0), color(48,0));
 //    pg_checkerboard = DwUtils.createCheckerBoard(this, width, height, 100, color(200, 0), color(255,0));
     reset();
-    frameRate(1000);
+    frameRate(120);
   }
   
   
@@ -127,6 +127,7 @@ public class liquidfun_ParticleRenderGroups_LiquidFxDark extends PApplet {
     
 
     // box2d/liquidfun world
+//    world.INIT_GL_PARTICLES = false;
     world = new DwWorld(this, 15);
     
     // particle render settings

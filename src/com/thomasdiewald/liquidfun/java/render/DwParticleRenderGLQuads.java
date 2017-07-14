@@ -18,7 +18,9 @@ import java.nio.IntBuffer;
 
 import org.jbox2d.dynamics.World;
 import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2ES1;
+import com.jogamp.opengl.GL2ES2;
 import com.jogamp.opengl.GL2ES3;
 import com.jogamp.opengl.GL3;
 import com.thomasdiewald.liquidfun.java.DwViewportTransform;
@@ -41,12 +43,12 @@ import processing.opengl.PShader;
  * @author Thomas Diewald
  *
  */
-public class DwParticleRenderGL extends DwParticleRender{
+public class DwParticleRenderGLQuads extends DwParticleRender{
   
   static public final String SHADER_DIR = "/com/thomasdiewald/liquidfun/glsl/";
   
   // GL
-  protected GL2ES3 gl;
+  protected GL3 gl;
   protected PJOGL pgl;
   
   // Shader
@@ -61,12 +63,48 @@ public class DwParticleRenderGL extends DwParticleRender{
   
   // GL: VBO Index Handle
   public int[] HANDLE_vbo_idx = {0};
+  
+  public int[] HANDLE_vbo_quad = {0};
 
 
 
   static public String NL = System.getProperty("line.separator");
 
   // vertex shader code for rendering point sprites
+//  static public String[] src_vert =
+//    {   ""
+//      , "#version 150                               " + NL
+//      , "                                           " + NL
+//      , "uniform mat4 mat_mvp;                      " + NL
+//      , "uniform float point_size;                  " + NL
+//      , "                                           " + NL
+//      , "in vec2 pos;                               " + NL
+//      , "in vec4 col;                               " + NL
+//      , "out vec4 tint;                             " + NL
+//      , "                                           " + NL
+//      , "void main() {                              " + NL
+//      , "  gl_Position = mat_mvp * vec4(pos, 0, 1); " + NL
+//      , "  gl_PointSize = point_size;               " + NL
+//      , "  tint = col;                              " + NL
+//      , "}                                          " + NL
+//    }; 
+//  
+//  // fragment shader code for rendering point sprites
+//  static public String[] src_frag =
+//    {   ""
+//      , "#version 150                                             "+NL
+//      , "                                                         "+NL
+//      , "out vec4 fragColor;                                      "+NL
+//      , "in vec4 tint;                                            "+NL
+//      , "                                                         "+NL
+//      , "uniform sampler2D tex_sprite;                            "+NL
+//      , "                                                         "+NL
+//      , "void main() {                                            "+NL
+//      , "  fragColor = texture(tex_sprite, gl_PointCoord) * tint; "+NL
+//      , "}                                                        "+NL
+//    }; 
+  
+  
   static public String[] src_vert =
     {   ""
       , "#version 150                               " + NL
@@ -74,13 +112,15 @@ public class DwParticleRenderGL extends DwParticleRender{
       , "uniform mat4 mat_mvp;                      " + NL
       , "uniform float point_size;                  " + NL
       , "                                           " + NL
+      , "in vec2 vtx;                               " + NL
       , "in vec2 pos;                               " + NL
       , "in vec4 col;                               " + NL
       , "out vec4 tint;                             " + NL
+      , "out vec2 texcoord;                             " + NL
       , "                                           " + NL
       , "void main() {                              " + NL
-      , "  gl_Position = mat_mvp * vec4(pos, 0, 1); " + NL
-      , "  gl_PointSize = point_size;               " + NL
+      , "  gl_Position = mat_mvp * vec4(pos + vtx * point_size, 0, 1); " + NL
+      , "  texcoord = vtx * 0.5 + 0.5;               " + NL
       , "  tint = col;                              " + NL
       , "}                                          " + NL
     }; 
@@ -92,18 +132,19 @@ public class DwParticleRenderGL extends DwParticleRender{
       , "                                                         "+NL
       , "out vec4 fragColor;                                      "+NL
       , "in vec4 tint;                                            "+NL
+      , "in vec2 texcoord;                                            "+NL
       , "                                                         "+NL
       , "uniform sampler2D tex_sprite;                            "+NL
       , "                                                         "+NL
       , "void main() {                                            "+NL
-      , "  fragColor = texture(tex_sprite, gl_PointCoord) * tint; "+NL
+      , "  fragColor = texture(tex_sprite, texcoord) * tint; "+NL
       , "}                                                        "+NL
     }; 
   
   
   
 
-  public DwParticleRenderGL(PApplet papplet, World world, DwViewportTransform transform){
+  public DwParticleRenderGLQuads(PApplet papplet, World world, DwViewportTransform transform){
     super(papplet, world, transform);
     
 //    String[] src_frag = DwUtils.readASCIIfile(papplet, SHADER_DIR + "particle_render2.frag");
@@ -121,6 +162,8 @@ public class DwParticleRenderGL extends DwParticleRender{
     gl.glDeleteBuffers(1, HANDLE_vbo_col, 0); HANDLE_vbo_col[0] = 0;
 //    gl.glDeleteBuffers(1, HANDLE_vbo_vel, 0); HANDLE_vbo_vel[0] = 0;
 //    gl.glDeleteBuffers(1, HANDLE_vbo_con, 0); HANDLE_vbo_con[0] = 0;
+    
+    gl.glDeleteBuffers(1, HANDLE_vbo_quad, 0); HANDLE_vbo_quad[0] = 0;
     errCheck("DwParticleRenderGL.release");
     endGL();
     
@@ -171,7 +214,7 @@ public class DwParticleRenderGL extends DwParticleRender{
     
     endGL();
   }
-  
+
   
   protected void assureBuffers(){
     // VBO handles
@@ -180,6 +223,15 @@ public class DwParticleRenderGL extends DwParticleRender{
     if(HANDLE_vbo_col[0] == 0) gl.glGenBuffers(1, HANDLE_vbo_col, 0);
 //    if(HANDLE_vbo_vel[0] == 0) gl.glGenBuffers(1, HANDLE_vbo_vel, 0);
 //    if(HANDLE_vbo_con[0] == 0) gl.glGenBuffers(1, HANDLE_vbo_con, 0);
+    
+    if(HANDLE_vbo_quad[0] == 0){
+      float[] quad = { -1,-1,  -1,+1,  +1,-1,  +1,+1};
+      gl.glGenBuffers(1, HANDLE_vbo_quad, 0);  
+      gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, HANDLE_vbo_quad[0]); 
+      gl.glBufferData(GL3.GL_ARRAY_BUFFER, quad.length * 4, FloatBuffer.wrap(quad), GL3.GL_STATIC_DRAW);
+      gl.glBindBuffer(GL3.GL_ARRAY_BUFFER, 0);
+    }
+      
   }
   
   
@@ -204,8 +256,8 @@ public class DwParticleRenderGL extends DwParticleRender{
 
     shader.set("mat_mvp", mat_mvp);
     shader.set("tex_sprite", param.tex_sprite);
-    shader.set("point_size", particle_rad_screen * 2);
-    
+//    shader.set("point_size", particle_rad_screen * 2);
+    shader.set("point_size", particle_rad_world);
     errCheck("DwParticleRenderGL.display-uniforms");
     
     // shader vertex attribute: position
@@ -222,6 +274,14 @@ public class DwParticleRenderGL extends DwParticleRender{
       gl.glBindBuffer(GL.GL_ARRAY_BUFFER, HANDLE_vbo_col[0]);
       gl.glEnableVertexAttribArray(LOC_col);
       gl.glVertexAttribPointer(LOC_col, 4, GL.GL_UNSIGNED_BYTE, true, 0, 0);
+    }
+    
+    // shader vertex attribute: quad vertex
+    int LOC_vtx = gl.glGetAttribLocation(shader.glProgram, "vtx");
+    if(LOC_vtx != -1){
+      gl.glBindBuffer(GL.GL_ARRAY_BUFFER, HANDLE_vbo_quad[0]);
+      gl.glEnableVertexAttribArray(LOC_vtx);
+      gl.glVertexAttribPointer(LOC_vtx, 2, GL.GL_FLOAT, false, 0, 0);
     }
     
     // shader vertex attribute: velocity
@@ -244,21 +304,23 @@ public class DwParticleRenderGL extends DwParticleRender{
     errCheck("DwParticleRenderGL.display-buffers");
 
 
-
     // settings
-    // https://github.com/diwi/LiquidFunProcessing/issues/2
 //    gl.glEnable(GL2.GL_POINT_SMOOTH);
 //    gl.glEnable(GL3.GL_VERTEX_PROGRAM_POINT_SIZE);
 //    gl.glPointSize(particle_rad_screen * 2);
     
     // ... f***ing OpenGL mess
-    gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
-    gl.glEnable(GL2ES1.GL_POINT_SPRITE);
-
-    errCheck("DwParticleRenderGL.display-pointRendering");
+//    gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
+//    gl.glEnable(GL2ES1.GL_POINT_SPRITE);
+//
+//    errCheck("DwParticleRenderGL.display-pointRendering");
   
+    gl.glVertexAttribDivisor(LOC_vtx, 0);
+    gl.glVertexAttribDivisor(LOC_pos, 1);
+    gl.glVertexAttribDivisor(LOC_col, 1);
     
-  
+
+    
     // draw particles as points (see fragment shader for details)
     if(USE_GROUPS)
     {
@@ -272,22 +334,31 @@ public class DwParticleRenderGL extends DwParticleRender{
         }
         int off = group_offsets[id];
         int len = group_lengths[id];
-        gl.glDrawElements(GL.GL_POINTS, len, GL.GL_UNSIGNED_INT, off * 4);
+        
+//        gl.glDrawElements(GL.GL_POINTS, len, GL.GL_UNSIGNED_INT, off * 4);
+        gl.glDrawElementsInstanced(GL.GL_TRIANGLE_STRIP, 4, GL.GL_UNSIGNED_INT, off * 4, len);
       }
+
       gl.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0);
       errCheck("DwParticleRenderGL.display-glDrawElements");
     } 
     else {
-      gl.glDrawArrays(GL.GL_POINTS, 0, particle_num);
+//      gl.glDrawArrays(GL.GL_POINTS, 0, particle_num);
+      gl.glDrawArraysInstanced(GL.GL_TRIANGLE_STRIP, 0, 4, particle_num);
+
       errCheck("DwParticleRenderGL.display-glDrawArrays");
     }
     
+    gl.glVertexAttribDivisor(LOC_vtx, 0);
+    gl.glVertexAttribDivisor(LOC_pos, 0);
+    gl.glVertexAttribDivisor(LOC_col, 0);
     
     // cleanup
     if(LOC_pos != -1) gl.glDisableVertexAttribArray(LOC_pos);
     if(LOC_col != -1) gl.glDisableVertexAttribArray(LOC_col);
 //    if(LOC_vel != -1) gl.glDisableVertexAttribArray(LOC_vel);
 //    if(LOC_con != -1) gl.glDisableVertexAttribArray(LOC_con);
+    if(LOC_vtx != -1) gl.glDisableVertexAttribArray(LOC_vtx);
     
     shader.unbind();
     errCheck("DwParticleRenderGL.shader.unbind()");
@@ -301,7 +372,7 @@ public class DwParticleRenderGL extends DwParticleRender{
   protected void beginGL(){
     if(gl == null){
       pgl = (PJOGL) papplet.beginPGL();  
-      gl = pgl.gl.getGL2ES3();
+      gl = pgl.gl.getGL3();
     }
   }
   

@@ -95,7 +95,7 @@ public class liquidfun_ParticleRenderGroups_LiquidFx extends PApplet {
     pg_checkerboard = DwUtils.createCheckerBoard(this, width, height, 100, color(32, 0), color(48,0));
 //    pg_checkerboard = DwUtils.createCheckerBoard(this, width, height, 100, color(200, 0), color(255,0));
     reset();
-    frameRate(1000);
+    frameRate(120);
   }
   
   
@@ -397,8 +397,8 @@ public class liquidfun_ParticleRenderGroups_LiquidFx extends PApplet {
     
     screen_x = width/4;
     screen_y = height/2;
-//    world.mouse_spawn_particles.setBoxShape(500, 20);
-//    world.mouse_spawn_particles.spawn(screen_x, screen_y);
+    world.mouse_spawn_particles.setBoxShape(500, 20);
+    world.mouse_spawn_particles.spawn(screen_x, screen_y);
     
     setParticleSpawnProperties(spawn_type_cpy);
     

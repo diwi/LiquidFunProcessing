@@ -70,7 +70,7 @@ public class DwWorld extends World{
   public DwViewportTransform transform;
   
   /**
-   * if true, particles is an instance of {@link DwParticleRenderGL}
+   * if true, particles is an instance of {@link DwParticleRenderGLQuads}
    * otheriwse {@link DwParticleRenderP5} is instantiated.
    */
   static public boolean INIT_GL_PARTICLES = true;
