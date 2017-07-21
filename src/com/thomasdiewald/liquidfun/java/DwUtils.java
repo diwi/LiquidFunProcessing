@@ -205,6 +205,7 @@ public class DwUtils {
           dd = dd*dd; dd = dd*dd; dd = dd*dd;
       
           dd = 1.0f - dd;
+          dd = DwUtils.clamp(dd, 0, 1);
           int a = (int)(dd*255);
           pimg.pixels[pid] = a << 24 | 0x00FFFFFF;
         }
@@ -213,6 +214,7 @@ public class DwUtils {
           if(dd<0) dd=0; else if(dd>1) dd=1;
           dd = 1-dd;
 //          dd = dd*dd;
+          dd = DwUtils.clamp(dd, 0, 1);
           int a = (int)(dd*255);
           pimg.pixels[pid] = a << 24 | 0x00FFFFFF;
         }
@@ -222,7 +224,7 @@ public class DwUtils {
           dd *= 1.8f;
           dd = 1-dd;
           dd = dd*dd*dd;
-          if(dd<0) dd=0; else if(dd>1) dd=1;
+          dd = DwUtils.clamp(dd, 0, 1);
           int a = (int)(dd*255);
           pimg.pixels[pid] = a << 24 | 0x00FFFFFF;
         }
@@ -258,11 +260,12 @@ public class DwUtils {
         float yn = (y / (float)size) * 2f - 1f;
         float dd = (float) Math.sqrt(xn*xn + yn*yn);
         
-        if(dd < 0) dd = 0; else if(dd > 1) dd = 1;
+        dd = DwUtils.clamp(dd, 0, 1);
         dd = (float) Math.pow(dd, exp1);
         dd = 1.0f - dd;
         dd = (float) Math.pow(dd, exp2);
         dd *= mult;
+        dd = DwUtils.clamp(dd, 0, 1);
         pimg.pixels[pid] = ((int)(dd * 255)) << 24 | 0x00FFFFFF;
       }
     }

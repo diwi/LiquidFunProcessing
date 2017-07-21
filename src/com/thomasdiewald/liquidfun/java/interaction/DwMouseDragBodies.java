@@ -154,20 +154,17 @@ public class DwMouseDragBodies implements DwInteractionEvent, QueryCallback{
     Body body = argFixture.getBody();
     
     // static bodies can be moved too, but need to set to dynamic for the
-    // mousejoint to work.
-    body_type_cpy = body.getType();
-    if(enable_static_drag){
-      body.setType(BodyType.DYNAMIC);
-    }
-    
-    if (body.getType() == BodyType.DYNAMIC) 
-    {
+    // mouse-joint to work.
+    BodyType type = body.getType();
+    if (BodyType.DYNAMIC == type || enable_static_drag) {
       if (argFixture.testPoint(point)) {
+        body_type_cpy = type;
         fixture = argFixture;
+        body.setType(BodyType.DYNAMIC);
         return false;
       }
     }
-    return true;
+    return true; 
   }
 
 
