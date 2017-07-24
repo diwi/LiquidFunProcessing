@@ -144,8 +144,10 @@ public class box2d_Chain_RevoluteJoint extends PApplet {
     }
 
     {
+      float seg = 1.5f;
+      
       PolygonShape shape = new PolygonShape();
-      shape.setAsBox(0.6f, 0.225f);
+      shape.setAsBox(seg/2, 0.225f);
 
       FixtureDef fd = new FixtureDef();
       fd.shape = shape;
@@ -155,17 +157,18 @@ public class box2d_Chain_RevoluteJoint extends PApplet {
       RevoluteJointDef jd = new RevoluteJointDef();
       jd.collideConnected = false;
 
-      int count = 30;
-      final float y = 25.0f;
+      int count = 20;
+      final float py = 25.0f;
+      final float px = 5.0f;
       Body prevBody = ground;
       for (int i = 0; i < count; ++i) {
         BodyDef bd = new BodyDef();
         bd.type = BodyType.DYNAMIC;
-        bd.position.set(0.5f + i, y);
+        bd.position.set(px + i*seg + seg/2, py);
         Body body = world.createBody(bd);
         body.createFixture(fd);
 
-        Vec2 anchor = new Vec2(i, y);
+        Vec2 anchor = new Vec2(px + i*seg, py);
         jd.initialize(prevBody, body, anchor);
         Joint joint = world.createJoint(jd);
         
