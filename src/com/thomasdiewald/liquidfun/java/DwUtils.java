@@ -256,8 +256,8 @@ public class DwUtils {
       for(int x = 0; x < size; x++){
         int pid = y * size + x;
         
-        float xn = (x / (float)size) * 2f - 1f;
-        float yn = (y / (float)size) * 2f - 1f;
+        float xn = ((x+0.5f) / (float)size) * 2f - 1f;
+        float yn = ((y+0.5f) / (float)size) * 2f - 1f;
         float dd = (float) Math.sqrt(xn*xn + yn*yn);
         
         dd = DwUtils.clamp(dd, 0, 1);
@@ -308,8 +308,7 @@ public class DwUtils {
     }
     
     pg.endDraw();
-    
-    
+
     return pg;
   }
   
