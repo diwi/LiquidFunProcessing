@@ -18,7 +18,7 @@ import java.nio.IntBuffer;
 
 import org.jbox2d.dynamics.World;
 import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2ES1;
+import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2ES3;
 import com.jogamp.opengl.GL3;
 import com.thomasdiewald.liquidfun.java.DwViewportTransform;
@@ -246,14 +246,15 @@ public class DwParticleRenderGL extends DwParticleRender{
 
 
     // settings
+    // fix: PJOGL.profile = 3; in settings()
     // https://github.com/diwi/LiquidFunProcessing/issues/2
 //    gl.glEnable(GL2.GL_POINT_SMOOTH);
-//    gl.glEnable(GL3.GL_VERTEX_PROGRAM_POINT_SIZE);
+    gl.glEnable(GL3.GL_VERTEX_PROGRAM_POINT_SIZE);
 //    gl.glPointSize(particle_rad_screen * 2);
     
     // ... f***ing OpenGL mess
     gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
-    gl.glEnable(GL2ES1.GL_POINT_SPRITE);
+    gl.glEnable(GL2.GL_POINT_SPRITE);
 
     errCheck("DwParticleRenderGL.display-pointRendering");
   

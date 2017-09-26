@@ -29,6 +29,7 @@ import org.jbox2d.particle.ParticleType;
 
 import processing.core.*;
 import processing.opengl.PGraphics2D;
+import processing.opengl.PJOGL;
 
 
 public class liquidfun_DamBreak_LiquidFx extends PApplet {
@@ -73,6 +74,7 @@ public class liquidfun_DamBreak_LiquidFx extends PApplet {
   public void settings(){
     size(viewport_w, viewport_h, P2D);
     smooth(8);
+    PJOGL.profile = 3;
   }
   
   
