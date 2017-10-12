@@ -28,7 +28,6 @@ import org.jbox2d.particle.ParticleType;
 
 import processing.core.*;
 import processing.opengl.PGraphics2D;
-import processing.opengl.PJOGL;
 
 
 public class Basic_Tutorial extends PApplet {
@@ -99,7 +98,6 @@ public class Basic_Tutorial extends PApplet {
     size(viewport_w, viewport_h, P2D);
     // some MSAA antialiasing
     smooth(8); 
-    PJOGL.profile = 3;
   }
   
   

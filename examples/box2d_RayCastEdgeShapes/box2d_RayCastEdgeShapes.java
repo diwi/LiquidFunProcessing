@@ -11,7 +11,7 @@
 
 
 
-package box2d_EdgeShapes;
+package box2d_RayCastEdgeShapes;
 
 
 import com.thomasdiewald.liquidfun.java.DwWorld;
@@ -32,7 +32,7 @@ import processing.core.*;
 import processing.opengl.PGraphics2D;
 
 
-public class box2d_EdgeShapes extends PApplet {
+public class box2d_RayCastEdgeShapes extends PApplet {
 
   // Example to demonstrate how to use the RayCastCallback
   
@@ -302,7 +302,7 @@ public class box2d_EdgeShapes extends PApplet {
 
 
   public static void main(String args[]) {
-    PApplet.main(new String[] { box2d_EdgeShapes.class.getName() });
+    PApplet.main(new String[] { box2d_RayCastEdgeShapes.class.getName() });
   }
   
 }

@@ -18,7 +18,6 @@ import java.nio.IntBuffer;
 
 import org.jbox2d.dynamics.World;
 import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL2ES3;
 import com.jogamp.opengl.GL3;
 import com.thomasdiewald.liquidfun.java.DwViewportTransform;
@@ -76,12 +75,14 @@ public class DwParticleRenderGL extends DwParticleRender{
       , "                                           " + NL
       , "in vec2 pos;                               " + NL
       , "in vec4 col;                               " + NL
+      , "out vec2 posn;                             " + NL
       , "out vec4 tint;                             " + NL
       , "                                           " + NL
       , "void main() {                              " + NL
       , "  gl_Position = mat_mvp * vec4(pos, 0, 1); " + NL
       , "  gl_PointSize = point_size;               " + NL
       , "  tint = col;                              " + NL
+      , "  posn = gl_Position.xy * 0.5 + 0.5;       " + NL
       , "}                                          " + NL
     }; 
   
@@ -92,11 +93,15 @@ public class DwParticleRenderGL extends DwParticleRender{
       , "                                                         "+NL
       , "out vec4 fragColor;                                      "+NL
       , "in vec4 tint;                                            "+NL
+      , "in vec2 posn;                                            "+NL
       , "                                                         "+NL
+      , "uniform float point_size;                                "+NL
+      , "uniform vec2 wh_viewport;                                "+NL
       , "uniform sampler2D tex_sprite;                            "+NL
       , "                                                         "+NL
       , "void main() {                                            "+NL
-      , "  fragColor = texture(tex_sprite, gl_PointCoord) * tint; "+NL
+      , "  vec2 my_PointCoord = ((posn * wh_viewport) - gl_FragCoord.xy) / point_size + 0.5; // [0, 1]"+NL
+      , "  fragColor = texture(tex_sprite, my_PointCoord) * tint; "+NL
       , "}                                                        "+NL
     }; 
   
@@ -205,6 +210,7 @@ public class DwParticleRenderGL extends DwParticleRender{
     shader.set("mat_mvp", mat_mvp);
     shader.set("tex_sprite", param.tex_sprite);
     shader.set("point_size", particle_rad_screen * 2);
+    shader.set("wh_viewport", (float)canvas.width, (float) canvas.height);
     
     errCheck("DwParticleRenderGL.display-uniforms");
     
@@ -248,13 +254,13 @@ public class DwParticleRenderGL extends DwParticleRender{
     // settings
     // fix: PJOGL.profile = 3; in settings()
     // https://github.com/diwi/LiquidFunProcessing/issues/2
-//    gl.glEnable(GL2.GL_POINT_SMOOTH);
-    gl.glEnable(GL3.GL_VERTEX_PROGRAM_POINT_SIZE);
-//    gl.glPointSize(particle_rad_screen * 2);
+    //  gl.glEnable(GL2.GL_POINT_SMOOTH);
+    // gl.glEnable(GL3.GL_VERTEX_PROGRAM_POINT_SIZE);
+    //  gl.glPointSize(particle_rad_screen * 2);
     
     // ... f***ing OpenGL mess
     gl.glEnable(GL3.GL_PROGRAM_POINT_SIZE);
-    gl.glEnable(GL2.GL_POINT_SPRITE);
+    // gl.glEnable(GL2.GL_POINT_SPRITE); // causes gl error
 
     errCheck("DwParticleRenderGL.display-pointRendering");
   

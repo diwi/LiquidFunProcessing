@@ -34,7 +34,6 @@ import org.jbox2d.particle.ParticleType;
 
 import processing.core.*;
 import processing.opengl.PGraphics2D;
-import processing.opengl.PJOGL;
 
 
 public class liquidfun_ParticleRenderGroups_LiquidFxDark extends PApplet {
@@ -89,7 +88,6 @@ public class liquidfun_ParticleRenderGroups_LiquidFxDark extends PApplet {
   public void settings(){
     size(viewport_w, viewport_h, P2D);
     smooth(8);
-    PJOGL.profile = 3;
   }
   
   public void setup(){ 
@@ -97,7 +95,7 @@ public class liquidfun_ParticleRenderGroups_LiquidFxDark extends PApplet {
     pg_checkerboard = DwUtils.createCheckerBoard(this, width, height, 100, color(32, 0), color(48,0));
 //    pg_checkerboard = DwUtils.createCheckerBoard(this, width, height, 100, color(200, 0), color(255,0));
     reset();
-    frameRate(120);
+    frameRate(520);
   }
   
   
